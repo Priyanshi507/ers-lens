@@ -1,0 +1,7 @@
+event,driver,lap,lap_time_s,max_frozen_run,top_speed_kmh,end_speed_kmh,flat_out_drop_kmh,peak_before_brake_m,lift_before_brake_m,lift_min_throttle,drop_to_brake_kmh
+Australian Grand Prix,LAW,7,80.448,2,326.0,291.0,35.0,526.1872222222228,34.4666666666667,100.0,35.0
+Australian Grand Prix,LAW,13,80.136,3,327.0,286.0,41.0,541.3127777777781,19.0,100.0,41.0
+Australian Grand Prix,LIN,2,80.622,2,327.0,292.0,35.0,485.8972222222219,25.422222222222445,100.0,35.0
+Australian Grand Prix,LIN,8,81.109,2,329.0,287.0,42.0,497.3975000000005,22.011111111111404,100.0,42.0
+Australian Grand Prix,COL,5,82.211,3,325.0,316.0,9.0,233.35583333333307,24.57777777777801,100.0,9.0
+Australian Grand Prix,PER,2,83.293,3,321.0,287.0,34.0,524.3830555555551,24.788333333332957,100.0,34.0

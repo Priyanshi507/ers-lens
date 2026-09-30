@@ -125,9 +125,12 @@ def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
     return lap_quality(lap, start_m, end_m)[0]
 
 
-def analyse_driver(race: pd.DataFrame, start_m: float, end_m: float) -> pd.DataFrame:
+def analyse_driver(race: pd.DataFrame, start_m: float, end_m: float,
+                   pace_ref: str = "median") -> pd.DataFrame:
+    """pace_ref="fastest" suits qualifying, where out- and cool-down laps dominate the median."""
     durations = race.groupby("lap")["time_s"].max()
-    clean = durations[durations <= 1.07 * durations.median()].index
+    ref = durations.min() if pace_ref == "fastest" else durations.median()
+    clean = durations[durations <= 1.07 * ref].index
     rows, reasons = [], {}
     for lap_no, lap in race.groupby("lap"):
         if lap_no == 1 or lap_no not in clean:

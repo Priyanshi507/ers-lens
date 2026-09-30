@@ -228,8 +228,17 @@ def test_race_summary_measures_clip_time():
         res = analyse_driver(obs, start, end)
         res.insert(0, "driver", name)
         rows.append(res)
-    clip, none = (race_summary(r, len(r)) for r in rows)
+    clip, none = (race_summary(r, len(r), end - start) for r in rows)
     assert none["clip_s_mean"] < 0.5
     # Clipping from half-way down a ~1.1 km straight lasts several seconds.
     assert 3.0 < clip["clip_s_mean"] < 10.0
     assert clip["clip_s_lo"] <= clip["clip_s_mean"] <= clip["clip_s_hi"]
+
+
+def test_permutation_p_is_exact_and_bounded():
+    import sys
+    sys.path.insert(0, "scripts")
+    from multi_race import permutation_p
+
+    assert permutation_p([0.9, 0.8, 0.85], [0.1, 0.2, 0.15, 0.12]) == 1 / 35
+    assert permutation_p([0.1, 0.2, 0.15], [0.9, 0.8, 0.85, 0.7]) == 1.0

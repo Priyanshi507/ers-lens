@@ -30,7 +30,7 @@ def longest_flat_out_run(track: Track) -> tuple[float, float]:
 
 def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
     win = lap[(lap["distance_m"] >= start_m) & (lap["distance_m"] <= end_m + 100)]
-    flat = (win["throttle"] >= FULL_THROTTLE).to_numpy()
+    flat = ((win["throttle"] >= FULL_THROTTLE) & ~win["brake"].astype(bool)).to_numpy()
     if flat.sum() < 5:
         return None
     speed = win["speed_kmh"].to_numpy()

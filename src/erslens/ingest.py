@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -6,6 +7,7 @@ import pandas as pd
 from .track import Track, track_from_reference
 
 
+@lru_cache(maxsize=4)
 def _session(year: int, event: str | int, kind: str, cache_dir: str | Path):
     import fastf1
 

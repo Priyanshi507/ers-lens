@@ -90,3 +90,13 @@ python scripts/fetch_session.py --event China --drivers ANT RUS HAM LEC BEA GAS 
 python scripts/derate_analysis.py --track data/real/2026_china_track.npz --races data/real/2026_china_*_race.parquet
 python scripts/abstract_figure.py --track data/real/2026_china_track.npz --race-glob "data/real/2026_china_{drv}_race.parquet"
 ```
+
+## Result: seven 2026 races, before and after the FIA's Miami rule change
+
+![Clipping across seven races](docs/multi_race_R.png)
+
+On 2,924 quality-controlled race laps, cars spent 34.7% of the longest straight losing
+speed at full throttle before the Miami rule change and 34.1% after (exact permutation
+test over races, p = 0.51): no measurable change in race clipping.
+
+Reproduce: `python scripts/multi_race.py --session R --events Australia China Japan Miami Canada Austria Belgium`

@@ -95,9 +95,9 @@ def main():
     ax[0].legend()
 
     ax[1].scatter(eligible["peak_m"], eligible["share"] * 100, s=30)
-    for drv, row in eligible.iterrows():
+    for i, (drv, row) in enumerate(eligible.sort_values("peak_m").iterrows()):
         ax[1].annotate(f"{drv} ({int(row['n'])})", (row["peak_m"], row["share"] * 100), fontsize=8,
-                       xytext=(3, 3), textcoords="offset points")
+                       xytext=(4, 4 if i % 2 == 0 else -11), textcoords="offset points")
     ax[1].set_xlabel("median distance from speed peak to braking point (m)")
     ax[1].set_ylabel(f"% of clean laps losing >= {args.threshold:g} km/h at full throttle")
     ax[1].set_title("B. Per-driver clipping (laps analysed in brackets)")

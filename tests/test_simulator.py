@@ -94,8 +94,8 @@ def _detected_drop(policy):
     obs = sensor_model(sim, CAR, np.random.default_rng(0))
     obs["distance_m"] -= obs["lap"] * TRACK.length_m
     drops = [lap_metrics(lap.reset_index(drop=True), start, end)["flat_out_drop_kmh"]
-             for _, lap in obs.groupby("lap")]
-    return float(np.mean(drops[1:]))
+             for lap_no, lap in obs.groupby("lap") if lap_no > 0]
+    return float(np.mean(drops))
 
 
 def test_derate_detector_matches_ground_truth():
@@ -117,7 +117,8 @@ def test_lap_with_telemetry_gap_is_rejected():
 
     dist = np.arange(0, 1200, 20.0)
     brake = dist > 1000
-    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": 200 + dist / 10,
+    speed = np.where(brake, 300 - (dist - 1000) * 1.2, 200 + dist / 10)
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed,
                         "throttle": np.where(brake, 0.0, 100.0), "brake": brake})
     assert lap_metrics(lap, 0, 1000) is not None
     gappy = lap.drop(index=range(30, 36)).reset_index(drop=True)
@@ -131,8 +132,8 @@ def test_stale_speed_and_truncated_laps_are_rejected():
     from derate_analysis import lap_quality
 
     dist = np.arange(0, 1200, 20.0)
-    speed = np.minimum(150 + dist / 5, 320.0)
     brake = dist > 1000
+    speed = np.where(brake, 320 - (dist - 1000) * 1.2, 150 + dist * 0.17)
     lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed,
                         "throttle": np.where(brake, 0.0, 100.0), "brake": brake})
     assert lap_quality(lap, 0, 1000)[1] == "ok"
@@ -152,11 +153,26 @@ def test_single_throttle_blip_does_not_hide_speed_loss():
     from derate_analysis import lap_quality
 
     dist = np.arange(0, 1200, 20.0)
-    speed = np.where(dist < 500, 200 + dist / 5, 300 - (dist - 500) / 25)
     brake = dist > 1000
+    speed = np.where(dist < 500, 200 + dist / 5, 300 - (dist - 500) / 25)
+    speed = np.where(brake, 280 - (dist - 1000) * 1.2, speed)
     throttle = np.where(brake, 0.0, 100.0)
     throttle[30] = 96.0
     lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle, "brake": brake})
     metrics, reason = lap_quality(lap, 0, 1000)
     assert reason == "ok"
     assert metrics["flat_out_drop_kmh"] > 15
+
+
+def test_frozen_lap_without_braking_is_rejected():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import lap_quality
+
+    dist = np.arange(0, 1200, 20.0)
+    brake = dist > 1000
+    speed = np.where(dist < 100, 142.0, 291.0)
+    throttle = np.where(brake, 0.0, 100.0)
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle, "brake": brake})
+    assert lap_quality(lap, 0, 1000)[1] != "ok"

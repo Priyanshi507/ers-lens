@@ -19,6 +19,10 @@ STALE_MARGIN_KMH = 15.0
 STRICT_FROZEN_RUN = 6
 # Throttle below full for more than this before the brake point counts as a partial lift.
 PARTIAL_LIFT_M = 60.0
+MIN_BRAKE_DROP_KMH = 100.0
+MIN_FLAT_RUN_M = 300.0
+# Far longer than a genuine top-speed plateau holds one integer value (~230 m).
+FROZEN_ANYWHERE_RUN = 10
 
 
 def longest_flat_out_run(track: Track) -> tuple[float, float]:
@@ -76,6 +80,21 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
     if len(brake_zone) == 0:
         return None, "data_ends_before_braking"
     brake_idx = int(brake_zone[0])
+    # Physical plausibility: a genuine lap brakes hard for the corner, has a long
+    # flat-out run, and never shows an identical speed repeated along the straight.
+    if speed[brake_idx:].min() > speed[peak] - MIN_BRAKE_DROP_KMH:
+        return None, "no_braking_decel"
+    first = peak
+    while first > 0 and flat[first - 1]:
+        first -= 1
+    if dist[last] - dist[first] < MIN_FLAT_RUN_M:
+        return None, "short_flat_run"
+    same = np.concatenate([[False], speed[1:brake_idx] == speed[:brake_idx - 1]])
+    run = 0
+    for k in range(brake_idx):
+        run = run + 1 if same[k] else 0
+        if run + 1 >= FROZEN_ANYWHERE_RUN:
+            return None, "frozen_channel"
     frozen, longest = 1, 1
     for k in range(1, last + 1):
         frozen = frozen + 1 if flat[k] and flat[k - 1] and speed[k] == speed[k - 1] else 1

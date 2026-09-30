@@ -206,3 +206,30 @@ def test_frozen_speed_after_throttle_closes_is_rejected():
     lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle,
                         "brake": dist >= 1400})
     assert lap_quality(lap, 0, 1400)[1] != "ok"
+
+
+def test_race_summary_measures_clip_time():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import analyse_driver, longest_flat_out_run
+    from erslens.policies import ClipEndOfStraight
+    from multi_race import race_summary
+
+    start, end = longest_flat_out_run(TRACK)
+    rows = []
+    for name, pol in [("clip", ClipEndOfStraight(clip_from=0.5, clip_w=350e3)), ("none", StraightsOnly())]:
+        sim = simulate(TRACK, CAR, pol, n_laps=6, soc0_frac=0.5)
+        obs = sensor_model(sim, CAR, np.random.default_rng(1))
+        obs["lap"] += 1
+        obs["distance_m"] -= (obs["lap"] - 1) * TRACK.length_m
+        obs["time_s"] -= obs.groupby("lap")["time_s"].transform("min")
+        obs["pit_in"] = obs["pit_out"] = False
+        res = analyse_driver(obs, start, end)
+        res.insert(0, "driver", name)
+        rows.append(res)
+    clip, none = (race_summary(r, len(r)) for r in rows)
+    assert none["clip_s_mean"] < 0.5
+    # Clipping from half-way down a ~1.1 km straight lasts several seconds.
+    assert 3.0 < clip["clip_s_mean"] < 10.0
+    assert clip["clip_s_lo"] <= clip["clip_s_mean"] <= clip["clip_s_hi"]

@@ -25,7 +25,12 @@ MIN_FLAT_RUN_M = 300.0
 FROZEN_ANYWHERE_RUN = 10
 
 
-def longest_flat_out_run(track: Track) -> tuple[float, float]:
+def longest_flat_out_run(track: Track, avoid_boundary: bool = False) -> tuple[float, float]:
+    """Longest full-throttle stretch of the reference lap.
+
+    avoid_boundary skips stretches touching the start/finish line: lap distance
+    resets there, so a straight crossing it is split across two laps.
+    """
     flat = ~np.isfinite(track.v_limit_ms)
     best, best_len, i = (0, 0), 0, 0
     while i < track.n:
@@ -33,7 +38,8 @@ def longest_flat_out_run(track: Track) -> tuple[float, float]:
             j = i
             while j < track.n and flat[j]:
                 j += 1
-            if j - i > best_len:
+            touches = i == 0 or j == track.n
+            if j - i > best_len and not (avoid_boundary and touches):
                 best, best_len = (i, j), j - i
             i = j
         else:

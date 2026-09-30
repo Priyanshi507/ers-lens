@@ -1,12 +1,12 @@
 import argparse
 from pathlib import Path
 
-from erslens.ingest import load_driver_race, reference_track, save_track
+from erslens.ingest import load_driver_race, race_drivers, reference_track, save_track
 
 p = argparse.ArgumentParser(description="Download a 2026 session and build track + race tables")
 p.add_argument("--year", type=int, default=2026)
 p.add_argument("--event", required=True, help='e.g. "China" or a round number')
-p.add_argument("--drivers", nargs="+", default=["HAM", "LEC", "RUS", "ANT"])
+p.add_argument("--drivers", nargs="+", default=["all"], help='driver codes, or "all"')
 p.add_argument("--out", default="data/real")
 args = p.parse_args()
 
@@ -18,7 +18,8 @@ track = reference_track(args.year, event)
 save_track(track, out / f"{track.name}_track.npz")
 print(f"track {track.name}: {track.length_m:.0f} m, {track.straight_mode.mean():.0%} straight-mode")
 
-for drv in args.drivers:
+drivers = race_drivers(args.year, event) if args.drivers == ["all"] else args.drivers
+for drv in drivers:
     df = load_driver_race(args.year, event, drv)
     if df.empty:
         print(f"{drv}: no car data (did not start or retired before lap data), skipped")

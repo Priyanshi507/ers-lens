@@ -73,3 +73,16 @@ def save_track(track: Track, path: str | Path) -> None:
 def load_track(path: str | Path) -> Track:
     z = np.load(path)
     return Track(str(z["name"]), z["distance_m"], z["v_limit_ms"], z["straight_mode"])
+
+
+def race_drivers(year: int, event: str | int, kind: str = "R",
+                 cache_dir: str | Path = "data/cache") -> list[str]:
+    session = _session(year, event, kind, cache_dir)
+    return [d for d in session.results["Abbreviation"] if isinstance(d, str)]
+
+
+def event_info(year: int, event: str | int) -> tuple[str, pd.Timestamp]:
+    import fastf1
+
+    ev = fastf1.get_event(year, event)
+    return str(ev["EventName"]), pd.Timestamp(ev["EventDate"])

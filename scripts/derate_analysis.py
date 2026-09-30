@@ -65,8 +65,6 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
         last += 1
     if last + 1 >= len(flat):
         return None, "data_ends_before_braking"
-    if np.diff(dist[: last + 2]).max(initial=0.0) > MAX_GAP_M:
-        return None, "telemetry_gap"
     # Repeated identical speeds while still accelerating hard mean a frozen channel.
     # Near the peak the car barely accelerates, so repeats there are genuine.
     accel = (np.arange(len(speed)) < peak) & flat & (speed < speed[peak] - STALE_MARGIN_KMH)
@@ -80,6 +78,10 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
     if len(brake_zone) == 0:
         return None, "data_ends_before_braking"
     brake_idx = int(brake_zone[0])
+    # Gaps anywhere up to the braking point can hide a speed loss, not just gaps
+    # inside the flat-out stretch.
+    if np.diff(dist[: brake_idx + 1]).max(initial=0.0) > MAX_GAP_M:
+        return None, "telemetry_gap"
     # Physical plausibility: a genuine lap brakes hard for the corner, has a long
     # flat-out run, and never shows an identical speed repeated along the straight.
     if speed[brake_idx:].min() > speed[peak] - MIN_BRAKE_DROP_KMH:

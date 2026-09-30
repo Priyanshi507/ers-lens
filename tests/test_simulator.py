@@ -176,3 +176,17 @@ def test_frozen_lap_without_braking_is_rejected():
     throttle = np.where(brake, 0.0, 100.0)
     lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle, "brake": brake})
     assert lap_quality(lap, 0, 1000)[1] != "ok"
+
+
+def test_gap_between_flat_run_and_braking_is_rejected():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import lap_quality
+
+    dist = np.concatenate([np.arange(0, 1080, 20.0), [1090.0], np.arange(1390, 1500, 20.0)])
+    brake = dist >= 1390
+    speed = np.where(brake, 325 - (dist - 1390) * 2.0, np.minimum(200 + dist / 4, 325.0))
+    throttle = np.where(brake, 0.0, np.where(dist >= 1090, 60.0, 100.0))
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle, "brake": brake})
+    assert lap_quality(lap, 0, 1400)[1] == "telemetry_gap"

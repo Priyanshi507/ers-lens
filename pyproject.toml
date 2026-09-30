@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "erslens"
+version = "0.1.0"
+description = "Estimating hidden 2026 F1 battery (ERS) state from public telemetry"
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "pyarrow", "pyyaml", "matplotlib"]
+
+[project.optional-dependencies]
+real = ["fastf1>=3.4"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

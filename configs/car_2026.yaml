@@ -1,0 +1,23 @@
+# Approximate 2026-regulation car. Values marked VERIFY come from press
+# summaries of the FIA 2026 technical regulations and should be checked
+# against the published regulation text before any result is reported.
+car:
+  mass_kg: 768.0              # minimum mass incl. driver
+  fuel_kg: 70.0               # race-start fuel load (estimate)
+  fuel_per_lap_kg: 1.3
+  cda_straight: 0.95          # active aero straight mode (estimate)
+  cda_corner: 1.35            # active aero corner mode (estimate)
+  crr: 0.012
+  rho: 1.20
+  ice_power_w: 400000.0       # ~50% of total output (estimate)
+  mguk_power_w: 350000.0      # VERIFY
+  mguk_taper_start_kmh: 290.0 # VERIFY: deploy tapers above this speed
+  mguk_taper_end_kmh: 355.0   # VERIFY
+  es_capacity_j: 4000000.0    # usable state-of-charge window (estimate)
+  harvest_per_lap_j: 8500000.0  # VERIFY (press quotes 8.5-9 MJ)
+  eta_harvest: 0.90
+  eta_deploy: 0.95
+  traction_max_n: 14000.0
+  brake_g_low: 1.8
+  brake_g_high: 5.0
+  brake_v_ref_ms: 83.0

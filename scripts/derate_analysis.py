@@ -91,9 +91,11 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
         first -= 1
     if dist[last] - dist[first] < MIN_FLAT_RUN_M:
         return None, "short_flat_run"
-    same = np.concatenate([[False], speed[1:brake_idx] == speed[:brake_idx - 1]])
+    # Checked through the braking zone too: speed cannot stay constant once the
+    # throttle is closed, so a repeat there is a frozen channel.
+    same = np.concatenate([[False], speed[1:] == speed[:-1]])
     run = 0
-    for k in range(brake_idx):
+    for k in range(len(speed)):
         run = run + 1 if same[k] else 0
         if run + 1 >= FROZEN_ANYWHERE_RUN:
             return None, "frozen_channel"

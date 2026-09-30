@@ -73,3 +73,20 @@ python scripts/make_synthetic.py --track data/real/2026_china_track.npz
 - No tyre degradation, traffic or weather yet.
 
 Data: [FastF1](https://github.com/theOehrly/Fast-F1). Not affiliated with Formula 1 or the FIA.
+
+## Result: 2026 Chinese Grand Prix (SSAC27 abstract)
+
+![Flat-out speed loss on Shanghai's back straight](docs/ssac27_figure.png)
+
+On quality-controlled laps, 92.9% show the car losing speed at full throttle on
+Shanghai's back straight: evidence of near-universal energy "super-clipping".
+69% of candidate laps were rejected by physical plausibility checks; without
+them, the data produces spurious driver differences.
+
+Reproduce:
+
+```bash
+python scripts/fetch_session.py --event China --drivers ANT RUS HAM LEC BEA GAS LAW HAD SAI COL HUL LIN BOT OCO PER VER ALO STR
+python scripts/derate_analysis.py --track data/real/2026_china_track.npz --races data/real/2026_china_*_race.parquet
+python scripts/abstract_figure.py --track data/real/2026_china_track.npz --race-glob "data/real/2026_china_{drv}_race.parquet"
+```

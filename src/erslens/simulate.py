@@ -12,6 +12,7 @@ V_MIN = 5.0
 def simulate(track: Track, car: CarParams, policy: EnergyPolicy, n_laps: int = 1,
              soc0_frac: float = 0.5, fuel0_kg: float | None = None) -> pd.DataFrame:
     env = braking_envelope(track, car)
+    progress = track.straight_progress
     ds, n = track.ds, track.n
     soc = soc0_frac * car.es_capacity_j
     fuel = car.fuel_kg if fuel0_kg is None else fuel0_kg
@@ -32,7 +33,7 @@ def simulate(track: Track, car: CarParams, policy: EnergyPolicy, n_laps: int = 1
             space = car.es_capacity_j - soc
 
             ctx = StepContext(v_eff, soc / car.es_capacity_j, budget / car.harvest_per_lap_j,
-                              straight, i / n)
+                              straight, i / n, float(progress[i]))
             cmd = policy.command_w(ctx)
             dt_guess = ds / v_eff
 

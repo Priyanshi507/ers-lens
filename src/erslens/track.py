@@ -11,6 +11,22 @@ class Track:
     straight_mode: np.ndarray   # active-aero low-drag zones
 
     @property
+    def straight_progress(self) -> np.ndarray:
+        """0 at the start of each straight-mode zone, rising to 1 at its end."""
+        out = np.zeros(self.n)
+        i = 0
+        while i < self.n:
+            if self.straight_mode[i]:
+                j = i
+                while j < self.n and self.straight_mode[j]:
+                    j += 1
+                out[i:j] = np.linspace(0.0, 1.0, j - i)
+                i = j
+            else:
+                i += 1
+        return out
+
+    @property
     def ds(self) -> float:
         return float(self.distance_m[1] - self.distance_m[0])
 

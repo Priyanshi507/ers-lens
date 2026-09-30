@@ -11,6 +11,7 @@ class StepContext:
     harvest_left_frac: float
     straight_mode: bool
     lap_frac: float
+    straight_progress: float = 0.0
 
 
 class EnergyPolicy(Protocol):
@@ -57,12 +58,31 @@ class SocTarget:
         return cmd
 
 
+@dataclass
+class ClipEndOfStraight:
+    """Deploy early on each straight, then harvest at full throttle before the braking point."""
+    deploy_w: float = 350e3
+    clip_from: float = 0.7
+    clip_w: float = 250e3
+    name: str = "clip_end_of_straight"
+
+    def command_w(self, ctx: StepContext) -> float:
+        if not ctx.straight_mode:
+            return 0.0
+        if ctx.straight_progress < self.clip_from or ctx.harvest_left_frac <= 0:
+            return self.deploy_w
+        return -self.clip_w
+
+
 def random_policy(rng: np.random.Generator) -> EnergyPolicy:
-    kind = rng.integers(3)
+    kind = rng.integers(4)
     if kind == 0:
         return FlatOut(power_w=rng.uniform(200e3, 350e3))
     if kind == 1:
         return StraightsOnly(deploy_w=rng.uniform(250e3, 350e3),
                              superclip_w=rng.uniform(0.0, 200e3))
-    return SocTarget(target=rng.uniform(0.3, 0.8), gain_w=rng.uniform(300e3, 1500e3),
-                     reserve=rng.uniform(0.05, 0.2))
+    if kind == 2:
+        return SocTarget(target=rng.uniform(0.3, 0.8), gain_w=rng.uniform(300e3, 1500e3),
+                         reserve=rng.uniform(0.05, 0.2))
+    return ClipEndOfStraight(deploy_w=rng.uniform(250e3, 350e3), clip_from=rng.uniform(0.5, 0.9),
+                             clip_w=rng.uniform(100e3, 350e3))

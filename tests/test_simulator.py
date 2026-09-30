@@ -82,3 +82,28 @@ def test_generate_dataset(tmp_path):
     data = generate_dataset(TRACK, CAR, n_episodes=3, out_dir=tmp_path, laps_per_episode=2)
     assert data["episode"].nunique() == 3
     assert (tmp_path / "demo_synthetic.parquet").exists()
+
+
+def _detected_drop(policy):
+    import sys
+    sys.path.insert(0, "scripts")
+    from derate_analysis import lap_metrics, longest_flat_out_run
+
+    start, end = longest_flat_out_run(TRACK)
+    sim = simulate(TRACK, CAR, policy, n_laps=4, soc0_frac=0.5)
+    obs = sensor_model(sim, CAR, np.random.default_rng(0))
+    obs["distance_m"] -= obs["lap"] * TRACK.length_m
+    drops = [lap_metrics(lap.reset_index(drop=True), start, end)["flat_out_drop_kmh"]
+             for _, lap in obs.groupby("lap")]
+    return float(np.mean(drops[1:]))
+
+
+def test_derate_detector_matches_ground_truth():
+    from erslens.policies import ClipEndOfStraight
+
+    none = _detected_drop(StraightsOnly())
+    mild = _detected_drop(ClipEndOfStraight(clip_from=0.85, clip_w=150e3))
+    hard = _detected_drop(ClipEndOfStraight(clip_from=0.5, clip_w=350e3))
+    assert none < 2.0
+    assert none < mild < hard
+    assert hard > 20.0

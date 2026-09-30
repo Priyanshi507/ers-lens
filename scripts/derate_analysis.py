@@ -10,6 +10,15 @@ from erslens.ingest import load_track
 from erslens.track import Track
 
 FULL_THROTTLE = 98.0
+NOISE_THROTTLE = 90.0
+# ~24 m between samples at 340 km/h and 4 Hz; a larger gap means dropped telemetry.
+MAX_GAP_M = 60.0
+STALE_RUN = 4
+STALE_MARGIN_KMH = 15.0
+# Sensitivity check: identical speed for this many samples (~130 m) even at the peak.
+STRICT_FROZEN_RUN = 6
+# Throttle below full for more than this before the brake point counts as a partial lift.
+PARTIAL_LIFT_M = 60.0
 
 
 def longest_flat_out_run(track: Track) -> tuple[float, float]:
@@ -28,11 +37,20 @@ def longest_flat_out_run(track: Track) -> tuple[float, float]:
     return float(track.distance_m[best[0]]), float(track.distance_m[best[1] - 1])
 
 
-def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
+def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict | None, str]:
+    """Return (metrics, "ok") or (None, reason the lap was rejected)."""
     win = lap[(lap["distance_m"] >= start_m) & (lap["distance_m"] <= end_m + 100)]
-    flat = ((win["throttle"] >= FULL_THROTTLE) & ~win["brake"].astype(bool)).to_numpy()
+    thr = win["throttle"].to_numpy()
+    no_brake = ~win["brake"].astype(bool).to_numpy()
+    flat = (thr >= FULL_THROTTLE) & no_brake
+    # A single sample just under full throttle between two full-throttle samples is
+    # sensor noise, not a lift; left unbridged it would hide a real speed loss.
+    blip = np.zeros_like(flat)
+    blip[1:-1] = (~flat[1:-1] & (thr[1:-1] >= NOISE_THROTTLE) & no_brake[1:-1]
+                  & flat[:-2] & flat[2:])
+    flat = flat | blip
     if flat.sum() < 5:
-        return None
+        return None, "no_flat_out"
     speed = win["speed_kmh"].to_numpy()
     dist = win["distance_m"].to_numpy()
     peak = int(np.argmax(np.where(flat, speed, -np.inf)))
@@ -41,27 +59,60 @@ def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
     last = peak
     while last + 1 < len(flat) and flat[last + 1]:
         last += 1
+    if last + 1 >= len(flat):
+        return None, "data_ends_before_braking"
+    if np.diff(dist[: last + 2]).max(initial=0.0) > MAX_GAP_M:
+        return None, "telemetry_gap"
+    # Repeated identical speeds while still accelerating hard mean a frozen channel.
+    # Near the peak the car barely accelerates, so repeats there are genuine.
+    accel = (np.arange(len(speed)) < peak) & flat & (speed < speed[peak] - STALE_MARGIN_KMH)
+    run = 1
+    for k in range(1, len(speed)):
+        run = run + 1 if accel[k] and accel[k - 1] and speed[k] == speed[k - 1] else 1
+        if run >= STALE_RUN:
+            return None, "stale_speed"
+    brake_zone = np.flatnonzero((np.arange(len(speed)) > last)
+                                & ((thr < 20) | ~no_brake))
+    if len(brake_zone) == 0:
+        return None, "data_ends_before_braking"
+    brake_idx = int(brake_zone[0])
+    frozen, longest = 1, 1
+    for k in range(1, last + 1):
+        frozen = frozen + 1 if flat[k] and flat[k - 1] and speed[k] == speed[k - 1] else 1
+        longest = max(longest, frozen)
     return {
+        "max_frozen_run": longest,
         "top_speed_kmh": float(speed[peak]),
         "end_speed_kmh": float(speed[last]),
         "flat_out_drop_kmh": float(speed[peak] - speed[last]),
         "peak_before_brake_m": float(dist[last] - dist[peak]),
-    }
+        "lift_before_brake_m": float(dist[brake_idx] - dist[last]),
+        "lift_min_throttle": float(thr[last + 1:brake_idx].min(initial=100.0)),
+        "drop_to_brake_kmh": float(speed[peak] - speed[brake_idx - 1]),
+    }, "ok"
+
+
+def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
+    return lap_quality(lap, start_m, end_m)[0]
 
 
 def analyse_driver(race: pd.DataFrame, start_m: float, end_m: float) -> pd.DataFrame:
     durations = race.groupby("lap")["time_s"].max()
     clean = durations[durations <= 1.07 * durations.median()].index
-    rows = []
+    rows, reasons = [], {}
     for lap_no, lap in race.groupby("lap"):
         if lap_no == 1 or lap_no not in clean:
             continue
         if lap["pit_in"].iloc[0] or lap["pit_out"].iloc[0]:
             continue
-        m = lap_metrics(lap.reset_index(drop=True), start_m, end_m)
+        m, reason = lap_quality(lap.reset_index(drop=True), start_m, end_m)
         if m:
             rows.append({"lap": lap_no, "lap_time_s": float(durations[lap_no]), **m})
-    return pd.DataFrame(rows)
+        else:
+            reasons[reason] = reasons.get(reason, 0) + 1
+    out = pd.DataFrame(rows)
+    out.attrs["rejected"] = reasons
+    return out
 
 
 def main():
@@ -79,14 +130,22 @@ def main():
     start_m, end_m = longest_flat_out_run(track)
     print(f"Longest flat-out run: {start_m:.0f}-{end_m:.0f} m ({end_m - start_m:.0f} m)\n")
 
-    per_driver = {}
+    per_driver, totals = {}, {}
     for path in args.races:
         drv = Path(path).stem.split("_")[-2]
         res = analyse_driver(pd.read_parquet(path), start_m, end_m)
+        for reason, count in res.attrs.get("rejected", {}).items():
+            totals[reason] = totals.get(reason, 0) + count
         res.insert(0, "driver", drv)
         per_driver[drv] = res
 
     allres = pd.concat(per_driver.values(), ignore_index=True)
+    n_rej = sum(totals.values())
+    print(f"Laps kept: {len(allres)}, rejected for data quality: {n_rej} "
+          f"({n_rej / (len(allres) + n_rej):.0%})")
+    for reason, count in sorted(totals.items(), key=lambda kv: -kv[1]):
+        print(f"  {reason}: {count}")
+    print()
     allres.to_csv(out / "derate_per_lap.csv", index=False)
 
     allres["derate"] = allres["flat_out_drop_kmh"] >= args.drop_threshold
@@ -100,6 +159,33 @@ def main():
     ).round(2)
     summary.to_csv(out / "derate_summary.csv")
     print(summary.to_string())
+
+    strict = allres[allres["max_frozen_run"] < STRICT_FROZEN_RUN]
+    sens = pd.DataFrame({
+        "share_normal": allres.groupby("driver")["derate"].mean(),
+        "laps_strict": strict.groupby("driver")["lap"].count(),
+        "share_strict": strict.groupby("driver")["derate"].mean(),
+    }).round(2)
+    print(f"\nSensitivity: dropping laps with speed frozen for >= {STRICT_FROZEN_RUN} samples "
+          f"keeps {len(strict)}/{len(allres)} laps; "
+          f"flat-out drop share {allres['derate'].mean():.1%} -> {strict['derate'].mean():.1%}")
+    print(sens.sort_values("share_strict").to_string())
+    sens.to_csv(out / "derate_sensitivity.csv")
+
+    allres["partial_lift"] = ((allres["lift_before_brake_m"] > PARTIAL_LIFT_M)
+                              & (allres["lift_min_throttle"] < 90))
+    allres["any_drop"] = allres["drop_to_brake_kmh"] >= args.drop_threshold
+    s2 = allres[allres["max_frozen_run"] < STRICT_FROZEN_RUN]
+    styles = pd.DataFrame({
+        "laps": s2.groupby("driver")["lap"].count(),
+        "clip_at_full_throttle": s2.groupby("driver")["derate"].mean(),
+        "partial_lift": s2.groupby("driver")["partial_lift"].mean(),
+        "any_speed_loss_before_brake": s2.groupby("driver")["any_drop"].mean(),
+    }).round(2)
+    print(f"\nEnergy technique by driver (strict laps; partial lift = throttle below full "
+          f"below 90% for > {PARTIAL_LIFT_M:g} m before braking):")
+    print(styles.sort_values("clip_at_full_throttle").to_string())
+    styles.to_csv(out / "derate_styles.csv")
 
     corr = allres[["flat_out_drop_kmh", "lap_time_s"]].corr().iloc[0, 1]
     print(f"\nCorrelation(flat-out drop, lap time) across all clean laps: {corr:.3f}")

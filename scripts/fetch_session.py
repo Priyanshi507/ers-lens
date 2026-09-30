@@ -20,5 +20,8 @@ print(f"track {track.name}: {track.length_m:.0f} m, {track.straight_mode.mean():
 
 for drv in args.drivers:
     df = load_driver_race(args.year, event, drv)
+    if df.empty:
+        print(f"{drv}: no car data (did not start or retired before lap data), skipped")
+        continue
     df.to_parquet(out / f"{track.name}_{drv}_race.parquet", index=False)
     print(f"{drv}: {df['lap'].nunique()} laps, {len(df):,} samples")

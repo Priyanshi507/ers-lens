@@ -47,6 +47,8 @@ def load_driver_race(year: int, event: str | int, driver: str, kind: str = "R",
         df["pit_in"] = not pd.isna(lap["PitInTime"])
         df["pit_out"] = not pd.isna(lap["PitOutTime"])
         frames.append(df)
+    if not frames:
+        return pd.DataFrame()
     return pd.concat(frames, ignore_index=True)
 
 

@@ -107,3 +107,56 @@ def test_derate_detector_matches_ground_truth():
     assert none < 2.0
     assert none < mild < hard
     assert hard > 20.0
+
+
+def test_lap_with_telemetry_gap_is_rejected():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import lap_metrics
+
+    dist = np.arange(0, 1200, 20.0)
+    brake = dist > 1000
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": 200 + dist / 10,
+                        "throttle": np.where(brake, 0.0, 100.0), "brake": brake})
+    assert lap_metrics(lap, 0, 1000) is not None
+    gappy = lap.drop(index=range(30, 36)).reset_index(drop=True)
+    assert lap_metrics(gappy, 0, 1000) is None
+
+
+def test_stale_speed_and_truncated_laps_are_rejected():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import lap_quality
+
+    dist = np.arange(0, 1200, 20.0)
+    speed = np.minimum(150 + dist / 5, 320.0)
+    brake = dist > 1000
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed,
+                        "throttle": np.where(brake, 0.0, 100.0), "brake": brake})
+    assert lap_quality(lap, 0, 1000)[1] == "ok"
+
+    stale = lap.copy()
+    stale.loc[10:14, "speed_kmh"] = stale.loc[10, "speed_kmh"]
+    assert lap_quality(stale, 0, 1000)[1] == "stale_speed"
+
+    truncated = lap[lap["distance_m"] < 900].reset_index(drop=True)
+    assert lap_quality(truncated, 0, 1000)[1] == "data_ends_before_braking"
+
+
+def test_single_throttle_blip_does_not_hide_speed_loss():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import lap_quality
+
+    dist = np.arange(0, 1200, 20.0)
+    speed = np.where(dist < 500, 200 + dist / 5, 300 - (dist - 500) / 25)
+    brake = dist > 1000
+    throttle = np.where(brake, 0.0, 100.0)
+    throttle[30] = 96.0
+    lap = pd.DataFrame({"distance_m": dist, "speed_kmh": speed, "throttle": throttle, "brake": brake})
+    metrics, reason = lap_quality(lap, 0, 1000)
+    assert reason == "ok"
+    assert metrics["flat_out_drop_kmh"] > 15

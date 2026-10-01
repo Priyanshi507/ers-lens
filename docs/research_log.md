@@ -59,3 +59,20 @@ on a level-then-10%-uphill straight gives a false 65 kW swing assuming level gro
 **Prediction stated before running:** the correction moves Austria down and Belgium up
 toward the ~0.82 of the flat circuits. A fraction above 1 is physically possible (deploy
 cut plus harvesting), so Austria may stay above 1 if harvesting is real.
+
+## 2026-10-01 (evening): Elevation result
+
+Elevation units confirmed (lap ranges: Spa 102 m, Austria 63 m, Suzuka 40 m, flat
+circuits 3-7 m). **Prediction falsified:** the gravity correction barely moved the
+outliers (Austria 1.16 to 1.13, Belgium 0.69 to 0.69). Both passes through the speed
+band climb almost equally, so gravity largely cancels already; hills do not explain
+the outliers.
+
+Robust: flat circuits withdraw 0.81-0.83 of available MGU-K power when clipping,
+before and after Miami (Australia 0.81, China 0.81, Miami 0.83, Canada 0.83). Overall
+before 0.72 vs after 0.87, permutation p = 0.14: no significant change.
+
+Open: Austria above 1 suggests harvesting while clipping. Spa's wide spread
+(IQR 0.29-0.91) may come from slipstream or override mode changing drag or deployment
+between the two passes. Aston Martin -0.14 / -0.15 relative to race median in both
+periods; needs confidence intervals before any claim.

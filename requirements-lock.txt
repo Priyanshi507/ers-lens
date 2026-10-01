@@ -11,10 +11,14 @@ fastf1==3.8.3
 fonttools==4.66.1
 idna==3.20
 iniconfig==2.3.0
+jax==0.11.2
+jaxlib==0.11.2
 kiwisolver==1.5.1
 matplotlib==3.11.2
+ml_dtypes==0.6.0
 msgpack==1.1.2
 numpy==2.5.3
+opt_einsum==3.4.0
 packaging==26.3
 pandas==2.3.3
 pillow==12.3.0

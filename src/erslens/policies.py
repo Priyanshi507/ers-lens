@@ -86,3 +86,14 @@ def random_policy(rng: np.random.Generator) -> EnergyPolicy:
                          reserve=rng.uniform(0.05, 0.2))
     return ClipEndOfStraight(deploy_w=rng.uniform(250e3, 350e3), clip_from=rng.uniform(0.5, 0.9),
                              clip_w=rng.uniform(100e3, 350e3))
+
+
+@dataclass
+class ProfilePolicy:
+    """Open-loop command per track point (W; positive deploys, negative harvests)."""
+    cmd_w: np.ndarray
+    name: str = "profile"
+
+    def command_w(self, ctx: StepContext) -> float:
+        i = int(round(ctx.lap_frac * len(self.cmd_w))) % len(self.cmd_w)
+        return float(self.cmd_w[i])

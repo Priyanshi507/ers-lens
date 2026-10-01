@@ -76,3 +76,21 @@ open-loop command per 5 m of track and car parameters as differentiable inputs.
 
 Next: calibrate the simulator's energy behaviour against the real measurements
 (~82% of available MGU-K power withdrawn, ~5-7 s of clipping per straight).
+
+## 2026-10-01: Step 2, milestone 2 (strategy fitting)
+
+Inferring absolute battery state from speed is not identifiable (same trade-off as drag
+vs deployment). Instead, fit an interpretable 3-parameter strategy per lap on the longest
+straight: deployed fraction D of MGU-K cap, clip start s_c, harvest power H after it
+(`src/erslens/straightfit.py`, BFGS through a JAX model including gravity).
+
+- Recovery on synthetic laps with 4 Hz rounding and noise: D within 0.004, s_c within
+  2 m, H within 1 kW; fit error equals the noise level (0.85 km/h).
+- Compiled once per circuit: 0.07 s per lap.
+- Dry run: two independent swing estimates agree (Spearman 0.78); a 250 to 350 kW change
+  in harvest power is detected.
+- Sensitivity: +/-5% ICE power or +/-10% drag shifts swing by only 2-5 kW but total
+  energy used by 180-250 kJ. Swing is trustworthy; absolute energy depends on assumptions.
+
+Prediction stated before running on real data: if the Miami increase in peak
+super-clipping power (250 to 350 kW) applies in races, fitted H rises after Miami.

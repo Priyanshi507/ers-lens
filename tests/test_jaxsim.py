@@ -42,3 +42,23 @@ def test_batched_strategies():
     assert times.shape == (8,)
     # Deploying more on the straights should never make the lap slower here.
     assert np.all(np.diff(times) <= 1e-9)
+
+
+def test_straight_fit_recovers_known_strategy():
+    from erslens.straightfit import DS, _unpack, fit_straight, simulate_straight
+
+    rng = np.random.default_rng(0)
+    n = 240
+    s = jnp.arange(n) * DS
+    errs = []
+    for _ in range(5):
+        d, sc, h = rng.uniform(0.3, 1.0), rng.uniform(0.3, 0.8), rng.uniform(5e4, 3e5)
+        theta = jnp.array([np.log(d / (1 - d)), np.log(sc / (1 - sc)), np.log(np.expm1(h / 1e5))])
+        v, _ = simulate_straight(theta, 60.0, s, jnp.zeros(n), 800.0, CAR, CAR.ice_power_w, CAR.cda_straight)
+        v_obs = np.round(np.asarray(v) * 3.6 + rng.normal(0, 0.8, n)) / 3.6
+        f = fit_straight(v_obs, np.ones(n), np.zeros(n), 800.0, CAR)
+        errs.append((abs(f.deploy_frac - d), abs(f.clip_start_m - sc * float(s[-1])), abs(f.harvest_w - h)))
+    errs = np.array(errs).mean(axis=0)
+    assert errs[0] < 0.03
+    assert errs[1] < 15
+    assert errs[2] < 15e3

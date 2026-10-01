@@ -94,3 +94,20 @@ straight: deployed fraction D of MGU-K cap, clip start s_c, harvest power H afte
 
 Prediction stated before running on real data: if the Miami increase in peak
 super-clipping power (250 to 350 kW) applies in races, fitted H rises after Miami.
+
+## 2026-10-01 (later): Milestone 2 failed its checks on real data; fixed
+
+First real run (7 races) failed two built-in checks:
+- **Sensitivity not smooth:** both +5% and -5% ICE power lowered fitted H by 110-150 kW
+  (all perturbations lowered it by 110-265 kW). The clip point makes the loss multi-modal
+  (late clip + strong harvest vs early clip + gentle harvest), and BFGS found the nearest
+  valley. H results from that run are not interpretable.
+- **Sampling bug:** fits required full throttle from the straight's first point; race laps
+  often reach it later, so China kept 9 of 255 clean laps and Spa 53.
+- Spa misfit (rmse 7.9 km/h, H = 0): the 3-parameter model does not describe Kemmel.
+
+Fixes: profile over candidate clip points (19 coarse + 9 fine), with D and H fitted by
+BFGS at each one; start each fit at the lap's first full-throttle sample (zero-weighted
+padding keeps one compilation per circuit). Clip points fitting within 10% of the best
+give an uncertainty range. Recovery holds (D within 0.01, clip within 7 m, H within 3 kW),
+sensitivity is now symmetric (ICE +/-5% moves H -24/+24 kW, swing -11/+11 kW), 0.47 s/lap.

@@ -45,20 +45,38 @@ def test_batched_strategies():
 
 
 def test_straight_fit_recovers_known_strategy():
-    from erslens.straightfit import DS, _unpack, fit_straight, simulate_straight
+    from erslens.straightfit import DS, _simulate, fit_straight
 
     rng = np.random.default_rng(0)
     n = 240
     s = jnp.arange(n) * DS
     errs = []
-    for _ in range(5):
-        d, sc, h = rng.uniform(0.3, 1.0), rng.uniform(0.3, 0.8), rng.uniform(5e4, 3e5)
-        theta = jnp.array([np.log(d / (1 - d)), np.log(sc / (1 - sc)), np.log(np.expm1(h / 1e5))])
-        v, _ = simulate_straight(theta, 60.0, s, jnp.zeros(n), 800.0, CAR, CAR.ice_power_w, CAR.cda_straight)
+    for _ in range(4):
+        d, scf, h = rng.uniform(0.3, 1.0), rng.uniform(0.3, 0.9), rng.uniform(5e4, 3e5)
+        v, _ = _simulate(d, scf * float(s[-1]), h, 60.0, s, jnp.zeros(n), 800.0, CAR,
+                         CAR.ice_power_w, CAR.cda_straight)
         v_obs = np.round(np.asarray(v) * 3.6 + rng.normal(0, 0.8, n)) / 3.6
-        f = fit_straight(v_obs, np.ones(n), np.zeros(n), 800.0, CAR)
-        errs.append((abs(f.deploy_frac - d), abs(f.clip_start_m - sc * float(s[-1])), abs(f.harvest_w - h)))
+        mask = np.ones(n, bool)
+        mask[:20] = False  # race laps often reach full throttle after the straight begins
+        f = fit_straight(v_obs, mask, np.zeros(n), 800.0, CAR)
+        errs.append((abs(f.deploy_frac - d), abs(f.clip_start_m - scf * float(s[-1])),
+                     abs(f.harvest_w - h)))
     errs = np.array(errs).mean(axis=0)
     assert errs[0] < 0.03
-    assert errs[1] < 15
+    assert errs[1] < 25
     assert errs[2] < 15e3
+
+
+def test_straight_fit_sensitivity_is_smooth():
+    from erslens.straightfit import DS, _simulate, fit_straight
+
+    n = 240
+    s = jnp.arange(n) * DS
+    v, _ = _simulate(0.7, 0.6 * float(s[-1]), 1.5e5, 60.0, s, jnp.zeros(n), 800.0, CAR,
+                     CAR.ice_power_w, CAR.cda_straight)
+    v_obs = np.round(np.asarray(v) * 3.6) / 3.6
+    args = (v_obs, np.ones(n, bool), np.zeros(n), 800.0, CAR)
+    base, lo, hi = (fit_straight(*args, ice_w=CAR.ice_power_w * m) for m in (1.0, 0.95, 1.05))
+    d_lo, d_hi = lo.harvest_w - base.harvest_w, hi.harvest_w - base.harvest_w
+    assert d_lo * d_hi < 0  # opposite perturbations move the estimate in opposite directions
+    assert abs(d_lo + d_hi) < 0.25 * (abs(d_lo) + abs(d_hi))

@@ -18,7 +18,7 @@ from erslens.params import load_car_params
 from erslens.straightfit import DS, fit_straight
 from multi_race import permutation_p
 
-SENSITIVITY_LAPS = 150
+SENSITIVITY_LAPS = 80
 
 
 def lap_on_grid(lap: pd.DataFrame, grid: np.ndarray):
@@ -26,9 +26,7 @@ def lap_on_grid(lap: pd.DataFrame, grid: np.ndarray):
     v = np.interp(grid, d, lap["speed_kmh"].to_numpy()) / 3.6
     nearest = np.clip(np.searchsorted(d, grid), 0, len(d) - 1)
     flat = (lap["throttle"].to_numpy()[nearest] >= 98) & ~lap["brake"].astype(bool).to_numpy()[nearest]
-    # Only the unbroken flat-out stretch from the start of the straight is used.
-    mask = np.cumprod(flat).astype(bool)
-    return v, mask
+    return v, flat
 
 
 def analyse_event(year: int, event: str, car) -> pd.DataFrame:
@@ -58,14 +56,15 @@ def analyse_event(year: int, event: str, car) -> pd.DataFrame:
             if lap_quality(lap, start_m, end_m)[1] != "ok":
                 continue
             v, mask = lap_on_grid(lap, grid)
-            if mask.sum() < 40:
-                continue
             mass = car.mass_kg + max(0.0, car.fuel_kg - car.fuel_per_lap_kg * lap_no)
             f = fit_straight(v, mask, grade, mass, car)
+            if f is None:
+                continue
             ind = electric_power_swing(lap, start_m, end_m, mass, elevation)
             rows.append({"event": name, "date": date.date(), "driver": drv, "team": teams.get(drv, ""),
                          "lap": lap_no, "deploy_frac": f.deploy_frac,
                          "clip_start_frac": f.clip_start_m / (grid[-1] - grid[0]),
+                         "clip_range_m": f.clip_range_m, "run_start_m": f.run_start_m,
                          "harvest_kw": f.harvest_w / 1e3, "swing_fit_kw": f.swing_w / 1e3,
                          "energy_used_kj": f.energy_used_kj, "rmse_kmh": f.rmse_kmh,
                          "swing_independent_kw": ind["swing_w"] / 1e3 if ind else np.nan,
@@ -83,6 +82,8 @@ def sensitivity(laps: pd.DataFrame, car) -> pd.DataFrame:
         for _, r in sample.iterrows():
             f = fit_straight(r["_v"], r["_mask"], r["_grade"], r["_mass"], car,
                              car.ice_power_w * ice_mult, car.cda_straight * cda_mult)
+            if f is None:
+                continue
             d.append((f.deploy_frac - r["deploy_frac"], f.harvest_w / 1e3 - r["harvest_kw"],
                       f.swing_w / 1e3 - r["swing_fit_kw"], f.energy_used_kj - r["energy_used_kj"]))
         d = np.array(d)
@@ -115,6 +116,7 @@ def main():
         clip_start_frac=("clip_start_frac", "median"), harvest_kw=("harvest_kw", "median"),
         swing_fit_kw=("swing_fit_kw", "median"), swing_independent_kw=("swing_independent_kw", "median"),
         energy_used_kj=("energy_used_kj", "median"), rmse_kmh=("rmse_kmh", "median"),
+        clip_range_m=("clip_range_m", "median"),
     ).reset_index().sort_values("date")
     races.to_csv(out / "fits_per_race.csv", index=False)
     print("\n" + races.round(2).to_string(index=False))

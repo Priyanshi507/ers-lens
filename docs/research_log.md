@@ -111,3 +111,21 @@ BFGS at each one; start each fit at the lap's first full-throttle sample (zero-w
 padding keeps one compilation per circuit). Clip points fitting within 10% of the best
 give an uncertainty range. Recovery holds (D within 0.01, clip within 7 m, H within 3 kW),
 sensitivity is now symmetric (ICE +/-5% moves H -24/+24 kW, swing -11/+11 kW), 0.47 s/lap.
+
+## 2026-10-01 (evening): Milestone 2 on real data, checks passed
+
+Fixed run: China 237 laps (was 9), Spa 282. Sensitivity now symmetric for every pair
+(ICE -5/+5%: H -18/+14 kW, swing -7/+4 kW; drag -10/+10%: H +26/-23 kW, swing +13/-10 kW).
+Swing is robust to assumptions; total energy used is not (+/-230-380 kJ), so energy is
+reported only as relative. Fit error 1.0-3.8 km/h except Spa (8.9 km/h; excluded).
+Validation: fitted vs independent swing Spearman 0.55 on 2,013 laps; fit runs ~20-45 kW
+lower, possibly because real clipping ramps rather than steps.
+
+Pre-stated prediction (H rises after Miami): not supported; no clear change excluding Spa.
+
+Exploratory, not predicted: deploy_frac before clipping is higher in every post-Miami race
+(0.48-0.68) than every pre-Miami race (0.28-0.38); exact permutation p = 1/35. Treated as
+a hypothesis because it was found after looking.
+
+PREDICTION FOR OUT-OF-SAMPLE TEST (stated before running): every race after Belgium will
+have median deploy_frac >= 0.45. One race below 0.45 counts against the hypothesis.

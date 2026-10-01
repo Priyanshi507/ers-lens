@@ -129,3 +129,20 @@ a hypothesis because it was found after looking.
 
 PREDICTION FOR OUT-OF-SAMPLE TEST (stated before running): every race after Belgium will
 have median deploy_frac >= 0.45. One race below 0.45 counts against the hypothesis.
+
+## 2026-10-02: Out-of-sample test of the deploy_frac hypothesis
+
+Pre-registered: every post-Belgium race has median deploy_frac >= 0.45.
+Result: NOT CONFIRMED. Italy (the only measurable race) = 0.40. Hungary and Netherlands:
+0 laps fitted (no interior straight ending in heavy braking), so untestable, not evidence.
+Italy's measurement also fails validation (fitted vs independent swing Spearman -0.21,
+independent swing ~500 kW). It is not excluded to rescue the hypothesis: if invalid, it
+supports nothing. The deploy_frac increase remains an unconfirmed exploratory hypothesis.
+Across clipping fraction, harvest power and deploy_frac, no before/after effect of the
+Miami changes on race energy use is confirmed.
+
+Likely cause of the Monza failure: config taper is wrong. Reported regulation formula:
+available MGU-K power = 1800 - 5v kW (v in km/h, capped at 350) below 340 km/h, and
+6900 - 20v between 340 and 345 km/h (zero at 345, not 355). Override Mode: 7100 - 20v up
+to 355 km/h. Also reported (secondary source, VERIFY): power reduction rate-limited to
+50 kW/s, which would make clipping a ~6 s ramp rather than a step.

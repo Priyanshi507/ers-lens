@@ -1,0 +1,2 @@
+event,date,period,laps,deploy_frac,clip_start_frac,harvest_kw,swing_fit_kw,swing_independent_kw,energy_used_kj,rmse_kmh,clip_range_m
+Italian Grand Prix,2026-09-06,after,532,0.40188487522335237,0.25221774193548385,92.79805760160616,226.71953548162497,500.5166619782507,-19.57338408781554,2.501738260597972,34.874999999999986

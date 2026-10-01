@@ -86,3 +86,9 @@ def event_info(year: int, event: str | int) -> tuple[str, pd.Timestamp]:
 
     ev = fastf1.get_event(year, event)
     return str(ev["EventName"]), pd.Timestamp(ev["EventDate"])
+
+
+def driver_teams(year: int, event: str | int, kind: str = "R",
+                 cache_dir: str | Path = "data/cache") -> dict[str, str]:
+    session = _session(year, event, kind, cache_dir)
+    return session.results.set_index("Abbreviation")["TeamName"].to_dict()

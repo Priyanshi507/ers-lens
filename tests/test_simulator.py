@@ -242,3 +242,25 @@ def test_permutation_p_is_exact_and_bounded():
 
     assert permutation_p([0.9, 0.8, 0.85], [0.1, 0.2, 0.15, 0.12]) == 1 / 35
     assert permutation_p([0.1, 0.2, 0.15], [0.9, 0.8, 0.85, 0.7]) == 1.0
+
+
+def test_electric_power_swing_matches_ground_truth():
+    import sys
+    sys.path.insert(0, "scripts")
+    from energy_validate import run, summarise
+
+    s = summarise(run(n_cars=8, laps=4, seed=3))
+    assert s["false_positive_laps"] == 0
+    assert s["corr"] > 0.9  # 0.99 on the full 40-car validation; small sample here
+    assert s["mae_kw"] < 40
+
+
+def test_swing_is_none_without_clipping():
+    from erslens.energy import electric_power_swing
+    import pandas as pd
+
+    t = np.arange(0, 12, 0.25)
+    speed = np.minimum(200 + 12 * t, 320.0)
+    lap = pd.DataFrame({"time_s": t, "distance_m": np.cumsum(speed / 3.6 * 0.25),
+                        "speed_kmh": speed, "throttle": 100.0, "brake": False})
+    assert electric_power_swing(lap, 0, 1e6, 800) is None

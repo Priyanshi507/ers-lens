@@ -7,6 +7,9 @@ import pandas as pd
 from .track import Track, track_from_reference
 
 
+POS_UNIT_M = 0.1
+
+
 @lru_cache(maxsize=4)
 def _session(year: int, event: str | int, kind: str, cache_dir: str | Path):
     import fastf1
@@ -61,18 +64,28 @@ def reference_track(year: int, event: str | int, driver: str | None = None,
     lap = laps.pick_quicklaps().pick_fastest()
     df = _car_data(lap)
     name = f"{year}_{str(event).lower().replace(' ', '_')}"
-    return track_from_reference(name, df["distance_m"].to_numpy(), df["speed_kmh"].to_numpy(),
-                                df["throttle"].to_numpy(), ds=ds)
+    track = track_from_reference(name, df["distance_m"].to_numpy(), df["speed_kmh"].to_numpy(),
+                                 df["throttle"].to_numpy(), ds=ds)
+    try:
+        tel = lap.get_telemetry()
+        # FastF1 position coordinates are in tenths of a metre.
+        track.elevation_m = np.interp(track.distance_m, tel["Distance"].to_numpy(),
+                                      tel["Z"].to_numpy(dtype=float) * POS_UNIT_M)
+    except Exception:
+        track.elevation_m = None
+    return track
 
 
 def save_track(track: Track, path: str | Path) -> None:
+    extra = {} if track.elevation_m is None else {"elevation_m": track.elevation_m}
     np.savez(path, name=track.name, distance_m=track.distance_m,
-             v_limit_ms=track.v_limit_ms, straight_mode=track.straight_mode)
+             v_limit_ms=track.v_limit_ms, straight_mode=track.straight_mode, **extra)
 
 
 def load_track(path: str | Path) -> Track:
     z = np.load(path)
-    return Track(str(z["name"]), z["distance_m"], z["v_limit_ms"], z["straight_mode"])
+    elev = z["elevation_m"] if "elevation_m" in z.files else None
+    return Track(str(z["name"]), z["distance_m"], z["v_limit_ms"], z["straight_mode"], elev)
 
 
 def race_drivers(year: int, event: str | int, kind: str = "R",

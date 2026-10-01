@@ -38,3 +38,24 @@ positives on non-clipping cars, 64% of clipping laps measurable (band of at leas
 **Prediction stated before running on real data:** from Miami the FIA raised peak
 super-clipping power from 250 to 350 kW, so if that applies in races the swing should
 rise after Miami (`scripts/energy_real.py`).
+
+## 2026-10-01 (later): Circuit effects and elevation
+
+**Real-race result, level-ground assumption.** Swing did not rise after Miami (race
+medians 193 vs 200 kW, permutation p = 0.49). Circuit differences (126-291 kW) dwarfed
+the before/after difference.
+
+**Normalising by available MGU-K power at the band speed** (taper values from config,
+still marked VERIFY): Australia 0.81, China 0.82, Miami 0.83, Canada 0.84 of available
+power withdrawn. Outliers were the two hilliest circuits, Austria 1.16 and Belgium 0.69
+(Japan 0.60 on only 23 laps).
+
+**Gravity does not cancel between the two passes** when they sit on different gradients.
+Added each pass's elevation change to the energy balance, using the circuit elevation
+profile from FastF1 position data (Z, tenths of a metre). Test: constant electric power
+on a level-then-10%-uphill straight gives a false 65 kW swing assuming level ground and
+-3.8 kW with the correction.
+
+**Prediction stated before running:** the correction moves Austria down and Belgium up
+toward the ~0.82 of the flat circuits. A fraction above 1 is physically possible (deploy
+cut plus harvesting), so Austria may stay above 1 if harvesting is real.

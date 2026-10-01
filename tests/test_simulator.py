@@ -264,3 +264,28 @@ def test_swing_is_none_without_clipping():
     lap = pd.DataFrame({"time_s": t, "distance_m": np.cumsum(speed / 3.6 * 0.25),
                         "speed_kmh": speed, "throttle": 100.0, "brake": False})
     assert electric_power_swing(lap, 0, 1e6, 800) is None
+
+
+def test_elevation_correction_removes_gravity_bias():
+    """Constant electric power on a level-then-uphill straight: the true swing is zero."""
+    import pandas as pd
+    from erslens.energy import electric_power_swing
+
+    m, p, cda, grade = 800.0, 450e3, 1.0, 0.10
+    dt, v, s, rows = 0.01, 85.0, 0.0, []
+    for k in range(int(16 / dt)):
+        slope = grade if s >= 600 else 0.0
+        a = (p / v - 0.5 * 1.2 * cda * v * v - m * 9.81 * slope) / m
+        if k % 25 == 0:
+            rows.append((k * dt, s, v * 3.6))
+        v += a * dt
+        s += v * dt
+    t, dist, kmh = map(np.array, zip(*rows))
+    lap = pd.DataFrame({"time_s": t, "distance_m": dist, "speed_kmh": kmh,
+                        "throttle": 100.0, "brake": False})
+    grid = np.arange(0, 2000, 5.0)
+    hill = (grid, np.where(grid >= 600, grade * (grid - 600), 0.0))
+    level = electric_power_swing(lap, 0, 1e6, m)
+    corrected = electric_power_swing(lap, 0, 1e6, m, elevation=hill)
+    assert level["swing_w"] > 30e3
+    assert abs(corrected["swing_w"]) < 5e3

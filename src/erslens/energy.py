@@ -8,12 +8,16 @@ band [lo, hi] the energy balance gives
 
     swing = dKE * (1 / T_up + 1 / T_down),   dKE = m * (hi^2 - lo^2) / 2
 
-which needs only the car mass, not its drag or engine power. Fitting those per car from
+which needs only the car mass, not its drag or engine power. Gravity cancels only if
+both passes climb equally, so on hilly straights the elevation change of each pass is
+added to the energy balance (track elevation profile from FastF1 position data). Fitting those per car from
 speed alone is not identifiable: high drag with full deployment produces the same trace
 as low drag with partial deployment (see docs/research_log.md).
 """
 import numpy as np
 import pandas as pd
+
+from .physics import G
 
 DT = 0.25
 FULL_THROTTLE = 98.0
@@ -44,15 +48,19 @@ def _crossing_time(t: np.ndarray, v: np.ndarray, level: float, rising: bool) -> 
                                     else (v[i - 1:i + 1][::-1], t[i - 1:i + 1][::-1]))))
 
 
-def electric_power_swing(lap: pd.DataFrame, start_m: float, end_m: float,
-                         mass_kg: float) -> dict | None:
-    """Drop in electric power (W) after the speed peak, or None if the lap barely clips."""
+def electric_power_swing(lap: pd.DataFrame, start_m: float, end_m: float, mass_kg: float,
+                         elevation: tuple[np.ndarray, np.ndarray] | None = None) -> dict | None:
+    """Drop in electric power (W) after the speed peak, or None if the lap barely clips.
+
+    elevation is (distance_m, height_m) for the circuit; without it the straight is
+    assumed level.
+    """
     u = resample_uniform(lap)
     u = u[u["distance_m"].between(start_m, end_m)
           & (u["throttle"] >= FULL_THROTTLE) & ~u["brake"]]
     if len(u) < 10:
         return None
-    t, v = u["time_s"].to_numpy(), u["v"].to_numpy()
+    t, v, d = u["time_s"].to_numpy(), u["v"].to_numpy(), u["distance_m"].to_numpy()
     peak = int(np.argmax(v))
     # Running max/min make each branch monotone so noise cannot create extra crossings.
     tu, vu = t[:peak + 1], np.maximum.accumulate(v[:peak + 1])
@@ -61,13 +69,22 @@ def electric_power_swing(lap: pd.DataFrame, start_m: float, end_m: float,
     hi = v[peak] - PEAK_MARGIN_KMH / 3.6
     if hi - lo < MIN_BAND_KMH / 3.6:
         return None
-    t_up = _crossing_time(tu, vu, hi, True) - _crossing_time(tu, vu, lo, True)
-    t_down = _crossing_time(td, vd, lo, False) - _crossing_time(td, vd, hi, False)
+    up_lo, up_hi = _crossing_time(tu, vu, lo, True), _crossing_time(tu, vu, hi, True)
+    dn_hi, dn_lo = _crossing_time(td, vd, hi, False), _crossing_time(td, vd, lo, False)
+    t_up, t_down = up_hi - up_lo, dn_lo - dn_hi
     if not (t_up > 0 and t_down > 0):
         return None
     dke = 0.5 * mass_kg * (hi ** 2 - lo ** 2)
-    return {"swing_w": dke * (1 / t_up + 1 / t_down), "band_lo_kmh": lo * 3.6,
-            "band_hi_kmh": hi * 3.6, "t_up_s": t_up, "t_down_s": t_down}
+    flat = dke * (1 / t_up + 1 / t_down)
+    dz_up = dz_down = 0.0
+    if elevation is not None:
+        def z(tc):
+            return float(np.interp(np.interp(tc, t, d), *elevation))
+        dz_up, dz_down = z(up_hi) - z(up_lo), z(dn_lo) - z(dn_hi)
+    mg = mass_kg * G
+    swing = (dke + mg * dz_up) / t_up + (dke - mg * dz_down) / t_down
+    return {"swing_w": swing, "swing_level_w": flat, "dz_up_m": dz_up, "dz_down_m": dz_down,
+            "band_lo_kmh": lo * 3.6, "band_hi_kmh": hi * 3.6, "t_up_s": t_up, "t_down_s": t_down}
 
 
 def true_swing(sim: pd.DataFrame, lap: int, start_m: float, end_m: float,

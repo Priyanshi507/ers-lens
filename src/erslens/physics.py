@@ -10,14 +10,15 @@ def resistive_force(v: float, mass: float, cda: float, car: CarParams) -> float:
     return 0.5 * car.rho * cda * v * v + car.crr * mass * G
 
 
+def mguk_cap_kmh(kmh, car: CarParams, xp=np):
+    """Available MGU-K power (W) at speed kmh; works on scalars and NumPy or JAX arrays."""
+    low = xp.minimum(car.mguk_power_w, car.taper_a1_w - car.taper_b1_w_per_kmh * kmh)
+    cap = xp.where(kmh >= car.taper_knee_kmh, car.taper_a2_w - car.taper_b2_w_per_kmh * kmh, low)
+    return xp.maximum(cap, 0.0)
+
+
 def mguk_power_cap(v: float, car: CarParams) -> float:
-    kmh = v * 3.6
-    if kmh <= car.mguk_taper_start_kmh:
-        return car.mguk_power_w
-    if kmh >= car.mguk_taper_end_kmh:
-        return 0.0
-    frac = (car.mguk_taper_end_kmh - kmh) / (car.mguk_taper_end_kmh - car.mguk_taper_start_kmh)
-    return car.mguk_power_w * frac
+    return float(mguk_cap_kmh(v * 3.6, car))
 
 
 def brake_decel(v: float, car: CarParams) -> float:

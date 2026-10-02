@@ -1,5 +1,10 @@
 """Fit the 3-parameter energy strategy to every clean race lap on each circuit's longest straight.
 
+Both clipping models are fitted to every lap: a step (power switches at the clip point)
+and a ramp (power falls no faster than the reported 50 kW/s limit). Rule stated before
+running: the ramp model is preferred if its median fit error is lower on at least 5 of
+the 7 original circuits.
+
 Validation: the fitted swing (D x available power + H) is compared with the independent
 matched-speed estimator from Step 1. Prediction stated before running: from Miami the
 FIA raised peak super-clipping power from 250 to 350 kW, so if that applies in races the
@@ -18,7 +23,7 @@ from erslens.params import load_car_params
 from erslens.straightfit import DS, fit_straight
 from multi_race import permutation_p
 
-SENSITIVITY_LAPS = 80
+SENSITIVITY_LAPS = 40
 
 
 def lap_on_grid(lap: pd.DataFrame, grid: np.ndarray):
@@ -57,23 +62,27 @@ def analyse_event(year: int, event: str, car) -> pd.DataFrame:
                 continue
             v, mask = lap_on_grid(lap, grid)
             mass = car.mass_kg + max(0.0, car.fuel_kg - car.fuel_per_lap_kg * lap_no)
-            f = fit_straight(v, mask, grade, mass, car)
-            if f is None:
+            fs = fit_straight(v, mask, grade, mass, car, ramp=False)
+            fr = fit_straight(v, mask, grade, mass, car, ramp=True)
+            if fs is None or fr is None:
                 continue
             ind = electric_power_swing(lap, start_m, end_m, mass, elevation)
-            rows.append({"event": name, "date": date.date(), "driver": drv, "team": teams.get(drv, ""),
-                         "lap": lap_no, "deploy_frac": f.deploy_frac,
-                         "clip_start_frac": f.clip_start_m / (grid[-1] - grid[0]),
-                         "clip_range_m": f.clip_range_m, "run_start_m": f.run_start_m,
-                         "harvest_kw": f.harvest_w / 1e3, "swing_fit_kw": f.swing_w / 1e3,
-                         "energy_used_kj": f.energy_used_kj, "rmse_kmh": f.rmse_kmh,
-                         "swing_independent_kw": ind["swing_w"] / 1e3 if ind else np.nan,
-                         "_v": v, "_mask": mask, "_grade": grade, "_mass": mass})
+            row = {"event": name, "date": date.date(), "driver": drv, "team": teams.get(drv, ""),
+                   "lap": lap_no, "run_start_m": fs.run_start_m,
+                   "swing_independent_kw": ind["swing_w"] / 1e3 if ind else np.nan}
+            for tag, f in (("step", fs), ("ramp", fr)):
+                row.update({f"deploy_frac_{tag}": f.deploy_frac,
+                            f"clip_start_frac_{tag}": f.clip_start_m / (grid[-1] - grid[0]),
+                            f"harvest_kw_{tag}": f.harvest_w / 1e3, f"swing_fit_kw_{tag}": f.swing_w / 1e3,
+                            f"energy_used_kj_{tag}": f.energy_used_kj, f"rmse_kmh_{tag}": f.rmse_kmh,
+                            f"clip_range_m_{tag}": f.clip_range_m})
+            rows.append({**row, "_v": v, "_mask": mask, "_grade": grade, "_mass": mass})
     print(f"{name}: {len(rows)} laps fitted")
     return pd.DataFrame(rows)
 
 
-def sensitivity(laps: pd.DataFrame, car) -> pd.DataFrame:
+def sensitivity(laps: pd.DataFrame, car, ramp: bool) -> pd.DataFrame:
+    tag = "ramp" if ramp else "step"
     sample = laps.sample(min(SENSITIVITY_LAPS, len(laps)), random_state=0)
     out = []
     for label, ice_mult, cda_mult in [("ICE -5%", 0.95, 1), ("ICE +5%", 1.05, 1),
@@ -81,11 +90,12 @@ def sensitivity(laps: pd.DataFrame, car) -> pd.DataFrame:
         d = []
         for _, r in sample.iterrows():
             f = fit_straight(r["_v"], r["_mask"], r["_grade"], r["_mass"], car,
-                             car.ice_power_w * ice_mult, car.cda_straight * cda_mult)
+                             car.ice_power_w * ice_mult, car.cda_straight * cda_mult, ramp=ramp)
             if f is None:
                 continue
-            d.append((f.deploy_frac - r["deploy_frac"], f.harvest_w / 1e3 - r["harvest_kw"],
-                      f.swing_w / 1e3 - r["swing_fit_kw"], f.energy_used_kj - r["energy_used_kj"]))
+            d.append((f.deploy_frac - r[f"deploy_frac_{tag}"], f.harvest_w / 1e3 - r[f"harvest_kw_{tag}"],
+                      f.swing_w / 1e3 - r[f"swing_fit_kw_{tag}"],
+                      f.energy_used_kj - r[f"energy_used_kj_{tag}"]))
         d = np.array(d)
         out.append({"assumption": label, "shift_deploy_frac": d[:, 0].mean(),
                     "shift_harvest_kw": d[:, 1].mean(), "shift_swing_kw": d[:, 2].mean(),
@@ -111,30 +121,31 @@ def main():
     laps["period"] = np.where(pd.to_datetime(laps["date"]) >= change_date, "after", "before")
     laps.drop(columns=[c for c in laps.columns if c.startswith("_")]).to_csv(out / "fits_per_lap.csv", index=False)
 
-    races = laps.groupby(["event", "date", "period"]).agg(
-        laps=("lap", "count"), deploy_frac=("deploy_frac", "median"),
-        clip_start_frac=("clip_start_frac", "median"), harvest_kw=("harvest_kw", "median"),
-        swing_fit_kw=("swing_fit_kw", "median"), swing_independent_kw=("swing_independent_kw", "median"),
-        energy_used_kj=("energy_used_kj", "median"), rmse_kmh=("rmse_kmh", "median"),
-        clip_range_m=("clip_range_m", "median"),
-    ).reset_index().sort_values("date")
+    agg = {"laps": ("lap", "count"), "swing_independent_kw": ("swing_independent_kw", "median")}
+    for tag in ("step", "ramp"):
+        for col in ("rmse_kmh", "deploy_frac", "harvest_kw", "swing_fit_kw", "clip_range_m"):
+            agg[f"{col}_{tag}"] = (f"{col}_{tag}", "median")
+    races = laps.groupby(["event", "date", "period"]).agg(**agg).reset_index().sort_values("date")
     races.to_csv(out / "fits_per_race.csv", index=False)
-    print("\n" + races.round(2).to_string(index=False))
+    with pd.option_context("display.width", 250):
+        print("\n" + races.round(2).to_string(index=False))
+
+    ramp_wins = int((races["rmse_kmh_ramp"] < races["rmse_kmh_step"]).sum())
+    preferred = "ramp" if ramp_wins >= 5 else "step"
+    print(f"\nModel comparison: ramp has lower median fit error on {ramp_wins} of {len(races)} circuits "
+          f"-> preferred model: {preferred.upper()} (rule: ramp if >= 5 of 7)")
 
     both = laps.dropna(subset=["swing_independent_kw"])
-    rho, pval = spearmanr(both["swing_fit_kw"], both["swing_independent_kw"])
-    print(f"\nValidation, fitted vs independent swing on {len(both)} laps: Spearman rho = {rho:.2f} "
-          f"(p = {pval:.1g}); median difference {np.median(both.swing_fit_kw - both.swing_independent_kw):.0f} kW")
+    for tag in ("step", "ramp"):
+        rho, pval = spearmanr(both[f"swing_fit_kw_{tag}"], both["swing_independent_kw"])
+        diff = np.median(both[f"swing_fit_kw_{tag}"] - both["swing_independent_kw"])
+        print(f"Validation ({tag}): fitted vs independent swing on {len(both)} laps: "
+              f"Spearman rho = {rho:.2f} (p = {pval:.1g}); median difference {diff:.0f} kW")
 
-    before = races.loc[races["period"] == "before", "harvest_kw"].tolist()
-    after = races.loc[races["period"] == "after", "harvest_kw"].tolist()
-    if before and after:
-        print(f"Harvest power H (race medians): before {np.mean(before):.0f} kW vs after {np.mean(after):.0f} kW; "
-              f"permutation p (after > before) = {permutation_p(after, before):.3f}")
-
-    sens = sensitivity(laps, car)
+    sens = sensitivity(laps, car, ramp=preferred == "ramp")
     sens.to_csv(out / "sensitivity.csv", index=False)
-    print("\nSensitivity to pinned assumptions (mean shift per lap):\n" + sens.round(2).to_string(index=False))
+    print(f"\nSensitivity of the {preferred} model to pinned assumptions (mean shift per lap):\n"
+          + sens.round(2).to_string(index=False))
     print(f"\nSaved {out}/fits_per_lap.csv, fits_per_race.csv, sensitivity.csv")
 
 

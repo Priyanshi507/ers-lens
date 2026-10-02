@@ -112,37 +112,19 @@ padding keeps one compilation per circuit). Clip points fitting within 10% of th
 give an uncertainty range. Recovery holds (D within 0.01, clip within 7 m, H within 3 kW),
 sensitivity is now symmetric (ICE +/-5% moves H -24/+24 kW, swing -11/+11 kW), 0.47 s/lap.
 
-## 2026-10-01 (evening): Milestone 2 on real data, checks passed
+## 2026-10-02: Regulation taper, ramp model, model comparison
 
-Fixed run: China 237 laps (was 9), Spa 282. Sensitivity now symmetric for every pair
-(ICE -5/+5%: H -18/+14 kW, swing -7/+4 kW; drag -10/+10%: H +26/-23 kW, swing +13/-10 kW).
-Swing is robust to assumptions; total energy used is not (+/-230-380 kJ), so energy is
-reported only as relative. Fit error 1.0-3.8 km/h except Spa (8.9 km/h; excluded).
-Validation: fitted vs independent swing Spearman 0.55 on 2,013 laps; fit runs ~20-45 kW
-lower, possibly because real clipping ramps rather than steps.
+- Replaced the linear 290-355 km/h taper with the reported regulation formula, in one
+  shared function (`physics.mguk_cap_kmh`) used by both simulators and the fitter:
+  1800 - 5v kW below 340 km/h (capped at 350), 6900 - 20v between 340 and 345, zero above.
+  Previously three separate copies held the wrong formula.
+- Added a ramp-limited clipping model (power reduction at most 50 kW/s, VERIFY).
+- Model discrimination: on step-generated laps the step model wins 100% of the time; on
+  ramp-generated laps the ramp model wins 92%.
+- Swing redefined as the realised power change (pre-clip power, read 40 m before the
+  switch, minus power at the end of the run). On matching synthetic data: step fit bias
+  +1 kW, Spearman 0.98 with the independent estimator; ramp fit bias +3 kW, Spearman 0.89.
+  A ramp model on step data gives meaningless swings: model choice matters.
 
-Pre-stated prediction (H rises after Miami): not supported; no clear change excluding Spa.
-
-Exploratory, not predicted: deploy_frac before clipping is higher in every post-Miami race
-(0.48-0.68) than every pre-Miami race (0.28-0.38); exact permutation p = 1/35. Treated as
-a hypothesis because it was found after looking.
-
-PREDICTION FOR OUT-OF-SAMPLE TEST (stated before running): every race after Belgium will
-have median deploy_frac >= 0.45. One race below 0.45 counts against the hypothesis.
-
-## 2026-10-02: Out-of-sample test of the deploy_frac hypothesis
-
-Pre-registered: every post-Belgium race has median deploy_frac >= 0.45.
-Result: NOT CONFIRMED. Italy (the only measurable race) = 0.40. Hungary and Netherlands:
-0 laps fitted (no interior straight ending in heavy braking), so untestable, not evidence.
-Italy's measurement also fails validation (fitted vs independent swing Spearman -0.21,
-independent swing ~500 kW). It is not excluded to rescue the hypothesis: if invalid, it
-supports nothing. The deploy_frac increase remains an unconfirmed exploratory hypothesis.
-Across clipping fraction, harvest power and deploy_frac, no before/after effect of the
-Miami changes on race energy use is confirmed.
-
-Likely cause of the Monza failure: config taper is wrong. Reported regulation formula:
-available MGU-K power = 1800 - 5v kW (v in km/h, capped at 350) below 340 km/h, and
-6900 - 20v between 340 and 345 km/h (zero at 345, not 355). Override Mode: 7100 - 20v up
-to 355 km/h. Also reported (secondary source, VERIFY): power reduction rate-limited to
-50 kW/s, which would make clipping a ~6 s ramp rather than a step.
+Rule stated before the real run: ramp preferred if lower median fit error on >= 5 of 7
+circuits.

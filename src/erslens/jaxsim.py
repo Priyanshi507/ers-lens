@@ -10,7 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from .params import CarParams
-from .physics import G, braking_envelope
+from .physics import G, mguk_cap_kmh, braking_envelope
 from .track import Track
 
 jax.config.update("jax_enable_x64", True)
@@ -36,9 +36,7 @@ def params_of(car: CarParams) -> dict:
 
 
 def _mguk_cap(v, car: CarParams):
-    kmh = v * 3.6
-    frac = (car.mguk_taper_end_kmh - kmh) / (car.mguk_taper_end_kmh - car.mguk_taper_start_kmh)
-    return car.mguk_power_w * jnp.clip(frac, 0.0, 1.0)
+    return mguk_cap_kmh(v * 3.6, car, jnp)
 
 
 def _step(p: dict, car: CarParams, ds: float, mass, carry, x):

@@ -11,8 +11,15 @@ car:
   rho: 1.20
   ice_power_w: 400000.0       # ~50% of total output (estimate)
   mguk_power_w: 350000.0      # VERIFY
-  mguk_taper_start_kmh: 290.0 # VERIFY: deploy tapers above this speed
-  mguk_taper_end_kmh: 355.0   # VERIFY
+  # MGU-K power vs speed (v in km/h), as reported from the 2026 PU regulations. VERIFY.
+  # Below the knee: 1800 - 5v kW (capped at 350, so full power up to 290 km/h).
+  # Knee to zero: 6900 - 20v kW (100 kW at 340 km/h, zero at 345 km/h).
+  taper_a1_w: 1800000.0
+  taper_b1_w_per_kmh: 5000.0
+  taper_knee_kmh: 340.0
+  taper_a2_w: 6900000.0
+  taper_b2_w_per_kmh: 20000.0
+  mguk_ramp_w_per_s: 50000.0  # VERIFY (secondary source): max rate of power reduction
   es_capacity_j: 4000000.0    # usable state-of-charge window (estimate)
   harvest_per_lap_j: 8500000.0  # VERIFY (press quotes 8.5-9 MJ)
   eta_harvest: 0.90

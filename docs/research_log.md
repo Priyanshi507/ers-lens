@@ -129,11 +129,19 @@ sensitivity is now symmetric (ICE +/-5% moves H -24/+24 kW, swing -11/+11 kW), 0
 Rule stated before the real run: ramp preferred if lower median fit error on >= 5 of 7
 circuits.
 
-## 2026-10-02: Step vs ramp on real data
+## 2026-10-02: Identifiability result (core contribution)
 
-Pre-stated rule (ramp preferred if lower median fit error on >= 5 of 7 circuits):
-ramp won 1 of 7 (Australia, 2.19 vs 2.25 km/h). STEP model preferred. Real clipping
-behaves like a fast switch; the reported 50 kW/s limit does not describe clipping.
-Prediction that validation would improve with the regulation taper: not supported
-(step Spearman 0.54, ramp 0.52, vs 0.55 before). Step-model sensitivity remains
-symmetric (swing -4.8/+6.7 kW for ICE -5/+5%).
+On a full-throttle straight, m dv/dt = (P_ice + P_e)/v - 0.5 rho CdA v^2 - crr m g.
+The substitution P_ice -> P_ice + a, CdA -> CdA + delta, P_e(t) -> P_e(t) - a +
+0.5 rho delta v(t)^3 leaves the dynamics, and hence the speed trace, exactly unchanged
+while changing battery energy used. Electric power is identifiable from speed only up to
+a function of speed; differences at matched speeds cancel any such function, so the
+matched-speed estimator recovers exactly the identifiable part.
+
+Demonstration (`scripts/identifiability_demo.py`): speeds equal to 1e-14 m/s, 100% of
+4 Hz rounded telemetry rows identical, matched-speed swing identical (264.3 kW) for every
+alternative. Restricting alternatives to regulation-legal deployment at every instant
+(<= speed-dependent cap, >= -350 kW), battery energy on one straight still spans:
+ICE +/-10%, drag +/-20%: 2.53 MJ; +/-5%/+/-10%: 1.65 MJ; +/-2%/+/-5%: 0.76 MJ
+(4 MJ battery window). Absolute battery state is not recoverable from speed telemetry
+without stronger information than plausible priors on car parameters.

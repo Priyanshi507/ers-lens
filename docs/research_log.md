@@ -187,3 +187,23 @@ showed energy varies twice as much under flexible strategies (sd 1.80 MJ) as sim
 variance. P3 is replaced by:
 P3'. The increase in RMSE caused by car variation is at least twice as large for flexible
      strategies as for simple ones: (E4 / E2) >= 2 x (E3 / E1).
+
+## 2026-10-02: ML experiment results
+
+| Run | RMSE (MJ) | 90% coverage | Mean predicted sd (MJ) |
+| --- | --- | --- | --- |
+| E1 identical/simple | 0.008 | 88% | 0.007 |
+| E2 identical/flexible | 0.016 | 90% | 0.017 |
+| E3 varied/simple | 0.162 | 88% | 0.145 |
+| E4 varied/flexible | 0.358 | 90% | 0.317 |
+| T1 train E2, test E4 | 0.636 | 3% | 0.017 |
+
+P1 held. P2 held (E4 = 22.6x E2). P3' NOT held (E4/E2 22.6 vs E3/E1 21.1): restricting
+strategies to a 3-parameter family does not restore learnability; car variation, not
+strategy flexibility, drives the ambiguity. Lesson: ratio criteria with near-zero
+denominators (E1 = 0.008 MJ) are fragile; future criteria use absolute differences.
+P4 held: trained on identical cars, the model is confidently wrong on varied cars
+(predicted sd 0.017 MJ vs RMSE 0.636 MJ, 90% coverage 3%). P5 held: trained across car
+variation, its uncertainty is calibrated (coverage 88-90%; sd 0.317 vs RMSE 0.358 in E4).
+
+Single seed, one architecture. Next: 5 seeds and a capacity/data control for E4.

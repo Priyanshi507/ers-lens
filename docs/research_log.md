@@ -154,3 +154,36 @@ Formula 1 Power Unit Technical Regulations, Issue 6 (29 March 2024), which shows
 revision from earlier values (1850 - 5v; a flat 150 kW above 340 km/h). The newest
 Section C edition (Issue 12, 10 June 2025) could not be read as far as Article C5, so
 later changes are not excluded. The 50 kW/s ramp limit remains secondary-source only.
+
+## 2026-10-02: ML experiment, predictions recorded before any training run
+
+Question: does a neural network that appears to learn battery energy from telemetry
+learn physics, or a property of its training simulator?
+
+Design: synthetic full-throttle straights (240 points, 5 m apart; speed observed with
+0.8 km/h noise, rounded to whole km/h). Target: battery energy used on the straight (MJ).
+Factor 1, cars: identical (nominal) vs varied (ICE +/-10%, drag area +/-20%, mass 768-838 kg).
+Factor 2, strategies: simple (deploy fraction D of the cap until clip point s_c, then
+harvest H) vs flexible (random smooth profiles within the regulation limits).
+E1 identical/simple, E2 identical/flexible, E3 varied/simple, E4 varied/flexible;
+T1 trains on E2 and tests on E4. Model: MLP with a Gaussian output (mean and standard
+deviation), trained by negative log-likelihood. Metric: RMSE in MJ, plus coverage of
+the 90% predictive interval.
+
+Predictions:
+P1. E1 and E2 (identical cars): RMSE below 0.10 MJ.
+P2. E4 (varied cars, flexible strategies): RMSE at least 5x E2's and at least 0.30 MJ.
+P3. E3 (varied cars, simple strategies): RMSE at most half of E4's; the restricted
+    strategy family makes battery energy look learnable.
+P4. T1 (trained on identical cars): RMSE at least 3x E2's, and 90% intervals cover the
+    truth on fewer than 70% of laps (overconfident under car variation).
+P5. In-distribution (E1-E4): 90% interval coverage between 85% and 95%; mean predicted
+    standard deviation in E4 at least 3x that in E2.
+
+Amendment before any training run: generated samples are filtered for realism in every
+regime (|energy| <= 4 MJ, the battery window; speed >= 180 km/h). Checking target ranges
+showed energy varies twice as much under flexible strategies (sd 1.80 MJ) as simple ones
+(0.88 MJ), so comparing E3 and E4 RMSE directly would confound identifiability with target
+variance. P3 is replaced by:
+P3'. The increase in RMSE caused by car variation is at least twice as large for flexible
+     strategies as for simple ones: (E4 / E2) >= 2 x (E3 / E1).

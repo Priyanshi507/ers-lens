@@ -73,7 +73,32 @@ flat-out run length) kept **2,924 of 6,400** candidate race laps. Without them, 
 data suggested Gasly clipped on 24% of laps against 94% for teammate Colapinto in the same
 car; after cleaning, the difference disappeared. It came from corrupted telemetry.
 
-### 5. Hypotheses tested
+### 5. Neural networks trained in simulation can be confidently wrong
+
+The identifiability result predicts a failure mode for machine learning: a network trained
+on simulated laps where every car is identical can learn battery energy through the
+simulator's fixed car parameters, not the physics. Predictions were committed to the
+research log before any training run.
+
+![Prediction error and calibration across training regimes](docs/ml_identifiability.png)
+
+| Training and test data | RMSE (MJ) | 90% intervals containing the truth |
+| --- | --- | --- |
+| Identical cars | 0.008–0.016 | 88–90% |
+| Varied cars (ICE ±10%, drag ±20%) | 0.16–0.36 | 88–90% |
+| **Trained on identical cars, tested on varied cars** | **0.64** | **3%** |
+
+Trained on identical cars, the network claims ±0.017 MJ certainty while its real error is
+0.64 MJ: about 37 times overconfident. Trained across realistic car variation, it reports
+honest uncertainty instead (predicted ±0.32 MJ against 0.36 MJ actual error). Near-perfect
+accuracy on simulated races is therefore weak evidence for real-race performance unless
+the simulator varies the car. One of five predictions failed: restricting strategies to a
+simple family did not make battery energy learnable.
+
+Status: single seed and one architecture so far; multi-seed runs and a capacity/data
+control are next. Reproduce: `python scripts/ml_identifiability.py`
+
+### 6. Hypotheses tested
 
 None of the six hypotheses below held. All were stated before their tests; four were also
 recorded in the research log beforehand.
@@ -97,6 +122,8 @@ src/erslens/
     jaxsim.py               differentiable simulator in JAX, verified against simulate.py
     energy.py               matched-speed estimator with elevation correction
     straightfit.py          3-parameter clipping fit (step and ramp models)
+    synthstraight.py        simulated straights for the ML experiment (JAX)
+    gaussnet.py             neural network with calibrated Gaussian uncertainty (JAX, Optax)
     ingest.py               FastF1 loading, track and elevation profiles
 scripts/
     derate_analysis.py      quality checks and full-throttle speed-loss detection
@@ -105,7 +132,8 @@ scripts/
     straight_real.py        parametric fits, model comparison, sensitivity
     energy_validate.py      estimator validation against simulated ground truth
     identifiability_demo.py finding 1
-tests/                      42 automated tests (physics invariants, estimators, quality checks)
+    ml_identifiability.py   finding 5
+tests/                      45 automated tests (physics invariants, estimators, quality checks)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
 ```
@@ -119,6 +147,7 @@ pip install -e . --no-deps
 python -m pytest
 
 python scripts/identifiability_demo.py
+python scripts/ml_identifiability.py
 python scripts/energy_validate.py
 python scripts/multi_race.py --session R --events Australia China Japan Miami Canada Austria Belgium
 python scripts/energy_real.py --events Australia China Japan Miami Canada Austria Belgium

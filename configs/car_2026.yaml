@@ -1,4 +1,4 @@
-# Approximate 2026-regulation car. Values marked VERIFY come from press
+# Approximate 2026-regulation car. Values still marked VERIFY come from press
 # summaries of the FIA 2026 technical regulations and should be checked
 # against the published regulation text before any result is reported.
 car:
@@ -10,8 +10,9 @@ car:
   crr: 0.012
   rho: 1.20
   ice_power_w: 400000.0       # ~50% of total output (estimate)
-  mguk_power_w: 350000.0      # VERIFY
-  # MGU-K power vs speed (v in km/h), as reported from the 2026 PU regulations. VERIFY.
+  mguk_power_w: 350000.0      # Honda regulation guide; equals the FIA taper formula at 290 km/h
+  # MGU-K power vs speed (v in km/h). Confirmed in the FIA 2026 Power Unit Technical
+  # Regulations, Issue 6 (29 March 2024); later issues not checked.
   # Below the knee: 1800 - 5v kW (capped at 350, so full power up to 290 km/h).
   # Knee to zero: 6900 - 20v kW (100 kW at 340 km/h, zero at 345 km/h).
   taper_a1_w: 1800000.0
@@ -19,7 +20,7 @@ car:
   taper_knee_kmh: 340.0
   taper_a2_w: 6900000.0
   taper_b2_w_per_kmh: 20000.0
-  mguk_ramp_w_per_s: 50000.0  # VERIFY (secondary source): max rate of power reduction
+  mguk_ramp_w_per_s: 50000.0  # secondary source only; real data reject it for clipping
   es_capacity_j: 4000000.0    # usable state-of-charge window (estimate)
   harvest_per_lap_j: 8500000.0  # VERIFY (press quotes 8.5-9 MJ)
   eta_harvest: 0.90

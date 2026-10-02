@@ -145,3 +145,12 @@ alternative. Restricting alternatives to regulation-legal deployment at every in
 ICE +/-10%, drag +/-20%: 2.53 MJ; +/-5%/+/-10%: 1.65 MJ; +/-2%/+/-5%: 0.76 MJ
 (4 MJ battery window). Absolute battery state is not recoverable from speed telemetry
 without stronger information than plausible priors on car parameters.
+
+## 2026-10-02: Regulation check
+
+The MGU-K taper formula used since the regulation-taper update (1800 - 5v kW below
+340 km/h, 6900 - 20v kW at or above 340 km/h) is confirmed in official FIA text: 2026
+Formula 1 Power Unit Technical Regulations, Issue 6 (29 March 2024), which shows the
+revision from earlier values (1850 - 5v; a flat 150 kW above 340 km/h). The newest
+Section C edition (Issue 12, 10 June 2025) could not be read as far as Article C5, so
+later changes are not excluded. The 50 kW/s ramp limit remains secondary-source only.

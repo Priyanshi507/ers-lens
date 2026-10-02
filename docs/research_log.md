@@ -128,3 +128,12 @@ sensitivity is now symmetric (ICE +/-5% moves H -24/+24 kW, swing -11/+11 kW), 0
 
 Rule stated before the real run: ramp preferred if lower median fit error on >= 5 of 7
 circuits.
+
+## 2026-10-02: Step vs ramp on real data
+
+Pre-stated rule (ramp preferred if lower median fit error on >= 5 of 7 circuits):
+ramp won 1 of 7 (Australia, 2.19 vs 2.25 km/h). STEP model preferred. Real clipping
+behaves like a fast switch; the reported 50 kW/s limit does not describe clipping.
+Prediction that validation would improve with the regulation taper: not supported
+(step Spearman 0.54, ramp 0.52, vs 0.55 before). Step-model sensitivity remains
+symmetric (swing -4.8/+6.7 kW for ICE -5/+5%).

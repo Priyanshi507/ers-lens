@@ -1,3 +1,4 @@
+absl-py==2.5.0
 annotated-types==0.8.0
 attrs==26.1.0
 cattrs==26.2.1
@@ -19,6 +20,7 @@ ml_dtypes==0.6.0
 msgpack==1.1.2
 numpy==2.5.3
 opt_einsum==3.4.0
+optax==0.2.8
 packaging==26.3
 pandas==2.3.3
 pillow==12.3.0

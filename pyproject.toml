@@ -11,7 +11,7 @@ dependencies = ["numpy", "pandas", "pyarrow", "pyyaml", "matplotlib"]
 
 [project.optional-dependencies]
 real = ["fastf1>=3.4"]
-ml = ["jax>=0.4"]
+ml = ["jax>=0.4", "optax>=0.2"]
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]

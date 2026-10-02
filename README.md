@@ -16,14 +16,15 @@ and measures it across the 2026 season.
 
 ### 1. A car's battery state cannot be recovered from speed telemetry
 
-On a full-throttle straight, a car with more engine power, more drag and a different
-electric deployment can produce exactly the same speed trace. Electric power is identifiable
+On a full-throttle straight, a car with different engine power, different drag and a
+different electric deployment can produce exactly the same speed trace. Electric power is identifiable
 from speed only up to an unknown function of speed, so battery energy is not identifiable.
 
 ![Two regulation-legal cars with identical speed and different hidden electric power](docs/identifiability.png)
 
-Searching every regulation-legal alternative (deployment within the speed-dependent MGU-K
-cap at every instant) with identical telemetry, battery energy used on one straight spans:
+Searching a grid of engine power and drag values for regulation-legal alternatives
+(deployment within the speed-dependent MGU-K cap at every instant) with identical
+telemetry, battery energy used on one straight spans:
 
 | ICE power known to within | Drag area known to within | Battery energy spread | Share of 4 MJ window |
 | --- | --- | --- | --- |

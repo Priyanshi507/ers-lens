@@ -287,3 +287,27 @@ L1. At every measurable circuit (>= 20 laps), median time lost per lap on the lo
 L2. Per-lap time loss correlates with the matched-speed power drop (Spearman >= 0.4).
 L3. On real laps with loss > 0.05 s, the median parameter-ambiguity range is under 10%
     of the estimate.
+
+## 2026-10-03: Lap-time loss, first real-data run and diagnosis
+
+Validation (60 simulated laps): median abs error 0.033 s, 90th percentile 0.108 s.
+
+Real races: plausible losses at four circuits (Australia 0.124, China 0.324, Miami 0.274,
+Canada 0.251 s per lap), but two checks caught problems, so the pre-registered predictions
+are recorded as not held: L1 (Austria 0.000 s, Belgium -0.127 s), L2 (Spearman 0.30 on
+1,645 laps) and L3 (median ambiguity range 15.7%).
+
+Root causes identified:
+1. Austria: inconsistency with the Phase 2 detector, which bridges single-sample throttle
+   noise (90-98%); the lap-time code did not, ending the full-throttle run before the speed
+   peak (3.8% of laps flagged vs 82% by the detector).
+2. Belgium: a negative loss is physically impossible, so the pre-clip model is invalid on
+   Spa's long uphill straight, where counterfactual errors accumulate with distance.
+3. Validation design: simulated laps shared the estimator's own assumptions (an "inverse
+   crime"), so simulation accuracy overstated real-data accuracy. This mirrors the ML
+   finding that in-model accuracy does not guarantee real-world validity.
+
+Actions: one shared definition of full throttle across the project; laps with loss below
+-0.09 s flagged as model failures and reported per circuit; validation on simulated laps
+that deliberately violate the estimator's assumptions. Team comparisons are held back
+until these are complete.

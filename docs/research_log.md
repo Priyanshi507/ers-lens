@@ -257,3 +257,33 @@ set by whole-km/h rounding. The capacity contrast (21% vs 10%) is weaker than pr
 so it does not by itself establish an information limit. What holds: at the largest
 configuration, varied-car error remains 28x identical-car error (0.313 vs 0.011 MJ), and
 the network resolves about half of the car ambiguity (ratio 0.55) at every scale.
+
+## 2026-10-03: Lap time lost to clipping (method development)
+
+Question for strategists: how much lap time does clipping cost? Method
+(`src/erslens/laptime.py`): fit pre-clip power on full-throttle running below the speed
+peak (electric power = d x regulation cap), for each ICE power (+/-10%), drag area
+(+/-20%) and mass (+/-35 kg) on a grid; keep legal fits within 25% of the best residual;
+simulate each admissible car without clipping from the start of the fit to the end of
+full throttle; time loss = observed time minus counterfactual time.
+
+Development on simulated laps (method choices made while looking at simulation results,
+so these are development findings, not tests):
+- First version started at the speed peak: biased low, because clipping starts before
+  the peak. Changed to start where the fit starts.
+- Apparent remaining bias (-0.07 s) was a validation error: truth was measured over the
+  whole straight, the estimator over the telemetry span. Compared over the same span:
+  median absolute error 0.023-0.033 s on a median loss of 0.72 s, bias -0.011 to +0.006 s,
+  correlation 0.99-1.00 (2 seeds x 40 laps). 90th-percentile error 0.08-0.09 s.
+- Within the d x cap model, the parameter-ambiguity range is only 2-3% of the estimate;
+  noise dominates. Each lap's interval = parameter range +/- 0.09 s.
+Contrast with Section 3: battery energy is ambiguous by up to 63% of the battery window,
+but time lost to clipping is recoverable to about 5%, assuming pre-clip deployment
+follows the shape of the regulation cap.
+
+Predictions for real races, recorded before running:
+L1. At every measurable circuit (>= 20 laps), median time lost per lap on the longest
+    straight is between 0.05 and 0.50 s.
+L2. Per-lap time loss correlates with the matched-speed power drop (Spearman >= 0.4).
+L3. On real laps with loss > 0.05 s, the median parameter-ambiguity range is under 10%
+    of the estimate.

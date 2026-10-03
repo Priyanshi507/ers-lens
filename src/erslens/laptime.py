@@ -12,7 +12,8 @@ regulation limit; d is fitted for each (ICE power, drag area) combination.
 import numpy as np
 import pandas as pd
 
-from .energy import FULL_THROTTLE, resample_uniform
+from .energy import resample_uniform
+from .throttle import full_throttle_mask, run_around
 from .params import CarParams
 from .physics import G, mguk_cap_kmh
 
@@ -30,16 +31,22 @@ SIM_ERROR_90_S = 0.09
 
 
 def _flat_run(lap: pd.DataFrame, start_m: float, end_m: float) -> pd.DataFrame | None:
-    u = resample_uniform(lap)
-    u = u[u["distance_m"].between(start_m, end_m)].reset_index(drop=True)
-    flat = ((u["throttle"] >= FULL_THROTTLE) & ~u["brake"]).to_numpy()
+    """The full-throttle run containing the speed peak, as the Phase 2 detector defines it:
+    shared noise bridging, and a window reaching 100 m past the straight to the braking point."""
+    raw = lap[lap["distance_m"].between(start_m, end_m + 100)].reset_index(drop=True)
+    if len(raw) < 5:
+        return None
+    flat_raw = full_throttle_mask(raw["throttle"].to_numpy(), raw["brake"].to_numpy())
+    if not flat_raw.any():
+        return None
+    u = resample_uniform(raw)
+    nearest = np.clip(np.searchsorted(raw["time_s"].to_numpy(), u["time_s"].to_numpy()), 0, len(raw) - 1)
+    flat = flat_raw[nearest]
     if not flat.any():
         return None
-    i0 = int(np.argmax(flat))
-    i1 = i0
-    while i1 + 1 < len(flat) and flat[i1 + 1]:
-        i1 += 1
-    return u.iloc[i0:i1 + 1].reset_index(drop=True)
+    peak = int(np.argmax(np.where(flat, u["v"].to_numpy(), -np.inf)))
+    a, b = run_around(flat, peak)
+    return u.iloc[a:b + 1].reset_index(drop=True)
 
 
 def _fit_range(v: np.ndarray, peak: int) -> tuple[int, int]:

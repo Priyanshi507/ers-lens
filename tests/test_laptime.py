@@ -24,3 +24,13 @@ def test_no_clipping_means_no_time_loss():
                         "throttle": 100.0, "brake": False})
     r = clip_time_loss(lap, 0, 1e6, 800.0, CarParams())
     assert r is not None and not r["clipping"] and r["t_loss_s"] == 0.0
+
+
+def test_single_throttle_blip_does_not_hide_clipping():
+    from erslens.throttle import full_throttle_mask
+
+    thr = np.array([100, 100, 95, 100, 100, 85, 100], dtype=float)
+    brake = np.zeros(7, dtype=bool)
+    mask = full_throttle_mask(thr, brake)
+    assert mask[2]          # 95% between full-throttle samples is noise
+    assert not mask[5]      # 85% is a real lift

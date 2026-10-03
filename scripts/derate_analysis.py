@@ -7,10 +7,9 @@ import numpy as np
 import pandas as pd
 
 from erslens.ingest import load_track
+from erslens.throttle import FULL_THROTTLE, NOISE_THROTTLE, full_throttle_mask
 from erslens.track import Track
 
-FULL_THROTTLE = 98.0
-NOISE_THROTTLE = 90.0
 # ~24 m between samples at 340 km/h and 4 Hz; a larger gap means dropped telemetry.
 MAX_GAP_M = 60.0
 STALE_RUN = 4
@@ -52,13 +51,7 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
     win = lap[(lap["distance_m"] >= start_m) & (lap["distance_m"] <= end_m + 100)]
     thr = win["throttle"].to_numpy()
     no_brake = ~win["brake"].astype(bool).to_numpy()
-    flat = (thr >= FULL_THROTTLE) & no_brake
-    # A single sample just under full throttle between two full-throttle samples is
-    # sensor noise, not a lift; left unbridged it would hide a real speed loss.
-    blip = np.zeros_like(flat)
-    blip[1:-1] = (~flat[1:-1] & (thr[1:-1] >= NOISE_THROTTLE) & no_brake[1:-1]
-                  & flat[:-2] & flat[2:])
-    flat = flat | blip
+    flat = full_throttle_mask(thr, ~no_brake)
     if flat.sum() < 5:
         return None, "no_flat_out"
     speed = win["speed_kmh"].to_numpy()

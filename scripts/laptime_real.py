@@ -12,10 +12,13 @@ from scipy.stats import spearmanr
 
 from derate_analysis import lap_quality, longest_flat_out_run
 from erslens.energy import electric_power_swing
-from erslens.laptime import clip_time_loss
+from erslens.laptime import SIM_ERROR_90_S, clip_time_loss
 from erslens.params import load_car_params
 
 MIN_LAPS = 20
+# A loss below minus the 90th-percentile error is physically impossible beyond noise, so the
+# pre-clip model has failed on that lap; circuits with many such laps are not reported.
+MAX_FAILURE_SHARE = 0.20
 
 
 def analyse_event(year: int, event: str, car) -> pd.DataFrame:
@@ -66,37 +69,48 @@ def main():
     laps = pd.concat([analyse_event(args.year, ev, car) for ev in args.events], ignore_index=True)
     laps.to_csv(out / "laptime_per_lap.csv", index=False)
 
+    laps["model_failure"] = laps["t_loss_s"] < -SIM_ERROR_90_S
+    ok = laps[~laps["model_failure"]]
     q = lambda p: (lambda x: x.quantile(p))  # noqa: E731
     races = laps.groupby(["event", "date"]).agg(
-        laps=("lap", "count"), clipping_share=("clipping", "mean"),
-        t_loss_median_s=("t_loss_s", "median"), t_loss_q25_s=("t_loss_s", q(0.25)),
-        t_loss_q75_s=("t_loss_s", q(0.75))).reset_index().sort_values("date")
-    races["used"] = races["laps"] >= MIN_LAPS
+        laps=("lap", "count"), failure_share=("model_failure", "mean")).reset_index()
+    races = races.merge(ok.groupby("event").agg(
+        clipping_share=("clipping", "mean"), t_loss_median_s=("t_loss_s", "median"),
+        t_loss_q25_s=("t_loss_s", q(0.25)), t_loss_q75_s=("t_loss_s", q(0.75))).reset_index(), on="event")
+    races["valid"] = (races["laps"] >= MIN_LAPS) & (races["failure_share"] <= MAX_FAILURE_SHARE)
+    races = races.sort_values("date")
     races.to_csv(out / "laptime_per_race.csv", index=False)
-    print("\n" + races.round(3).to_string(index=False))
+    with pd.option_context("display.width", 200):
+        print("\n" + races.round(3).to_string(index=False))
 
-    clip = laps[laps["clipping"]]
+    valid_events = set(races.loc[races["valid"], "event"])
+    clip = ok[ok["clipping"] & ok["event"].isin(valid_events)]
     clip = clip.assign(rel=clip["t_loss_s"] - clip.groupby("event")["t_loss_s"].transform("median"))
     teams = clip.groupby("team").agg(laps=("rel", "count"), vs_race_median_s=("rel", "median"))
     teams = teams.sort_values("vs_race_median_s")
     teams.to_csv(out / "laptime_team_vs_race.csv")
-    print("\nTime lost to clipping relative to the race median (s per lap; + = loses more):\n"
-          + teams.round(3).to_string())
+    print("\nTime lost to clipping relative to the race median, valid circuits only "
+          "(s per lap; + = loses more):\n" + teams.round(3).to_string())
 
-    used = races[races["used"]]
-    l1 = used["t_loss_median_s"].between(0.05, 0.50).all()
+    used = races[races["valid"]]
     both = clip.dropna(subset=["swing_kw"])
     rho = spearmanr(both["t_loss_s"], both["swing_kw"])[0] if len(both) > 10 else np.nan
     big = clip[clip["t_loss_s"] > 0.05]
     width = ((big["t_high_s"] - big["t_low_s"]) / big["t_loss_s"]).median()
-    print("\nPredictions recorded before running (docs/research_log.md):")
-    for label, ok, detail in [
-        ("L1  every circuit's median time loss in 0.05-0.50 s", l1,
+    print("\nPost-fix diagnostics against the L1-L3 criteria (not a test: L1-L3 were already "
+          "tested and not held before these fixes):")
+    for label, ok_, detail in [
+        ("L1  valid circuits' median loss in 0.05-0.50 s", used["t_loss_median_s"].between(0.05, 0.50).all(),
          ", ".join(f"{e.replace(' Grand Prix', '')} {m:.3f}" for e, m in zip(used["event"], used["t_loss_median_s"]))),
-        ("L2  time loss vs matched-speed power drop, Spearman >= 0.4", rho >= 0.4, f"rho = {rho:.2f} on {len(both)} laps"),
-        ("L3  median parameter-ambiguity range < 10% of estimate", width < 0.10, f"median width {width:.1%}"),
+        ("L2  time loss vs power drop, Spearman >= 0.4", rho >= 0.4, f"rho = {rho:.2f} on {len(both)} laps"),
+        ("L3  median ambiguity range < 10%", width < 0.10, f"median width {width:.1%}"),
     ]:
-        print(f"  {'HELD    ' if ok else 'NOT HELD'}  {label}: {detail}")
+        print(f"  {'meets   ' if ok_ else 'misses  '}  {label}: {detail}")
+    invalid = races.loc[~races["valid"], ["event", "laps", "failure_share"]]
+    if len(invalid):
+        print("\nMethod not valid (too few laps or > 20% model failures): "
+              + ", ".join(f"{e.replace(' Grand Prix', '')} ({f:.0%} failures, {n} laps)"
+                          for e, n, f in invalid.itertuples(index=False)))
 
     fig, ax = plt.subplots(figsize=(8, 4.4))
     x = np.arange(len(used))

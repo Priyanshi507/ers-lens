@@ -243,3 +243,17 @@ in [-7, 4], and fit() raises an error if no finite validation loss occurs.
 All ML experiments are re-run with the fixed training. Expectations recorded before the
 re-run: no run diverges (E2 at 40k laps, 3x512 below 0.05 MJ in every seed), and every
 verdict (P1, P2, P3', P4, P5, R1-R4) is unchanged.
+
+## 2026-10-03: Re-run with stable training
+
+No run diverged (E2 seed sd now about 0.0001 MJ). P1, P2, P4, P5 held; P3' not held.
+R1 held (E4 seed sd 1.4% of mean). R2 NOT HELD: E2 fell 21% (0.0141 -> 0.0112 MJ), not
+>= 30%. R3 held: E4 fell 10% (0.3492 -> 0.3133 MJ). R4 held: 0.349 / 0.635 = 0.55.
+The expectation that every verdict would be unchanged was therefore wrong.
+
+Lesson: the earlier R2 pass (43%) was partly an artefact of the training bug, which
+inflated the E2 baseline (0.0204 vs 0.0141 MJ). With stable training, E2 is near the floor
+set by whole-km/h rounding. The capacity contrast (21% vs 10%) is weaker than predicted,
+so it does not by itself establish an information limit. What holds: at the largest
+configuration, varied-car error remains 28x identical-car error (0.313 vs 0.011 MJ), and
+the network resolves about half of the car ambiguity (ratio 0.55) at every scale.

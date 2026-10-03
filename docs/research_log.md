@@ -207,3 +207,20 @@ P4 held: trained on identical cars, the model is confidently wrong on varied car
 variation, its uncertainty is calibrated (coverage 88-90%; sd 0.317 vs RMSE 0.358 in E4).
 
 Single seed, one architecture. Next: 5 seeds and a capacity/data control for E4.
+
+## 2026-10-03: Robustness and capacity control, predictions recorded before any run
+
+Concern: the "flexible" strategies are themselves a restricted family (five smooth bumps
+through tanh), so the network may extract car information from the family's structure.
+For each test lap, the car-uncertainty ambiguity sigma_amb is computed: the standard
+deviation of battery energy that would remain if speed revealed nothing about ICE power,
+drag area or mass (first-order, uniform priors as in the generator).
+
+R1. With 5 seeds, the verdicts of P1, P2, P4 and P5 are the same in every seed, and the
+    seed-to-seed standard deviation of E4 RMSE is below 10% of its mean.
+R2. E2 (identical cars): 4x training data and a 3x512 network reduce RMSE by at least 30%
+    relative to the baseline (40k laps, 2x256).
+R3. E4 (varied cars): the same changes reduce RMSE by less than 25%. If R2 and R3 both
+    hold, the E4 error is information-limited, not model-limited.
+R4. Baseline E4 RMSE divided by the mean sigma_amb lies between 0.3 and 0.9: the network
+    resolves part, but not all, of the car-uncertainty ambiguity.

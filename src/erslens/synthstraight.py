@@ -69,11 +69,15 @@ def _drive(car: CarParams, ice, cda, mass, v0, strategy, flexible: bool):
         f = jnp.minimum((ice + p_e) / v, car.traction_max_n)
         a = (f - 0.5 * car.rho * cda * v * v - car.crr * mass * G) / mass
         v_next = jnp.sqrt(jnp.maximum(v * v + 2.0 * a * DS, 25.0))
-        battery = jnp.where(p_e > 0, p_e / car.eta_deploy, p_e * car.eta_harvest) * DS / v
-        return v_next, (v, battery)
+        dt = DS / v
+        battery = jnp.where(p_e > 0, p_e / car.eta_deploy, p_e * car.eta_harvest) * dt
+        accel = (v_next ** 2 - v ** 2) / (2.0 * DS)
+        # Sensitivities of electric power to ICE power, drag area and mass along a fixed
+        # speed trace: -1, 0.5*rho*v^3 and v*(dv/dt + crr*g), integrated over time.
+        return v_next, (v, battery, dt, v ** 3 * dt, v * (accel + car.crr * G) * dt)
 
-    _, (v, battery) = jax.lax.scan(step, v0, s_grid)
-    return v, battery.sum() / 1e6
+    _, (v, battery, dt, v3dt, mdt) = jax.lax.scan(step, v0, s_grid)
+    return v, battery.sum() / 1e6, (dt.sum(), v3dt.sum(), mdt.sum())
 
 
 @partial(jax.jit, static_argnames=("n", "varied", "flexible", "car"))
@@ -83,25 +87,49 @@ def _generate(key, n: int, varied: bool, flexible: bool, car: CarParams):
         ice, cda, mass = _car_draw(kc, car, varied)
         strategy = _strategy_draw(ks, flexible)
         v0 = jax.random.uniform(kv, minval=55.0, maxval=70.0)
-        v, energy_mj = _drive(car, ice, cda, mass, v0, strategy, flexible)
+        v, energy_mj, sens = _drive(car, ice, cda, mass, v0, strategy, flexible)
         observed = jnp.round(v * 3.6 + SPEED_NOISE_KMH * jax.random.normal(kn, v.shape))
-        return observed, energy_mj
+        return observed, energy_mj, jnp.stack(sens)
 
     return jax.vmap(one)(jax.random.split(key, n))
+
+
+def _generate_filtered(seed: int, n: int, cars: str, strategies: str, car: CarParams):
+    if cars not in ("identical", "varied") or strategies not in ("simple", "flexible"):
+        raise ValueError(f"unknown regime {cars}/{strategies}")
+    xs, ys, ss, batch, round_no = [], [], [], max(n, 1000), 0
+    while sum(len(y) for y in ys) < n:
+        key = jax.random.fold_in(jax.random.PRNGKey(seed), round_no)
+        x, y, sens = (np.asarray(a) for a in _generate(key, batch, cars == "varied",
+                                                          strategies == "flexible", car))
+        keep = (np.abs(y) <= MAX_ABS_ENERGY_MJ) & (x.min(axis=1) >= MIN_SPEED_KMH)
+        xs.append(x[keep])
+        ys.append(y[keep])
+        ss.append(sens[keep])
+        round_no += 1
+    return np.concatenate(xs)[:n], np.concatenate(ys)[:n], np.concatenate(ss)[:n]
 
 
 def generate(seed: int, n: int, cars: str, strategies: str, car: CarParams):
     """Returns (speed_kmh[n, 240], battery_energy_mj[n]) for cars in {identical, varied}
     and strategies in {simple, flexible}, keeping only physically plausible samples."""
-    if cars not in ("identical", "varied") or strategies not in ("simple", "flexible"):
-        raise ValueError(f"unknown regime {cars}/{strategies}")
-    xs, ys, batch, round_no = [], [], max(n, 1000), 0
-    while sum(len(y) for y in ys) < n:
-        key = jax.random.fold_in(jax.random.PRNGKey(seed), round_no)
-        x, y = (np.asarray(a) for a in _generate(key, batch, cars == "varied",
-                                                    strategies == "flexible", car))
-        keep = (np.abs(y) <= MAX_ABS_ENERGY_MJ) & (x.min(axis=1) >= MIN_SPEED_KMH)
-        xs.append(x[keep])
-        ys.append(y[keep])
-        round_no += 1
-    return np.concatenate(xs)[:n], np.concatenate(ys)[:n]
+    x, y, _ = _generate_filtered(seed, n, cars, strategies, car)
+    return x, y
+
+
+def car_ambiguity_mj(seed: int, n: int, strategies: str, car: CarParams) -> np.ndarray:
+    """Per-lap standard deviation of battery energy that would remain if the speed trace
+    revealed nothing about ICE power, drag area or mass (uniform priors as in _car_draw).
+
+    First-order: perturbing the car while holding the speed trace fixed changes electric
+    power by -dICE + 0.5*rho*dCdA*v^3 + dm*v*(dv/dt + crr*g); deployment and harvest
+    efficiencies are treated as 1. Same seed and n as generate() give the same laps.
+    """
+    _, _, sens = _generate_filtered(seed, n, "varied", strategies, car)
+    total_time, v3_time, m_time = sens.T
+    var_ice = (0.2 * car.ice_power_w) ** 2 / 12
+    var_cda = (0.4 * car.cda_straight) ** 2 / 12
+    var_mass = car.fuel_kg ** 2 / 12
+    var = (var_ice * total_time ** 2 + (0.5 * car.rho) ** 2 * var_cda * v3_time ** 2
+           + var_mass * m_time ** 2)
+    return np.sqrt(var) / 1e6

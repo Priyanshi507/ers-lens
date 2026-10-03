@@ -37,3 +37,11 @@ def test_gaussian_network_recovers_known_noise():
     assert r["rmse_mj"] < 0.4
     assert 0.8 <= r["coverage_90"] <= 0.97
     assert 0.2 < r["mean_std_mj"] < 0.45
+
+
+def test_car_ambiguity_is_positive_and_per_lap():
+    from erslens.synthstraight import car_ambiguity_mj
+
+    amb = car_ambiguity_mj(5, 300, "flexible", CAR)
+    assert amb.shape == (300,)
+    assert np.all(amb > 0)

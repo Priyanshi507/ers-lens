@@ -14,6 +14,9 @@ from scipy.stats import norm
 jax.config.update("jax_enable_x64", True)
 
 MIN_LOG_STD = -7.0
+# Bounding log-variance from above stops exp() overflowing into NaN losses.
+MAX_LOG_STD = 4.0
+CLIP_NORM = 1.0
 
 
 @dataclass
@@ -38,7 +41,7 @@ def _forward(params, x):
         x = jax.nn.gelu(x @ w + b)
     w, b = params[-1]
     out = x @ w + b
-    return out[:, 0], jnp.maximum(out[:, 1], MIN_LOG_STD)
+    return out[:, 0], jnp.clip(out[:, 1], MIN_LOG_STD, MAX_LOG_STD)
 
 
 def _nll(params, x, y):
@@ -57,7 +60,9 @@ def fit(x: np.ndarray, y: np.ndarray, seed: int = 0, hidden=(256, 256), epochs: 
     val, tr = idx[:n_val], idx[n_val:]
 
     params = _init(jax.random.PRNGKey(seed), [x.shape[1], *hidden, 2])
-    opt = optax.adamw(optax.cosine_decay_schedule(lr, epochs * (len(tr) // batch)), weight_decay=1e-4)
+    opt = optax.chain(
+        optax.clip_by_global_norm(CLIP_NORM),
+        optax.adamw(optax.cosine_decay_schedule(lr, epochs * (len(tr) // batch)), weight_decay=1e-4))
     state = opt.init(params)
 
     @jax.jit
@@ -78,6 +83,9 @@ def fit(x: np.ndarray, y: np.ndarray, seed: int = 0, hidden=(256, 256), epochs: 
         # Keep the epoch with the best held-out likelihood rather than the last one.
         if v < best:
             best, best_params = v, params
+    # A NaN loss never compares as better, which would silently return untrained weights.
+    if not np.isfinite(best):
+        raise RuntimeError(f"training diverged: no finite validation loss in {epochs} epochs")
     return Fitted(best_params, x_mean, x_std, y_mean, y_std, history)
 
 

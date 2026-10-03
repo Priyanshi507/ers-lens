@@ -45,3 +45,10 @@ def test_car_ambiguity_is_positive_and_per_lap():
     amb = car_ambiguity_mj(5, 300, "flexible", CAR)
     assert amb.shape == (300,)
     assert np.all(amb > 0)
+
+
+def test_fit_fails_loudly_instead_of_returning_untrained_weights():
+    x = np.random.default_rng(0).normal(size=(600, 4))
+    y = np.full(600, np.nan)
+    with pytest.raises(RuntimeError, match="diverged"):
+        fit(x, y, epochs=2)

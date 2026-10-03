@@ -224,3 +224,22 @@ R3. E4 (varied cars): the same changes reduce RMSE by less than 25%. If R2 and R
     hold, the E4 error is information-limited, not model-limited.
 R4. Baseline E4 RMSE divided by the mean sigma_amb lies between 0.3 and 0.9: the network
     resolves part, but not all, of the car-uncertainty ambiguity.
+
+## 2026-10-03: Robustness results, a training bug, and a re-run
+
+Results (5 seeds; capacity control 3 seeds): R1 HELD (verdicts identical in all seeds,
+E4 seed sd 3.8% of mean). R2 HELD (E2 fell 43%, 0.0204 -> 0.0117 MJ). R3 HELD (E4 fell
+11%, 0.3555 -> 0.3181 MJ). R4 HELD (0.355 / 0.635 = 0.56). Verdicts also hold for the
+exact pre-registered configuration (160k laps, 3x512). Summary over seeds: E1 0.009,
+E2 0.027, E3 0.159, E4 0.365, T1 0.633 MJ (T1 90% coverage 3-9%).
+
+Anomaly: E2 with 40k laps and 3x512 gave 0.757 +/- 1.243 MJ; two seeds near 0.01 MJ and
+one near 2.2 MJ, the error of an untrained network. Cause (diagnosed from the code, not
+reproduced): if the validation loss becomes NaN, "v < best" is never true, so fit()
+silently returned the randomly initialised weights; log-variance was unbounded above,
+allowing exp() overflow. Fix: gradient clipping (global norm 1.0), log-variance bounded
+in [-7, 4], and fit() raises an error if no finite validation loss occurs.
+
+All ML experiments are re-run with the fixed training. Expectations recorded before the
+re-run: no run diverges (E2 at 40k laps, 3x512 below 0.05 MJ in every seed), and every
+verdict (P1, P2, P3', P4, P5, R1-R4) is unchanged.

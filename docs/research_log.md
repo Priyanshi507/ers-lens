@@ -311,3 +311,34 @@ Actions: one shared definition of full throttle across the project; laps with lo
 -0.09 s flagged as model failures and reported per circuit; validation on simulated laps
 that deliberately violate the estimator's assumptions. Team comparisons are held back
 until these are complete.
+
+## 2026-10-03: Lap-time loss, first real-data run and diagnosis
+
+Validation (60 simulated laps): median abs error 0.033 s, 90th percentile 0.108 s.
+
+Real races: plausible losses at four circuits (Australia 0.124, China 0.324, Miami 0.274,
+Canada 0.251 s per lap), but two checks caught problems, so the pre-registered predictions
+are recorded as not held: L1 (Austria 0.000 s, Belgium -0.127 s), L2 (Spearman 0.30 on
+1,645 laps) and L3 (median ambiguity range 15.7%).
+
+Root causes identified:
+1. Austria: the lap-time code defined full throttle differently from the Phase 2 detector
+   (no single-sample noise bridging, first run rather than the run containing the peak,
+   window stopping at the straight's end rather than 100 m beyond).
+2. Belgium: a negative loss is physically impossible, so the pre-clip model is invalid on
+   Spa's long uphill straight.
+3. Validation design: simulated laps shared the estimator's own assumptions (an "inverse
+   crime"), so simulation accuracy overstated real-data accuracy. This mirrors the ML
+   finding that in-model accuracy does not guarantee real-world validity.
+
+Fixes: full throttle now has one shared definition (src/erslens/throttle.py) used by the
+detector and the lap-time code; laps with loss below -0.09 s are flagged as model failures,
+and circuits with more than 20% failures are reported as "method not valid"; L1-L3 checks
+after the fixes are printed as diagnostics, not tests.
+
+Stress test outside the model family (scripts/laptime_stress.py, 20 laps per scenario):
+in-model 0.028 s median error (interval covers 95%); constant pre-clip power 0.051 s, bias
++0.046 s (90%); gradual clipping 0.028 s (100%); 2% uphill 0.030 s (95%); all three
+0.062 s, bias +0.062 s (80%). The elevation correction handles gradients; deployment shape
+matters most; the method overestimates when its shape assumption is wrong. Realistic
+accuracy is about +/-0.06 s per lap. Spa's failure is therefore not explained by gradient.

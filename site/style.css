@@ -1,0 +1,163 @@
+:root {
+  --ink: #1d2430;
+  --ink-soft: #4d5868;
+  --paper: #eef1f4;
+  --surface: #ffffff;
+  --grid: #c9d1da;
+  --battery: #2a6fdb;
+  --battery-wash: rgba(42, 111, 219, 0.12);
+  --clip: #c8332b;
+  --caution: #a56f05;
+  --caution-wash: #f6ead0;
+  --band: rgba(77, 88, 104, 0.12);
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --measure: 68ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e4e9ef;
+    --ink-soft: #a7b1bf;
+    --paper: #161b23;
+    --surface: #1f2631;
+    --grid: #384353;
+    --battery: #6a9ef0;
+    --battery-wash: rgba(106, 158, 240, 0.16);
+    --clip: #ef6a5f;
+    --caution: #e2ad45;
+    --caution-wash: #3a311d;
+    --band: rgba(167, 177, 191, 0.14);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--body);
+  font-variant-numeric: tabular-nums;
+}
+
+a { color: var(--battery); text-underline-offset: 0.18em; }
+:focus-visible { outline: 3px solid var(--battery); outline-offset: 2px; }
+
+.masthead, main, .footer {
+  width: min(100% - 2.5rem, 64rem);
+  margin-inline: auto;
+}
+
+.masthead { padding-block: 2.5rem 1.5rem; }
+
+.wordmark {
+  margin: 0 0 1.25rem;
+  font: 600 1rem/1 var(--display);
+  letter-spacing: 0.02em;
+}
+.wordmark a { color: var(--ink); text-decoration: none; border-left: 4px solid var(--battery); padding-left: 0.5rem; }
+
+h1 {
+  margin: 0;
+  max-width: 18ch;
+  font: 600 clamp(2.1rem, 5.5vw, 3.6rem)/1.02 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.lede { max-width: var(--measure); margin: 1rem 0 0; color: var(--ink-soft); font-size: 1.075rem; }
+
+h2 { margin: 0 0 0.4rem; font: 600 1.45rem/1.2 var(--display); }
+
+/* Season strip: the rounds really are a sequence, so they are numbered. */
+.season ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--ink);
+}
+
+.round {
+  width: 100%;
+  height: 100%;
+  padding: 0.65rem 0.7rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--grid);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.round:hover { background: var(--surface); }
+.round[aria-pressed="true"] { background: var(--surface); box-shadow: inset 0 -4px 0 var(--battery); }
+.round-number { display: block; color: var(--ink-soft); font: 500 0.8rem/1 var(--display); }
+.round-name { display: block; margin-top: 0.3rem; font: 600 1.05rem/1.15 var(--display); }
+.round-value { display: block; margin-top: 0.35rem; font-size: 0.9rem; color: var(--clip); font-weight: 600; }
+.round-value.is-unreported { color: var(--caution); font-weight: 500; }
+
+/* The answer sentence is the hero: it changes with the selected race. */
+.answer { padding-block: 2.25rem 1.75rem; }
+.answer-main {
+  max-width: 30ch;
+  margin: 0;
+  font: 500 clamp(1.5rem, 3.4vw, 2.3rem)/1.18 var(--display);
+}
+.answer-main strong { color: var(--clip); font-weight: 600; white-space: nowrap; }
+.answer.is-unreported .answer-main strong { color: var(--caution); }
+.answer-detail { max-width: var(--measure); margin: 0.9rem 0 0; color: var(--ink-soft); }
+
+.panel {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.5rem 1.25rem;
+  background: var(--surface);
+  border-left: 4px solid var(--grid);
+}
+#laps.panel { border-left-color: var(--battery); }
+.note { max-width: var(--measure); margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.95rem; }
+
+.chart { position: relative; }
+.chart-teams { height: 26rem; }
+.chart-lap { height: 22rem; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: end; margin: 0.6rem 0 1rem; }
+.controls label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--ink-soft); }
+select, .controls button {
+  min-height: 2.5rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--grid);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 500 1rem var(--body);
+}
+select { min-width: 11rem; }
+.controls button { cursor: pointer; }
+.controls button:hover { border-color: var(--battery); }
+
+.lap-summary { max-width: var(--measure); min-height: 3em; margin: 0 0 0.75rem; }
+.lap-summary strong { color: var(--clip); }
+
+.legend { margin: 0.6rem 0 0; color: var(--ink-soft); font-size: 0.875rem; }
+.key { display: inline-block; width: 0.9rem; height: 0.9rem; margin: 0 0.35rem -0.12rem 0; vertical-align: baseline; }
+.key + .key, .legend .key-peak { margin-left: 1rem; }
+.key-flat { background: var(--battery-wash); border: 1px solid var(--battery); }
+.key-peak { border-radius: 50%; background: var(--clip); }
+
+.limits { border-left-color: var(--ink); }
+.limits p { max-width: var(--measure); margin: 0.4rem 0 0.8rem; }
+
+.footer { padding-block: 1rem 3rem; color: var(--ink-soft); font-size: 0.875rem; }
+
+.error { color: var(--clip); }
+
+@media (max-width: 40rem) {
+  .panel { padding: 1.1rem 1rem 1rem; }
+  .chart-teams { height: 30rem; }
+  .chart-lap { height: 17rem; }
+  select { min-width: 9rem; }
+}
+.note:empty { display: none; }

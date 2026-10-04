@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERS-Lens Explorer: what clipping cost each car in 2026</title>
+<meta name="description" content="How much lap time Formula 1 cars lost to battery clipping in the 2026 season, measured from public telemetry.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body>
+<header class="masthead">
+  <p class="wordmark"><a href="https://github.com/Priyanshi507/ers-lens">ERS-Lens</a></p>
+  <h1>What did clipping cost each car in 2026?</h1>
+  <p class="lede">In 2026 an F1 car's electric motor fades out near the end of long straights, a drop the paddock calls clipping. Public telemetry can't show the battery, but it can show the speed lost. This site measures that loss, lap by lap.</p>
+</header>
+
+<main>
+  <nav class="season" aria-label="Races in the 2026 season">
+    <ol id="rounds"></ol>
+  </nav>
+
+  <section class="answer" aria-live="polite">
+    <p id="answer-main" class="answer-main">Loading the season…</p>
+    <p id="answer-detail" class="answer-detail"></p>
+  </section>
+
+  <section id="teams" class="panel" hidden>
+    <h2>By team</h2>
+    <p id="teams-note" class="note"></p>
+    <p id="teams-left-out" class="note"></p>
+    <div class="chart chart-teams"><canvas id="team-chart" role="img" aria-label="Time lost to clipping by team, relative to the race median"></canvas></div>
+  </section>
+
+  <section id="laps" class="panel" hidden>
+    <h2>One lap at a time</h2>
+    <div class="controls">
+      <label>Driver <select id="driver"></select></label>
+      <label>Lap <select id="lap"></select></label>
+      <button type="button" id="share">Copy link to this lap</button>
+    </div>
+    <p id="lap-summary" class="lap-summary" aria-live="polite"></p>
+    <div class="chart chart-lap"><canvas id="lap-chart" role="img" aria-label="Speed along the longest straight for the selected lap"></canvas></div>
+    <p class="legend"><span class="key key-flat"></span>Full throttle <span class="key key-peak"></span>Speed peak, where clipping begins</p>
+  </section>
+
+  <section class="panel limits">
+    <h2>What this can't tell you</h2>
+    <p>It can't tell you how much charge a car has left. Cars with different engines and drag can produce the same speed trace while using very different amounts of battery energy, up to 2.5 MJ on one straight. So this site measures what clipping costs in lap time, which public data does support, and not the battery itself.</p>
+    <p><a href="https://github.com/Priyanshi507/ers-lens#1-a-cars-battery-state-cannot-be-recovered-from-speed-telemetry">Read the proof and the method on GitHub</a></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Built by <a href="https://github.com/Priyanshi507">Priyanshi Sharma</a> from public FastF1 timing data. Not affiliated with Formula 1 or any team. Data generated <span id="generated">—</span>.</p>
+</footer>
+
+<script src="vendor/chart-4.4.1.umd.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

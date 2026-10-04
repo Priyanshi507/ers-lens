@@ -19,6 +19,9 @@ MIN_LAPS = 20
 # A loss below minus the 90th-percentile error is physically impossible beyond noise, so the
 # pre-clip model has failed on that lap; circuits with many such laps are not reported.
 MAX_FAILURE_SHARE = 0.20
+# Laps the method cannot fit are recorded, not dropped: dropping them biases a circuit's
+# results towards the laps that happen to be measurable (in Austria, the non-clipping ones).
+MIN_MEASURABLE_SHARE = 0.50
 
 
 def analyse_event(year: int, event: str, car) -> pd.DataFrame:
@@ -45,11 +48,14 @@ def analyse_event(year: int, event: str, car) -> pd.DataFrame:
                 continue
             mass = car.mass_kg + max(0.0, car.fuel_kg - car.fuel_per_lap_kg * lap_no)
             r = clip_time_loss(lap, start_m, end_m, mass, car, elevation)
+            base = {"event": name, "date": date.date(), "driver": drv, "team": teams.get(drv, ""),
+                    "lap": lap_no, "measurable": r is not None}
             if r is None:
+                rows.append({**base, "clipping": np.nan, "t_loss_s": np.nan, "t_low_s": np.nan,
+                             "t_high_s": np.nan, "swing_kw": np.nan})
                 continue
             sw = electric_power_swing(lap, start_m, end_m, mass, elevation)
-            rows.append({"event": name, "date": date.date(), "driver": drv, "team": teams.get(drv, ""),
-                         "lap": lap_no, "clipping": r["clipping"], "t_loss_s": r["t_loss_s"],
+            rows.append({**base, "clipping": r["clipping"], "t_loss_s": r["t_loss_s"],
                          "t_low_s": r["t_low_s"], "t_high_s": r["t_high_s"],
                          "swing_kw": sw["swing_w"] / 1e3 if sw else np.nan})
     print(f"{name}: {len(rows)} laps analysed")
@@ -70,14 +76,18 @@ def main():
     laps.to_csv(out / "laptime_per_lap.csv", index=False)
 
     laps["model_failure"] = laps["t_loss_s"] < -SIM_ERROR_90_S
-    ok = laps[~laps["model_failure"]]
+    measured = laps[laps["measurable"]]
+    ok = measured[~measured["model_failure"]]
     q = lambda p: (lambda x: x.quantile(p))  # noqa: E731
     races = laps.groupby(["event", "date"]).agg(
-        laps=("lap", "count"), failure_share=("model_failure", "mean")).reset_index()
+        clean_laps=("lap", "count"), measurable_share=("measurable", "mean")).reset_index()
+    races = races.merge(measured.groupby("event").agg(
+        laps=("lap", "count"), failure_share=("model_failure", "mean")).reset_index(), on="event", how="left")
     races = races.merge(ok.groupby("event").agg(
         clipping_share=("clipping", "mean"), t_loss_median_s=("t_loss_s", "median"),
-        t_loss_q25_s=("t_loss_s", q(0.25)), t_loss_q75_s=("t_loss_s", q(0.75))).reset_index(), on="event")
-    races["valid"] = (races["laps"] >= MIN_LAPS) & (races["failure_share"] <= MAX_FAILURE_SHARE)
+        t_loss_q25_s=("t_loss_s", q(0.25)), t_loss_q75_s=("t_loss_s", q(0.75))).reset_index(), on="event", how="left")
+    races["valid"] = ((races["laps"] >= MIN_LAPS) & (races["failure_share"] <= MAX_FAILURE_SHARE)
+                      & (races["measurable_share"] >= MIN_MEASURABLE_SHARE))
     races = races.sort_values("date")
     races.to_csv(out / "laptime_per_race.csv", index=False)
     with pd.option_context("display.width", 200):
@@ -106,11 +116,13 @@ def main():
         ("L3  median ambiguity range < 10%", width < 0.10, f"median width {width:.1%}"),
     ]:
         print(f"  {'meets   ' if ok_ else 'misses  '}  {label}: {detail}")
-    invalid = races.loc[~races["valid"], ["event", "laps", "failure_share"]]
+    invalid = races.loc[~races["valid"], ["event", "clean_laps", "measurable_share", "failure_share"]]
     if len(invalid):
-        print("\nMethod not valid (too few laps or > 20% model failures): "
-              + ", ".join(f"{e.replace(' Grand Prix', '')} ({f:.0%} failures, {n} laps)"
-                          for e, n, f in invalid.itertuples(index=False)))
+        print("\nNot reported (needs >= 20 measured laps, >= 50% of clean laps measurable, <= 20% model "
+              "failures): " + ", ".join(
+                  f"{e.replace(' Grand Prix', '')} ({m:.0%} of {n} clean laps measurable, "
+                  f"{0 if pd.isna(f) else f:.0%} failures)"
+                  for e, n, m, f in invalid.itertuples(index=False)))
 
     fig, ax = plt.subplots(figsize=(8, 4.4))
     x = np.arange(len(used))

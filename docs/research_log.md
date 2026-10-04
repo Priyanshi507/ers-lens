@@ -359,3 +359,11 @@ its clean laps are measurable, >= 20 laps are measured, and <= 20% are model fai
 Consistency against the detector's clipping duration (a better check than power drop
 alone, since time lost depends on both the size and the duration of clipping), Spearman on
 clipping laps: Miami 0.88, China 0.87, Canada 0.77, Australia 0.54.
+
+## 2026-10-03: Lap-time loss, final run (chapter closed)
+
+With unmeasurable laps recorded: Australia 0.133 s (IQR 0.077-0.210), China 0.331 s
+(0.199-0.460), Miami 0.277 s (0.180-0.496), Canada 0.250 s (0.165-0.338) per lap; 96-99% of
+clean laps measurable, failures 0-0.5%. Not reported: Austria (30% of 959 clean laps
+measurable), Japan (32% of 50), Belgium (61% model failures). Team comparisons remain
+exploratory. README updated with the 5-seed ML results and this finding.

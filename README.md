@@ -79,30 +79,62 @@ car; after cleaning, the difference disappeared. It came from corrupted telemetr
 The identifiability result predicts a failure mode for machine learning: a network trained
 on simulated laps where every car is identical can learn battery energy through the
 simulator's fixed car parameters, not the physics. Predictions were committed to the
-research log before any training run.
+research log before any training run. Results are means over 5 random seeds.
 
-![Prediction error and calibration across training regimes](docs/ml_identifiability.png)
+![Prediction error across seeds, and the effect of more data and capacity](docs/ml_robustness.png)
 
 | Training and test data | RMSE (MJ) | 90% intervals containing the truth |
 | --- | --- | --- |
-| Identical cars | 0.008–0.016 | 88–90% |
-| Varied cars (ICE ±10%, drag ±20%) | 0.16–0.36 | 88–90% |
-| **Trained on identical cars, tested on varied cars** | **0.64** | **3%** |
+| Identical cars | 0.007–0.014 | 88–89% |
+| Varied cars (ICE ±10%, drag ±20%) | 0.155–0.352 | 87–90% |
+| **Trained on identical cars, tested on varied cars** | **0.633 ± 0.005** | **3%** |
 
-Trained on identical cars, the network claims ±0.017 MJ certainty while its real error is
-0.64 MJ: about 37 times overconfident. Trained across realistic car variation, it reports
-honest uncertainty instead (predicted ±0.32 MJ against 0.36 MJ actual error). Near-perfect
-accuracy on simulated races is therefore weak evidence for real-race performance unless
-the simulator varies the car. One of five predictions failed: restricting strategies to a
-simple family did not make battery energy learnable.
+Trained on identical cars, the network claims ±0.014 MJ certainty while its real error is
+0.633 MJ: about 45 times overconfident, in every seed. Trained across realistic car
+variation, it reports honest uncertainty instead (about ±0.30 MJ predicted against
+0.35 MJ actual error). With 4× more data and a larger network, varied-car error falls only
+10% (0.349 → 0.313 MJ) and stays 28 times the identical-car error; the network resolves
+about half of the car-parameter ambiguity at every scale. Near-perfect accuracy on
+simulated races is therefore weak evidence for real-race performance unless the simulator
+varies the car.
 
-Status: single seed and one architecture so far; multi-seed runs and a capacity/data
-control are next. Reproduce: `python scripts/ml_identifiability.py`
+Of nine pre-registered predictions, two did not hold: restricting strategies to a simple
+family did not make battery energy learnable, and identical-car error fell 21% with more
+data and capacity, not the predicted 30%. A training bug that silently returned untrained
+weights after divergence was found from one anomalous error bar, fixed, and every
+experiment re-run; details in the research log.
+Reproduce: `python scripts/ml_identifiability.py` and `python scripts/ml_robustness.py`
 
-### 6. Hypotheses tested
+### 6. Lap time lost to clipping
 
-None of the six hypotheses below held. All were stated before their tests; four were also
-recorded in the research log beforehand.
+For strategists, the useful unit is seconds. For each lap, ERS-Lens simulates the same car
+keeping its pre-clip power until the braking point, across every plausible combination of
+engine power, drag and mass that fits the observed acceleration, and reports the time
+difference.
+
+![Time lost to clipping per lap at the four reported circuits](docs/laptime.png)
+
+| Circuit (2026) | Median time lost per lap | Interquartile range |
+| --- | --- | --- |
+| Australia | 0.13 s | 0.08–0.21 s |
+| China | 0.33 s | 0.20–0.46 s |
+| Miami | 0.28 s | 0.18–0.50 s |
+| Canada | 0.25 s | 0.17–0.34 s |
+
+Accuracy is about ±0.06 s per lap, measured on simulated laps that deliberately break the
+method's assumptions (constant pre-clip power, gradual clipping, uphill road); the method
+tends to overestimate when its deployment-shape assumption is wrong. On real laps, time
+lost tracks the detector's clipping duration (Spearman 0.77–0.88 at three circuits, 0.54
+in Australia). The method refuses to report circuits it cannot measure honestly: Austria
+(only 30% of laps have enough running before the speed peak), Spa (61% of laps
+physically implausible) and Japan (too few laps). Team comparisons are exploratory and not
+claimed.
+Reproduce: `python scripts/laptime_real.py --events Australia China Japan Miami Canada Austria Belgium`
+
+### 7. Hypotheses tested
+
+None of the nine hypotheses below held as first tested. All were stated before their tests;
+seven were also recorded in the research log beforehand.
 
 | Hypothesis | Result |
 | --- | --- |
@@ -112,6 +144,9 @@ recorded in the research log beforehand.
 | Deployment before clipping rose after Miami (held-out test: every later race ≥ 0.45) | Not confirmed (Italy 0.40) |
 | Ramp-limited clipping fits better on ≥5 of 7 circuits | Not supported (1 of 7) |
 | Regulation taper formula improves agreement between estimators | Not supported (0.55 → 0.54) |
+| Median time lost per lap at every measurable circuit is 0.05–0.50 s | Not held on first run (Austria, Spa failed); after fixes, met at the four reported circuits |
+| Time lost tracks the electric power drop (Spearman ≥ 0.4) | Not held (0.30); the check ignored clipping duration, against which Spearman is 0.54–0.88 |
+| Parameter ambiguity in time lost is under 10% | Not held (about 17%) |
 
 ## Repository
 
@@ -123,6 +158,8 @@ src/erslens/
     jaxsim.py               differentiable simulator in JAX, verified against simulate.py
     energy.py               matched-speed estimator with elevation correction
     straightfit.py          3-parameter clipping fit (step and ramp models)
+    laptime.py              time lost to clipping, with bounds over car parameters
+    throttle.py             one shared definition of full-throttle running
     synthstraight.py        simulated straights for the ML experiment (JAX)
     gaussnet.py             neural network with calibrated Gaussian uncertainty (JAX, Optax)
     ingest.py               FastF1 loading, track and elevation profiles
@@ -134,7 +171,10 @@ scripts/
     energy_validate.py      estimator validation against simulated ground truth
     identifiability_demo.py finding 1
     ml_identifiability.py   finding 5
-tests/                      45 automated tests (physics invariants, estimators, quality checks)
+    ml_robustness.py        finding 5: seeds and capacity/data control
+    laptime_real.py         finding 6 on real races
+    laptime_stress.py       finding 6: accuracy when the method's assumptions are broken
+tests/                      50 automated tests (physics invariants, estimators, quality checks)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
 ```
@@ -149,10 +189,13 @@ python -m pytest
 
 python scripts/identifiability_demo.py
 python scripts/ml_identifiability.py
+python scripts/ml_robustness.py
+python scripts/laptime_stress.py
 python scripts/energy_validate.py
 python scripts/multi_race.py --session R --events Australia China Japan Miami Canada Austria Belgium
 python scripts/energy_real.py --events Australia China Japan Miami Canada Austria Belgium
 python scripts/straight_real.py --events Australia China Japan Miami Canada Austria Belgium
+python scripts/laptime_real.py --events Australia China Japan Miami Canada Austria Belgium
 ```
 
 Raw telemetry is Formula 1 timing data downloaded through [FastF1](https://github.com/theOehrly/Fast-F1)
@@ -169,6 +212,9 @@ and is not redistributed here.
   longest straight crosses the start/finish line or ends in a fast corner cannot be measured.
 - Car mass is assumed (768 kg plus a nominal fuel load); a 5% error shifts power drops by ~5%.
 - Slipstream and Override Mode are not yet separated from clipping.
+- Time lost assumes pre-clip deployment is a fixed fraction of the regulation limit; when it
+  is not, the estimate is biased high by up to about 0.06 s per lap. It needs about 4 s of
+  full-throttle running before the speed peak, so short straights cannot be measured.
 - Real battery data are not public, so validation relies on simulation and agreement between
   two estimators.
 

@@ -1,0 +1,109 @@
+{
+ "schema": 4,
+ "season": 2026,
+ "generated": "2026-10-04",
+ "accuracy": {
+  "typical_lap_s": 0.06,
+  "team_band_s": 0.09
+ },
+ "races": [
+  {
+   "id": "australian",
+   "name": "Australian Grand Prix",
+   "date": "2026-03-08",
+   "period": "before",
+   "clean_laps": 227,
+   "measured_laps": 219,
+   "reported": true,
+   "reason": null,
+   "clipping_share": 0.959,
+   "loss_median_s": 0.133,
+   "loss_q25_s": 0.077,
+   "loss_q75_s": 0.21
+  },
+  {
+   "id": "chinese",
+   "name": "Chinese Grand Prix",
+   "date": "2026-03-15",
+   "period": "before",
+   "clean_laps": 255,
+   "measured_laps": 244,
+   "reported": true,
+   "reason": null,
+   "clipping_share": 0.939,
+   "loss_median_s": 0.331,
+   "loss_q25_s": 0.199,
+   "loss_q75_s": 0.46
+  },
+  {
+   "id": "japanese",
+   "name": "Japanese Grand Prix",
+   "date": "2026-03-29",
+   "period": "before",
+   "clean_laps": 50,
+   "measured_laps": 16,
+   "reported": false,
+   "reason": "Only 32% of clean laps had enough full-throttle running before the speed peak to measure.",
+   "clipping_share": null,
+   "loss_median_s": null,
+   "loss_q25_s": null,
+   "loss_q75_s": null
+  },
+  {
+   "id": "miami",
+   "name": "Miami Grand Prix",
+   "date": "2026-05-03",
+   "period": "after",
+   "clean_laps": 494,
+   "measured_laps": 488,
+   "reported": true,
+   "reason": null,
+   "clipping_share": 0.951,
+   "loss_median_s": 0.277,
+   "loss_q25_s": 0.18,
+   "loss_q75_s": 0.496
+  },
+  {
+   "id": "canadian",
+   "name": "Canadian Grand Prix",
+   "date": "2026-05-24",
+   "period": "after",
+   "clean_laps": 655,
+   "measured_laps": 632,
+   "reported": true,
+   "reason": null,
+   "clipping_share": 0.97,
+   "loss_median_s": 0.25,
+   "loss_q25_s": 0.165,
+   "loss_q75_s": 0.338
+  },
+  {
+   "id": "austrian",
+   "name": "Austrian Grand Prix",
+   "date": "2026-06-28",
+   "period": "after",
+   "clean_laps": 959,
+   "measured_laps": 284,
+   "reported": false,
+   "reason": "Only 30% of clean laps had enough full-throttle running before the speed peak to measure.",
+   "clipping_share": null,
+   "loss_median_s": null,
+   "loss_q25_s": null,
+   "loss_q75_s": null
+  },
+  {
+   "id": "belgian",
+   "name": "Belgian Grand Prix",
+   "date": "2026-07-19",
+   "period": "after",
+   "clean_laps": 284,
+   "measured_laps": 282,
+   "reported": false,
+   "reason": "61% of laps gave physically impossible results, so the method is not valid on this straight.",
+   "clipping_share": null,
+   "loss_median_s": null,
+   "loss_q25_s": null,
+   "loss_q75_s": null
+  }
+ ]
+}

@@ -5,3 +5,6 @@ __pycache__/
 *.png
 !docs/*.png
 .venv/
+
+# The published site needs its exported data
+!site/data/

@@ -115,7 +115,7 @@ def test_committed_site_data_is_consistent():
 
     data = Path("site/data")
     if not (data / "index.json").exists():
-        pytest.skip("no exported site data committed yet")
+        pytest.fail("site/data/index.json is missing: run scripts/export_site.py and commit site/data")
     index = json.loads((data / "index.json").read_text())
     assert index["schema"] == SCHEMA_VERSION and index["races"]
     assert 0 < index["accuracy"]["typical_lap_s"] <= index["accuracy"]["team_band_s"]

@@ -342,3 +342,20 @@ in-model 0.028 s median error (interval covers 95%); constant pre-clip power 0.0
 0.062 s, bias +0.062 s (80%). The elevation correction handles gradients; deployment shape
 matters most; the method overestimates when its shape assumption is wrong. Realistic
 accuracy is about +/-0.06 s per lap. Spa's failure is therefore not explained by gradient.
+
+## 2026-10-03: Austria explained (survivorship bias); consistency check
+
+Diagnostic (scripts/laptime_diagnose.py): in Austria the lap-time code sees the speed drop
+on 72% of clean laps (detector: 82%), but returns no result on those laps: the method needs
+at least 4 s of full-throttle running above 210 km/h before the speed peak to fit pre-clip
+power, and Austria's short uphill straight provides less. The real-race script dropped
+these laps silently, so its 3.2% "clipping share" came from the surviving, mostly
+non-clipping laps: survivorship bias, not a measurement. The throttle-definition fix was
+not the cause.
+
+Fix: unmeasurable laps are recorded, not dropped; a circuit is reported only if >= 50% of
+its clean laps are measurable, >= 20 laps are measured, and <= 20% are model failures.
+
+Consistency against the detector's clipping duration (a better check than power drop
+alone, since time lost depends on both the size and the duration of clipping), Spearman on
+clipping laps: Miami 0.88, China 0.87, Canada 0.77, Australia 0.54.

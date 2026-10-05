@@ -367,3 +367,54 @@ With unmeasurable laps recorded: Australia 0.133 s (IQR 0.077-0.210), China 0.33
 clean laps measurable, failures 0-0.5%. Not reported: Austria (30% of 959 clean laps
 measurable), Japan (32% of 50), Belgium (61% model failures). Team comparisons remain
 exploratory. README updated with the 5-seed ML results and this finding.
+
+## 2026-10-05: Optimal energy deployment ("Strategy Lab"), predictions recorded before any code
+
+Question: what is the lap-time-optimal way to spend and recover electric energy on a 2026
+race lap under the regulations, and does it clip?
+
+Hypothesis: near top speed, aerodynamic drag absorbs power roughly as v^3, so a joule deployed
+there buys little speed, and a joule harvested there costs little time (approximately
+proportional to 1/v^3). The optimum should therefore cut electric power, or harvest, at the
+end of long straights. On this view super-clipping is a feature of optimal energy management,
+not a failure of it.
+
+Problem. One steady-state race lap (mass at mid-race fuel load), car and limits from
+configs/car_2026.yaml: MGU-K power cap with the FIA speed taper, 4 MJ state-of-charge window,
+per-lap harvest limit, efficiencies, braking envelope. The decision is the electric power at
+every track point (deploy or harvest, braking harvest included). Constraint: state of charge
+at the end of the lap is at least its value at the start, so no strategy can win by draining
+the battery. Objective: lap time. Tracks: the reference laps of the four reported circuits
+(Australia, China, Miami, Canada); Canada is used for development.
+
+Methods. M1, dynamic programming over state of charge (exact on its grid; the standard
+method in hybrid-vehicle energy management). M2, gradient descent through the JAX simulator,
+with the end-of-lap energy constraint as a penalty. M1 is the reference; M2 is the fast method.
+Clipping on the longest straight is measured as in the real-data analysis: electric power at the
+speed peak relative to its mean over the full-throttle running before the peak.
+
+Predictions:
+S1. For the nominal car at each of the four circuits, the optimal strategy clips on the
+    longest straight: electric power at the speed peak is at most 50% of its pre-peak mean.
+S2. S1 holds for at least 80% of cars in the legal parameter sweep (ICE power +/-10%, drag
+    area +/-20%, mass +/-35 kg; at least 27 cars) at every circuit.
+S3. With the MGU-K speed taper removed (cap 350 kW at all speeds, everything else unchanged),
+    the optimum still clips on the longest straight at at least 3 of the 4 circuits. If S3
+    fails, clipping is explained by the regulation taper, not by energy economics.
+S4. Electric energy is spent where it buys most time: the energy-weighted mean speed of
+    deployment is at least 20 km/h below the distance-weighted mean speed of full-throttle
+    running.
+S5. The optimum beats the best tuned simple policy (flat-out, straights-only, and
+    clip-at-end-of-straight, each tuned over its parameters) by less than 0.3 s per lap: most
+    of the benefit is available to a simple rule.
+S6. M1 and M2 agree: lap times within 0.02 s, and deployment profiles correlated at >= 0.9.
+    If they disagree, no S1-S5 result is reported until the cause is found.
+S7. Comparison with real cars (exploratory; the battery is not observable): the optimal
+    speed-peak position on the longest straight, measured from the start of full throttle,
+    lies within the interquartile range of observed speed-peak positions at at least 3 of the
+    4 circuits. If it lies after the range, real cars clip earlier than the optimum, which is
+    consistent with, but does not prove, energy-limited running.
+
+Safeguards fixed now: optimizer correctness is tested on toy tracks with known optimal answers
+before any circuit result is computed; results report the full sweep, not the best case; the
+simple policies get the same tuning effort as described in S5, so the comparison is fair.

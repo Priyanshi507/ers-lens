@@ -1,5 +1,7 @@
 # ERS-Lens
 
+**Live site: [priyanshi507.github.io/ers-lens](https://priyanshi507.github.io/ers-lens/)**, how much lap time each 2026 F1 car lost to clipping, race by race and lap by lap.
+
 **What public telemetry can and cannot reveal about 2026 Formula 1 energy management.**
 
 The 2026 regulations split power roughly equally between a ~400 kW combustion engine and a

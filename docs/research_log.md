@@ -418,3 +418,22 @@ S7. Comparison with real cars (exploratory; the battery is not observable): the 
 Safeguards fixed now: optimizer correctness is tested on toy tracks with known optimal answers
 before any circuit result is computed; results report the full sweep, not the best case; the
 simple policies get the same tuning effort as described in S5, so the comparison is fair.
+
+## 2026-10-07: Strategy Lab methods, status before any circuit result
+
+M1 (dynamic programming) and M2 (gradient descent through the JAX simulator) built and tested
+on toy tracks with known answers (free energy gives full deployment; no energy gives the
+engine-only lap; strategies are energy-neutral and respect the harvest limit).
+
+M2 from constant starting commands gets trapped in local optima on realistic tracks (2.6 s
+behind M1 on the demo circuit). Causes found: hard battery limits have zero gradient (search now
+relaxes them and penalizes leaving the window, with the real limits applied in the replay); a
+pure penalty gives no reward for surplus energy (now an augmented Lagrangian with a learned
+energy price); in corners a non-negative command has exactly zero gradient. M2 now starts from
+the best tuned simple policy, which keeps it independent of M1.
+
+S6 not met. Demo circuit lap times: M1 coarse grid 72.150 s, M1 fine grid 71.938 s, M1 fine
+grid with finer power steps 72.063 s, M2 72.095 s. The DP does not converge monotonically under
+grid refinement, so its lap times are currently uncertain by about 0.1-0.2 s, well above the
+0.02 s agreement S6 requires. Per the pre-registration, no S1-S5 result is reported until the
+cause is found.

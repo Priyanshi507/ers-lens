@@ -39,7 +39,9 @@ def _mguk_cap(v, car: CarParams):
     return mguk_cap_kmh(v * 3.6, car, jnp)
 
 
-def _step(p: dict, car: CarParams, ds: float, mass, carry, x):
+def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = True):
+    """hard_soc=False removes the battery-window limits so gradients survive an empty or full
+    battery; only optimizers use it, and they must penalize leaving the window themselves."""
     v, soc, harvested = carry
     cmd, target, straight = x
     cda = jnp.where(straight, p["cda_straight"], p["cda_corner"])
@@ -47,11 +49,13 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x):
     resist = 0.5 * car.rho * cda * v_eff ** 2 + car.crr * mass * G
     cap_k = _mguk_cap(v_eff, car)
     budget = jnp.maximum(0.0, car.harvest_per_lap_j - harvested)
-    space = car.es_capacity_j - soc
+    space = car.es_capacity_j - soc if hard_soc else jnp.inf
     dt_guess = ds / v_eff
     eh, ed = p["eta_harvest"], p["eta_deploy"]
 
-    deploy = jnp.minimum(jnp.minimum(jnp.maximum(cmd, 0.0), cap_k), soc * ed / dt_guess)
+    deploy = jnp.minimum(jnp.maximum(cmd, 0.0), cap_k)
+    if hard_soc:
+        deploy = jnp.minimum(deploy, soc * ed / dt_guess)
     ice_h = jnp.where(cmd < 0.0,
                       jnp.minimum(jnp.minimum(jnp.minimum(-cmd, cap_k), p["ice_power_w"]),
                                   jnp.minimum(budget, space) / (eh * dt_guess)),
@@ -77,20 +81,22 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x):
 
     dt = 2.0 * ds / (v + v_next)
     e_in = eh * (ice_h + brake_h) * dt
-    soc_next = jnp.clip(soc + e_in - deploy / ed * dt, 0.0, car.es_capacity_j)
+    soc_next = soc + e_in - deploy / ed * dt
+    if hard_soc:
+        soc_next = jnp.clip(soc_next, 0.0, car.es_capacity_j)
     out = (v, soc, deploy, ice_h + brake_h, dt)
     return (v_next, soc_next, harvested + e_in), out
 
 
 def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_laps: int,
-                  soc0_frac: float = 0.5, v0: float | None = None):
+                  soc0_frac: float = 0.5, v0: float | None = None, hard_soc: bool = True):
     """Returns per-lap outputs stacked as (n_laps, n_points): v, soc, deploy, harvest, dt."""
     v0 = jnp.minimum(st.env[-1], 80.0) if v0 is None else v0
 
     def lap(carry, lap_idx):
         v, soc = carry
         mass = car.mass_kg + jnp.maximum(0.0, car.fuel_kg - car.fuel_per_lap_kg * lap_idx)
-        step = lambda c, x: _step(p, car, st.ds, mass, c, x)
+        step = lambda c, x: _step(p, car, st.ds, mass, c, x, hard_soc)
         (v, soc, _), out = jax.lax.scan(step, (v, soc, 0.0), (cmd, st.env, st.straight))
         return (v, soc), out
 

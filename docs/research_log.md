@@ -437,3 +437,24 @@ grid with finer power steps 72.063 s, M2 72.095 s. The DP does not converge mono
 grid refinement, so its lap times are currently uncertain by about 0.1-0.2 s, well above the
 0.02 s agreement S6 requires. Per the pre-registration, no S1-S5 result is reported until the
 cause is found.
+
+## 2026-10-07: Method decision before any circuit result (deviation from the pre-registration)
+
+DP convergence, demo circuit, harvest price fixed: refining only the speed grid stalls near
+72.07 s because the charge grid then limits accuracy; refining both converges (speed 0.25 m/s
+with 321 charge levels: 72.040 s; speed 0.125 m/s: 72.024 s, a change of 0.016 s), and the DP's
+own predicted lap time then matches the simulator replay to within 0.002-0.017 s. The earlier
+non-monotone results came from re-running the harvest-price bisection on each grid.
+
+M2 does not reach the converged optimum: from the best tuned simple policy it reaches 72.095 s,
+and longer or slower optimization makes it worse (72.130, 72.430, 73.031 s), so it is trapped
+near its start, not short of iterations. S6 therefore fails, and the cause is identified: local
+optima of gradient descent on a lap full of switches (deploy or harvest, accelerating or braking,
+battery limits), which the DP avoids by searching every state.
+
+Decision, made before any real-circuit result exists: all results use M1. Every M1 result
+reports its own convergence check (predicted minus replayed lap time), and is not used if the
+check exceeds 0.05 s. Nominal cars (S1, S3, S4, S5) use the fine grid (0.125 m/s, 321 levels);
+the 27-car sweep (S2) uses 0.25 m/s with 161 levels, since S2 asks whether the optimum clips,
+not for lap times to the hundredth. M2 is still run and its gap to M1 reported, so the failure
+of S6 is shown on every circuit, not only the demo. Prediction thresholds are unchanged.

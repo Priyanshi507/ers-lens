@@ -131,38 +131,80 @@ class _Compiled:
         self.backward, self.forward, self.replay = jax.jit(backward), jax.jit(forward), jax.jit(replay)
 
 
+def _attempt(c: _Compiled, car: CarParams, track: Track, soc0: float, price: float):
+    values, v_end = c.backward(soc0, price)
+    cmd, start_cost = c.forward(values, v_end, soc0, price)
+    out = {k: np.asarray(a) for k, a in c.replay(cmd, soc0).items()}
+    harvested = float((out["harvest"] * out["dt"]).sum() * car.eta_harvest)
+    return Solution(track, car, np.asarray(cmd), soc0, price,
+                    float(start_cost) - price * harvested, float(out["dt"].sum()), out), harvested
+
+
+def _priced(attempt, budget: float, lo: float, hi: float, n_bisect: int):
+    """Smallest price in [lo, hi] whose strategy respects the harvest budget, by bisection."""
+    for _ in range(n_bisect):
+        mid = 0.5 * (lo + hi)
+        (lo, hi) = (mid, hi) if attempt(mid)[1] > budget else (lo, mid)
+    return attempt(hi)[0]
+
+
 def solve(track: Track, car: CarParams, grid: Grid | None = None, soc0_fracs=(0.25, 0.5, 0.75),
           terminal: bool = True, max_bisect: int = 12) -> Solution:
     """Optimal one-lap strategy for a mid-race car, with the harvest limit enforced.
 
     lap_time_dp_s is the DP's own prediction of the lap time (its optimal cost minus the harvest
-    price term), to be compared with lap_time_sim_s from replaying the strategy in the simulator.
+    price term), to be compared with lap_time_sim_s from replaying the strategy in the simulator;
+    the two agree once the grid is fine enough, which is the convergence check.
     """
     car = race_car(car)
     track = start_at_slowest_point(track, car)
     grid = grid or default_grid(car)
     c = _Compiled(track, car, grid, terminal)
-
-    def attempt(soc0, price):
-        values, v_end = c.backward(soc0, price)
-        cmd, start_cost = c.forward(values, v_end, soc0, price)
-        out = {k: np.asarray(a) for k, a in c.replay(cmd, soc0).items()}
-        harvested = float((out["harvest"] * out["dt"]).sum() * car.eta_harvest)
-        return Solution(track, car, np.asarray(cmd), soc0, price,
-                        float(start_cost) - price * harvested, float(out["dt"].sum()), out), harvested
+    budget = car.harvest_per_lap_j
 
     best = None
     for frac in soc0_fracs:
-        soc0 = frac * car.es_capacity_j
-        sol, harvested = attempt(soc0, 0.0)
-        if harvested > car.harvest_per_lap_j:
-            lo, hi = 0.0, 1e-6
-            while attempt(soc0, hi)[1] > car.harvest_per_lap_j:
+        attempt = lambda price, soc0=frac * car.es_capacity_j: _attempt(c, car, track, soc0, price)
+        sol, harvested = attempt(0.0)
+        if harvested > budget:
+            hi = 1e-6
+            while attempt(hi)[1] > budget:
                 hi *= 4.0
-            for _ in range(max_bisect):
-                mid = 0.5 * (lo + hi)
-                (lo, hi) = (mid, hi) if attempt(soc0, mid)[1] > car.harvest_per_lap_j else (lo, mid)
-            sol, _ = attempt(soc0, hi)
+            sol = _priced(attempt, budget, 0.0, hi, max_bisect)
         if best is None or sol.lap_time_sim_s < best.lap_time_sim_s:
             best = sol
     return best
+
+
+def grid_with(car: CarParams, dv: float, n_soc: int) -> Grid:
+    return Grid(np.arange(V_MIN, 101.0, dv), np.linspace(0.0, car.es_capacity_j, n_soc),
+                default_grid(car).cmd_w)
+
+
+def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 321,
+                  soc0_frac: float = 0.5, fine_bisect: int = 4) -> Solution:
+    """solve() on a fine grid, with the harvest price found on the coarse grid first.
+
+    The coarse price brackets the fine one, so only a few fine-grid solves are needed. Grid
+    convergence on the demo circuit: dv 0.125 m/s with 321 charge levels changes the lap time by
+    0.016 s from dv 0.25, and the DP prediction matches the replay to within 0.02 s.
+    """
+    coarse = solve(track, car, soc0_fracs=(soc0_frac,), max_bisect=10)
+    rc = race_car(car)
+    tr = start_at_slowest_point(track, rc)
+    c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
+    budget = rc.harvest_per_lap_j
+    attempt = lambda price: _attempt(c, rc, tr, soc0_frac * rc.es_capacity_j, price)
+    price = coarse.harvest_price_s_per_j
+    sol, harvested = attempt(price)
+    if harvested <= budget and price == 0.0:
+        return sol
+    if harvested > budget:
+        lo, hi = price, max(2.0 * price, 1e-7)
+        while attempt(hi)[1] > budget:
+            lo, hi = hi, 2.0 * hi
+    else:
+        lo, hi = 0.5 * price, price
+        while lo > 1e-9 and attempt(lo)[1] <= budget:
+            lo, hi = 0.5 * lo, lo
+    return _priced(attempt, budget, lo, hi, fine_bisect)

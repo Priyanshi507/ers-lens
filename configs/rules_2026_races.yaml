@@ -1,0 +1,30 @@
+# Race energy rules per event, overriding configs/car_2026.yaml for the Strategy Lab.
+# Checked 2026-10-07. Values marked unverified get a sensitivity run, not trust.
+#
+# Sources:
+#  [1] PlanetF1, "FIA clarifies F1 2026 rule confusion over Miami GP energy recharge limits":
+#      FIA confirmed up to 9 MJ recharge per lap in practice and the race at Miami, unchanged
+#      from the opening events; the April change lets officials lower it to 7 MJ at some events.
+#  [2] PlanetF1, "FIA confirms changes to F1 2026 rules for Miami Grand Prix" (FIA statement):
+#      peak superclip power increased to 350 kW, previously 250 kW, from Miami.
+#  [3] Yahoo Sports / Motorsport, "FIA confirms 2026 F1 rule changes ahead of Miami Grand Prix":
+#      from Miami, MGU-K deployment 350 kW in key acceleration zones, 250 kW elsewhere. The zones
+#      are not published, so this is modelled only as an extreme-case bound (250 kW everywhere).
+
+events:
+  Australia:
+    harvest_per_lap_j: 9.0e6     # [1] opening events, race
+    superclip_max_w: 250000.0    # [2] before Miami
+  China:
+    harvest_per_lap_j: 9.0e6     # [1]
+    superclip_max_w: 250000.0    # [2]
+  Miami:
+    harvest_per_lap_j: 9.0e6     # [1] confirmed for Miami
+    superclip_max_w: 350000.0    # [2]
+  Canada:
+    harvest_per_lap_j: 9.0e6     # unverified: no source found for Canada; 8 MJ sensitivity run
+    superclip_max_w: 350000.0    # [2]
+
+sensitivity:
+  harvest_low_j: 8.0e6           # tests a lower event limit, which [1] says officials may set
+  deploy_outside_zones_w: 250000.0  # [3] extreme case, Miami and later only

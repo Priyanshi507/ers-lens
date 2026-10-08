@@ -458,3 +458,33 @@ check exceeds 0.05 s. Nominal cars (S1, S3, S4, S5) use the fine grid (0.125 m/s
 the 27-car sweep (S2) uses 0.25 m/s with 161 levels, since S2 asks whether the optimum clips,
 not for lap times to the hundredth. M2 is still run and its gap to M1 reported, so the failure
 of S6 is shown on every circuit, not only the demo. Prediction thresholds are unchanged.
+
+## 2026-10-07: Regulation check and prior work, before re-running (no corrected results exist yet)
+
+Results committed at 73401ff stand as recorded. A check of published sources found three ways
+the model's rules differ from the 2026 races:
+1. Race harvest limit: the model uses 8.5 MJ per lap; the FIA confirmed 9 MJ in practice and the
+   race at the opening events and Miami, with power to lower it to 7 MJ at some events. No
+   source found for Canada: 9 MJ assumed, 8 MJ run as a sensitivity.
+2. Superclip power (harvesting at full throttle): 250 kW before Miami, 350 kW from Miami (FIA
+   statement). The model allowed up to the MGU-K cap at every race, so Australia and China
+   were modelled with more harvesting power than the rules allowed.
+3. From Miami, deployment is 350 kW in key acceleration zones and 250 kW elsewhere. The zones
+   are not published; only the extreme case (250 kW everywhere) is run, as a bound.
+Corrections live in configs/rules_2026_races.yaml with a source per value; car_2026.yaml is
+unchanged so the committed results stay reproducible. The simulator gained superclip and
+deployment caps whose defaults change nothing (tested). The corrected runs use the same
+thresholds as S1-S7.
+
+Context: the FIA's mid-season change explicitly targeted superclip duration (about 2-4 s per
+lap). If the optimum clips under the corrected rules, the regulation is pushing cars away from
+optimal energy use, which is why a rule was needed.
+
+Prior work: time-optimal energy management of F1 hybrids is established (Ebbesen, Salazar,
+Elbert, Bussi, Onder, IEEE TCST; Salazar et al., IEEE TCST 2017, analytical policy; van den
+Eshof, de Vries, Salazar 2026, bang-bang optimal policy for energy-limited race cars). This work
+does not claim the method. Its contributions are the 2026 rules (350 kW, 4 MJ window, speed
+taper, no MGU-H), public data only with convergence checks, separating the taper's effect from
+energy economics, and comparison with public telemetry. The bang-bang result suggests why S5
+failed: the simple rule families deploy at a constant intermediate power, which a bang-bang
+optimum does not; to be tested in the S5 diagnostic.

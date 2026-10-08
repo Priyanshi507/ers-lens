@@ -43,7 +43,7 @@ def main():
     runs = pd.read_csv(args.runs)
     events = list(dict.fromkeys(runs.loc[runs.variant == "nominal", "event"]))
     get = lambda variant: runs[runs.variant == variant].set_index("event")
-    nominal, lines, verdicts = get("nominal"), [], {}
+    nominal, lines, verdicts, extra = get("nominal"), [], {}, []
 
     def report(key, held, detail):
         verdicts[key] = held
@@ -92,13 +92,36 @@ def main():
             lines.append(f"|  | S7 {e} | optimum {opt:.0f} m, observed IQR {q25:.0f}-{q75:.0f} m |")
         report("S7 (exploratory)", sum(inside) >= IQR_CIRCUITS, f"{sum(inside)} of {len(events)} inside")
 
+    rules = get("rules")
+    if len(rules):
+        extra += ["", "**Corrected 2026 race rules** (configs/rules_2026_races.yaml; logged 2026-10-07, "
+                  "before these runs). Same thresholds as above.", "",
+                  "| Variant | Circuit | Clip ratio | Clips? | Deploy speed gap | Lap vs original | Converged |",
+                  "|---|---|---|---|---|---|---|"]
+        for variant in ("rules", "rules_no_taper", "rules_h8", "rules_deploy250"):
+            v = get(variant)
+            for e in v.index:
+                r = v.loc[e]
+                extra.append(f"| {variant} | {e} | {r.clip_ratio:.2f} | {'yes' if r.clip_ratio <= CLIP_MAX else 'no'} | "
+                             f"{r.full_throttle_mean_kmh - r.deploy_weighted_kmh:.0f} km/h | "
+                             f"{r.lap_s - nominal.lap_s.get(e, np.nan):+.3f} s | "
+                             f"{abs(r.dp_pred_s - r.lap_s):.3f} s |")
+        nt = get("rules_no_taper")
+        report("S1 (corrected rules)", bool((rules.clip_ratio <= CLIP_MAX).all()),
+               ", ".join(f"{e} {rules.clip_ratio[e]:.2f}" for e in rules.index))
+        report("S3 (corrected rules)", int((nt.clip_ratio <= CLIP_MAX).sum()) >= min(NO_TAPER_CIRCUITS, len(nt)),
+               f"{int((nt.clip_ratio <= CLIP_MAX).sum())} of {len(nt)} clip without the taper")
+        gap_r = rules.full_throttle_mean_kmh - rules.deploy_weighted_kmh
+        report("S4 (corrected rules)", bool((gap_r >= DEPLOY_GAP_KMH).all()),
+               ", ".join(f"{e} {gap_r[e]:.0f} km/h" for e in rules.index))
+
     soc = runs[runs.variant.str.startswith("soc0_")]
     if len(soc):
         spread = soc.groupby("event").lap_s.agg(lambda s: s.max() - s.min())
         lines.append("| Starting charge | sensitivity | " + ", ".join(
             f"{e} {spread[e]:.3f} s between 30% and 70%" for e in spread.index) + " |")
 
-    text = "\n".join(lines)
+    text = "\n".join(lines + extra)
     print(text)
     Path(args.runs).with_name("verdicts.md").write_text(text + "\n")
 

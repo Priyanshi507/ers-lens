@@ -26,6 +26,9 @@ class CarParams:
     mguk_ramp_w_per_s: float = 5e4
     es_capacity_j: float = 4.0e6
     harvest_per_lap_j: float = 8.5e6
+    # Limits the FIA set per event in 2026; the defaults impose nothing beyond the MGU-K cap.
+    superclip_max_w: float = 1e12   # harvesting while accelerating at full throttle
+    deploy_max_w: float = 1e12      # MGU-K deployment outside designated zones
     eta_harvest: float = 0.90
     eta_deploy: float = 0.95
     traction_max_n: float = 14000.0

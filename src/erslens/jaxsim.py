@@ -53,7 +53,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     dt_guess = ds / v_eff
     eh, ed = p["eta_harvest"], p["eta_deploy"]
 
-    deploy = jnp.minimum(jnp.maximum(cmd, 0.0), cap_k)
+    deploy = jnp.minimum(jnp.minimum(jnp.maximum(cmd, 0.0), cap_k), car.deploy_max_w)
     if hard_soc:
         deploy = jnp.minimum(deploy, soc * ed / dt_guess)
     ice_h = jnp.where(cmd < 0.0,
@@ -72,7 +72,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     v_next = jnp.where(accel, v_acc, target)
     p_need = f_needed * v_eff
     deploy = jnp.where(accel, deploy, 0.0)
-    ice_h = jnp.where(accel, ice_h,
+    ice_h = jnp.where(accel, jnp.minimum(ice_h, car.superclip_max_w),
                       jnp.where(partial, jnp.minimum(ice_h, jnp.maximum(0.0, p["ice_power_w"] - p_need)), 0.0))
     brake_h = jnp.where(braking,
                         jnp.minimum(jnp.minimum(-p_need, cap_k),

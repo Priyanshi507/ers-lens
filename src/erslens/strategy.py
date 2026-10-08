@@ -52,3 +52,21 @@ def clip_metrics(track: Track, out: dict) -> dict:
         "deploy_weighted_kmh": float((out["v"] * energy).sum() / energy.sum() * 3.6),
         "full_throttle_mean_kmh": float(out["v"][free].mean() * 3.6),
     }
+
+
+def race_rules(car: CarParams, event: str, path: str = "configs/rules_2026_races.yaml") -> CarParams:
+    """The car with an event's 2026 race energy rules applied (see the rules file for sources)."""
+    import yaml
+
+    with open(path) as f:
+        rules = yaml.safe_load(f)["events"]
+    if event not in rules:
+        raise KeyError(f"no 2026 race rules recorded for {event}; add them with a source")
+    return car.with_(**{k: float(v) for k, v in rules[event].items()})
+
+
+def rules_sensitivity(path: str = "configs/rules_2026_races.yaml") -> dict:
+    import yaml
+
+    with open(path) as f:
+        return yaml.safe_load(f)["sensitivity"]

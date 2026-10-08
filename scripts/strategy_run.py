@@ -20,7 +20,7 @@ from erslens.gradopt import solve_gradient
 from erslens.optimal import race_car, solve_refined, start_at_slowest_point
 from erslens.params import load_car_params
 from erslens.simple import tune
-from erslens.strategy import clip_metrics, legal_sweep, no_taper
+from erslens.strategy import clip_metrics, legal_sweep, no_taper, race_rules, rules_sensitivity
 from erslens.track import demo_circuit
 
 FIELDS = ["event", "variant", "car_id", "lap_s", "dp_pred_s", "harvest_mj", "soc_start_mj",
@@ -51,6 +51,8 @@ def main():
     ap.add_argument("--quick", action="store_true", help="coarse grids and 3 sweep cars: smoke test only")
     ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--out", default="results/strategy")
+    ap.add_argument("--rules", action="store_true",
+                    help="only the corrected per-race 2026 rules stage (configs/rules_2026_races.yaml)")
     args = ap.parse_args()
 
     events = ["demo"] if args.demo else args.events
@@ -110,6 +112,31 @@ def main():
             rows.append({"event": event, "variant": f"simple_{family}", "car_id": "nominal",
                          "lap_s": t.lap_time_s, **{k: np.nan for k in FIELDS[4:-1]}})
         return rows
+
+    if args.rules:
+        sens = rules_sensitivity()
+        for e in events:
+            rc = race_rules(car, e)
+
+            def corrected():
+                sol = solve_refined(tracks[e], rc, **fine)
+                np.savez_compressed(out_dir / f"profile_rules_{e}.npz", cmd_w=sol.cmd_w, v=sol.out["v"],
+                                    deploy=sol.out["deploy"], harvest=sol.out["harvest"],
+                                    distance_m=sol.track.distance_m, v_limit=sol.track.v_limit_ms)
+                return row(e, "rules", "nominal", sol, 0)
+
+            record(e, "rules", "nominal", corrected)
+            record(e, "rules_no_taper", "nominal",
+                   lambda: row(e, "rules_no_taper", "nominal", solve_refined(tracks[e], no_taper(rc), **fine), 0))
+            low = rc.with_(harvest_per_lap_j=float(sens["harvest_low_j"]))
+            record(e, "rules_h8", "nominal", lambda: row(e, "rules_h8", "nominal", solve_refined(tracks[e], low, **fine), 0))
+            if rc.superclip_max_w >= 350e3:
+                d250 = rc.with_(deploy_max_w=float(sens["deploy_outside_zones_w"]))
+                record(e, "rules_deploy250", "nominal",
+                       lambda: row(e, "rules_deploy250", "nominal", solve_refined(tracks[e], d250, **fine), 0))
+        f.close()
+        print(f"All results in {path}")
+        return
 
     for e in events:
         record(e, "nominal", "nominal", lambda: nominal(e))

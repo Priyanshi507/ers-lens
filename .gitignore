@@ -8,3 +8,4 @@ __pycache__/
 
 # The published site needs its exported data
 !site/data/
+.DS_Store

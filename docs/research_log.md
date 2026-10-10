@@ -488,3 +488,40 @@ taper, no MGU-H), public data only with convergence checks, separating the taper
 energy economics, and comparison with public telemetry. The bang-bang result suggests why S5
 failed: the simple rule families deploy at a constant intermediate power, which a bang-bang
 optimum does not; to be tested in the S5 diagnostic.
+
+## 2026-10-10: Convergence rule enforced on every result; S5 and S7 diagnostics
+
+Note on the log: the two entries titled "Lap-time loss, first real-data run and diagnosis"
+(2026-10-03) are a draft and its revision; both are kept unedited.
+
+The convergence rule (2026-10-07: an M1 result is not used if its DP prediction differs from its
+simulator replay by more than 0.05 s) was enforced only for the four nominal runs. Applied to all
+138 M1 results committed at 6e59c49, 6 fail: Miami rules_no_taper (0.099 s) and sweep cars
+Australia i0d2m2, China i0d1m1, i1d1m2, i2d2m1, Miami i0d2m1 (0.055-0.173 s). Raising the DP
+speed-grid ceiling was tested as a cause and ruled out (demo circuit, no taper: top speed
+98.9 m/s, below the 101 m/s ceiling; raising it to 120 m/s changed the result by 0.006 s).
+
+Decisions, made before any re-solve: the threshold lives in one place (erslens.strategy.
+CONVERGED_S) and every verdict uses only converged results. A failing case is re-solved on
+finer grids, (0.125 m/s, 321 levels), then (0.125, 641), then (0.0625, 321), stopping at the
+first that converges; re-solves are appended as new rows and committed rows are never edited.
+A case that never converges is excluded, listed in the verdicts, and counted against its
+prediction (a sweep car as not clipping, a circuit as failing). With the 6 cases excluded on
+that basis, verdicts are unchanged: S2 still holds (worst case China, 24 of 27 cars, 89%) and
+S3 under the corrected rules is not held (2 of 4).
+
+Diagnostics (exploratory, after the verdicts; scripts/strategy_diagnose.py):
+- S7: part of the gap was the definition. Race laps reach full throttle later than the
+  qualifying reference lap (runs 56-181 m shorter), which inflates the start-to-peak distance.
+  Measured back from the braking point, which the corner fixes for both, real cars still reach
+  their speed peak earlier than the optimum at every circuit: by 164 m (Australia), 132 m
+  (China), 369 m (Miami) and 113 m (Canada), medians over 209-613 clipping laps per
+  circuit. Real cars clip for longer than the optimum. Not causal: race laps include
+  traffic, slipstream and overtake mode, and the battery is not observable.
+- S5: the optimum is bang-bang. 96-99% of full-throttle points deploy at the MGU-K cap or at
+  zero, although the optimizer could choose any level in 25 kW steps; this matches the
+  bang-bang optimal policy of van den Eshof, de Vries and Salazar (2026). The simple rule
+  families set one deployment level per lap; on the demo circuit the best was an intermediate
+  275 kW. The levels chosen at the four real circuits were not stored, so they, and where on
+  the lap the optimum gains its time, are computed with --tracks before any S5 explanation is
+  claimed.

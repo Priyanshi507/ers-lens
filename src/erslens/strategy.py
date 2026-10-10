@@ -70,3 +70,65 @@ def rules_sensitivity(path: str = "configs/rules_2026_races.yaml") -> dict:
 
     with open(path) as f:
         return yaml.safe_load(f)["sensitivity"]
+
+
+# Pre-registered rule (research log, 2026-10-07): an M1 result whose own DP prediction differs
+# from its simulator replay by more than this is not used in any verdict.
+CONVERGED_S = 0.05
+REFINED_TAG = "|refined"
+NOT_M1 = ("m2", "simple_")
+# Finer grids tried, in order, for a result that fails the rule; each stays within ~4 GB.
+REFINE_LADDER = ((0.125, 321), (0.125, 641), (0.0625, 321))
+GRID = {"fine": (0.125, 321), "medium": (0.25, 161)}
+
+
+def original_grid(variant: str) -> tuple[float, int]:
+    return GRID["medium"] if variant == "sweep" or variant.startswith("soc0_") else GRID["fine"]
+
+
+def variant_setup(variant: str, car_id: str, event: str, car: CarParams) -> tuple[CarParams, float]:
+    """The car and starting charge behind a row of runs.csv, so any result can be re-solved."""
+    base_id = car_id.split(REFINED_TAG)[0]
+    if variant == "sweep":
+        return dict(legal_sweep(car))[base_id], 0.5
+    if variant.startswith("soc0_"):
+        return car, float(variant.removeprefix("soc0_"))
+    if variant == "nominal":
+        return car, 0.5
+    if variant == "no_taper":
+        return no_taper(car), 0.5
+    if variant.startswith("rules"):
+        rc = race_rules(car, event)
+        sens = rules_sensitivity()
+        return {"rules": rc, "rules_no_taper": no_taper(rc),
+                "rules_h8": rc.with_(harvest_per_lap_j=float(sens["harvest_low_j"])),
+                "rules_deploy250": rc.with_(deploy_max_w=float(sens["deploy_outside_zones_w"])),
+                }[variant], 0.5
+    raise ValueError(f"no M1 setup for variant {variant!r}")
+
+
+def resolve_runs(runs):
+    """Rows each verdict may use, and the M1 cases excluded because nothing converged.
+
+    For every (event, variant, car) case, the last converged row is used, so a refined re-solve
+    appended later replaces an unconverged original; rows are never edited. M2 and simple-policy
+    rows carry no DP prediction and pass through unchanged.
+    """
+    import pandas as pd
+
+    runs = runs.copy()
+    runs["base_id"] = runs.car_id.str.split(REFINED_TAG, regex=False).str[0]
+    other = runs.variant.str.startswith(NOT_M1)
+    m1 = runs[~other].copy()
+    m1["converged"] = (m1.dp_pred_s - m1.lap_s).abs() <= CONVERGED_S
+    m1["refined"] = m1.car_id.str.contains(REFINED_TAG, regex=False)
+    used, excluded = [], []
+    for _, case in m1.groupby(["event", "variant", "base_id"], sort=False):
+        ok = case[case.converged]
+        (used if len(ok) else excluded).append(ok.tail(1) if len(ok) else case.tail(1))
+    cols = list(runs.columns)
+    used = pd.concat(used + [runs[other].assign(converged=True, refined=False)], ignore_index=True)
+    excluded = pd.concat(excluded, ignore_index=True) if excluded else m1.iloc[0:0]
+    for df in (used, excluded):
+        df["car_id"] = df["base_id"]
+    return used[cols + ["converged", "refined"]].drop(columns="base_id"), excluded

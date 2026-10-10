@@ -20,7 +20,8 @@ from erslens.gradopt import solve_gradient
 from erslens.optimal import race_car, solve_refined, start_at_slowest_point
 from erslens.params import load_car_params
 from erslens.simple import tune
-from erslens.strategy import clip_metrics, legal_sweep, no_taper, race_rules, rules_sensitivity
+from erslens.strategy import (CONVERGED_S, REFINE_LADDER, REFINED_TAG, clip_metrics, legal_sweep, no_taper,
+                              original_grid, race_rules, resolve_runs, rules_sensitivity, variant_setup)
 from erslens.track import demo_circuit
 
 FIELDS = ["event", "variant", "car_id", "lap_s", "dp_pred_s", "harvest_mj", "soc_start_mj",
@@ -51,6 +52,8 @@ def main():
     ap.add_argument("--quick", action="store_true", help="coarse grids and 3 sweep cars: smoke test only")
     ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--out", default="results/strategy")
+    ap.add_argument("--refine", action="store_true",
+                    help="re-solve, on finer grids, every M1 result that fails the convergence rule")
     ap.add_argument("--rules", action="store_true",
                     help="only the corrected per-race 2026 rules stage (configs/rules_2026_races.yaml)")
     args = ap.parse_args()
@@ -112,6 +115,35 @@ def main():
             rows.append({"event": event, "variant": f"simple_{family}", "car_id": "nominal",
                          "lap_s": t.lap_time_s, **{k: np.nan for k in FIELDS[4:-1]}})
         return rows
+
+    if args.refine:
+        import pandas as pd
+
+        _, failing = resolve_runs(pd.read_csv(path))
+        failing = failing[failing.event.isin(events)]
+        print(f"{len(failing)} results fail the convergence rule", flush=True)
+        for r in failing.itertuples(index=False):
+            c, frac = variant_setup(r.variant, r.car_id, r.event, car)
+            dv0, n0 = (1.0, 81) if args.quick else original_grid(r.variant)
+            for dv, n in (((1.0, 121), (0.5, 81)) if args.quick else REFINE_LADDER):
+                if (dv, n) == (dv0, n0) or (dv >= dv0 and n <= n0):
+                    continue
+                tag = f"{r.car_id}{REFINED_TAG} dv={dv} soc={n}"
+                result = {}
+
+                def refined(dv=dv, n=n, tag=tag):
+                    sol = solve_refined(tracks[r.event], c, dv=dv, n_soc=n, soc0_frac=frac)
+                    result.update(row(r.event, r.variant, tag, sol, 0))
+                    return dict(result)
+
+                record(r.event, r.variant, tag, refined)
+                if not result:
+                    result = pd.read_csv(path).set_index(["event", "variant", "car_id"]).loc[(r.event, r.variant, tag)].to_dict()
+                if abs(float(result["dp_pred_s"]) - float(result["lap_s"])) <= CONVERGED_S:
+                    break
+        f.close()
+        print(f"All results in {path}")
+        return
 
     if args.rules:
         sens = rules_sensitivity()

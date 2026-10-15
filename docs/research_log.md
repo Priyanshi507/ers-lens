@@ -525,3 +525,35 @@ Diagnostics (exploratory, after the verdicts; scripts/strategy_diagnose.py):
   275 kW. The levels chosen at the four real circuits were not stored, so they, and where on
   the lap the optimum gains its time, are computed with --tracks before any S5 explanation is
   claimed.
+
+## 2026-10-15: The car model is too fast; calibrating it before anything is reported
+
+Check (scripts/strategy_plausibility.py, after the final verdicts at 197f82b): at qualifying
+fuel, charge-neutral, the optimum is faster than the real pole lap it was built from by 3.62 s
+(Australia), 3.28 s (China), 2.22 s (Miami) and 2.58 s (Canada). Even the best simple rule
+beats real pole at every circuit. A real qualifying lap may spend stored charge and the model
+may not, so the model should be no faster than real pole. The car model is too generous.
+
+Where (scripts/strategy_correlation.py): off full throttle the track is capped at the real
+trace, so all of the gain is under full throttle, and 2.35-3.28 s of it is above 200 km/h
+(0.11-0.35 s below). Top speeds roughly agree (model 338-340 km/h, real 327-343 km/h). The
+model reaches high speed too quickly on every straight. The energy rules are respected (about
+8 MJ deployed per lap, harvest at the 9 MJ limit), which leaves straight-mode drag (0.95, an
+estimate) and ICE power at the wheels (400 kW, no drivetrain loss) as the untested inputs.
+
+Consequence: every result so far used this car. The qualitative results (S1-S4, the bang-bang
+optimum) may survive; the sizes of gaps (S5: 1.7-2.0 s, S7 distances) cannot be reported
+until the car is calibrated.
+
+Decisions, made before the calibration runs (scripts/calibrate_car.py):
+- Fit two parameters, straight-mode CdA (0.95-1.45, step 0.10) and ICE wheel power
+  (320-400 kW, step 20 kW), by grid search. Target: sum of squared time errors on every
+  full-throttle run of at least 100 m of the four pole laps, optimum at qualifying fuel,
+  coarse DP grid (0.5 m/s, 81 charge levels).
+- Assumption, stated wherever the calibrated car is used: the pole lap is close to
+  energy-optimal, because its real deployment is not observable.
+- Check: leave one circuit out. The fit on three circuits is applied to the fourth; the
+  calibration is accepted if every held-out lap error is within 0.5 s. If the best fit lies on
+  the edge of the grid, the grid is widened before anything else.
+- Then the Strategy Lab is re-run with the calibrated car, with the same predictions and
+  thresholds, reported next to the original results. Nothing committed is edited.

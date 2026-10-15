@@ -1,0 +1,50 @@
+core           INFO 	Loading data for Australian Grand Prix - Qualifying [v3.8.3]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core        WARNING 	No lap data for driver 18
+core        WARNING 	No lap data for driver 55
+core        WARNING 	Failed to perform lap accuracy check - all laps marked as inaccurate (driver 18)
+core        WARNING 	Failed to perform lap accuracy check - all laps marked as inaccurate (driver 55)
+req            INFO 	Using cached data for car_data
+req            INFO 	Using cached data for position_data
+core           INFO 	Finished loading data for 22 drivers: ['63', '12', '6', '16', '81', '1', '44', '30', '41', '5', '27', '87', '31', '10', '23', '43', '14', '11', '77', '18', '3', '55']
+core           INFO 	Loading data for Chinese Grand Prix - Qualifying [v3.8.3]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+req            INFO 	Using cached data for car_data
+req            INFO 	Using cached data for position_data
+core           INFO 	Finished loading data for 22 drivers: ['12', '63', '44', '16', '81', '1', '10', '3', '6', '87', '27', '43', '31', '30', '41', '5', '55', '23', '14', '77', '18', '11']
+core           INFO 	Loading data for Miami Grand Prix - Qualifying [v3.8.3]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+req            INFO 	Using cached data for car_data
+req            INFO 	Using cached data for position_data
+core           INFO 	Finished loading data for 22 drivers: ['12', '3', '16', '1', '63', '44', '81', '43', '10', '27', '30', '87', '55', '31', '23', '41', '14', '18', '77', '11', '5', '6']
+core           INFO 	Loading data for Canadian Grand Prix - Qualifying [v3.8.3]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+req            INFO 	Using cached data for car_data
+req            INFO 	Using cached data for position_data
+core           INFO 	Finished loading data for 22 drivers: ['63', '12', '1', '81', '44', '3', '6', '16', '41', '43', '27', '30', '5', '10', '55', '87', '31', '23', '14', '11', '18', '77']
+0 results fail the convergence rule
+All results in results/strategy/runs.csv

@@ -123,11 +123,15 @@ def breakdown_lines(car, year: int) -> list[str]:
 
 
 def main():
+    global RESULTS
     ap = argparse.ArgumentParser()
     ap.add_argument("--tracks", action="store_true", help="add the S5 time breakdown (loads circuits via FastF1)")
     ap.add_argument("--year", type=int, default=2026)
+    ap.add_argument("--out", default=str(RESULTS), help="folder holding runs.csv and the profiles")
+    ap.add_argument("--car", default="configs/car_2026.yaml", help="car parameter file")
     args = ap.parse_args()
-    car = load_car_params("configs/car_2026.yaml")
+    RESULTS = Path(args.out)
+    car = load_car_params(args.car)
     used, _ = resolve_runs(pd.read_csv(RESULTS / "runs.csv"))
     nominal = used[used.variant == "nominal"].set_index("event")
     lines = ["# Strategy Lab diagnostics (exploratory, run after the verdicts were committed)", ""]

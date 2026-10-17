@@ -52,6 +52,8 @@ def main():
     ap.add_argument("--quick", action="store_true", help="coarse grids and 3 sweep cars: smoke test only")
     ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--out", default="results/strategy")
+    ap.add_argument("--car", default="configs/car_2026.yaml", help="car parameter file")
+    ap.add_argument("--skip-soc0", action="store_true", help="leave out the starting-charge sensitivity stage")
     ap.add_argument("--refine", action="store_true",
                     help="re-solve, on finer grids, every M1 result that fails the convergence rule")
     ap.add_argument("--rules", action="store_true",
@@ -74,7 +76,7 @@ def main():
     if write_header:
         writer.writeheader()
 
-    car = load_car_params("configs/car_2026.yaml")
+    car = load_car_params(args.car)
     tracks = {e: load_track(e, args.year) for e in events}
     sweep = legal_sweep(car)[:3] if args.quick else legal_sweep(car)
     nominal_cmd = {}
@@ -188,7 +190,7 @@ def main():
     for e in events:
         for car_id, c in sweep:
             record(e, "sweep", car_id, lambda: row(e, "sweep", car_id, solve_refined(tracks[e], c, **medium), 0))
-    for e in events:
+    for e in events if not args.skip_soc0 else []:
         for frac in (0.3, 0.7):
             record(e, f"soc0_{frac}", "nominal",
                    lambda: row(e, f"soc0_{frac}", "nominal", solve_refined(tracks[e], car, soc0_frac=frac, **medium), 0))

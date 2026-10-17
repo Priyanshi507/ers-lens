@@ -581,3 +581,40 @@ Decisions, made before the widened grid and before any Strategy Lab re-run:
   cars: the calibrated car, and a high-drag car on the ridge, CdA 1.35 with its best power
   from the first grid (400 kW). A result is reported as robust only if its verdict is the
   same for both cars; otherwise both are reported and the dependence is stated.
+
+## 2026-10-17: Widened calibration grid; the acceptance rule is not met, and why
+
+Widened grid (CdA 0.95-1.15 by 0.05, ICE wheel power 280-340 kW by 10 kW; 116 more coarse
+solves, results/calibration/grid.csv). The lowest total squared run error is now 1.79 s^2 at
+CdA 0.95 and 300 kW, again on the grid edge. Along the ridge the error barely changes: best
+power per drag value 0.95 at 300 kW (1.79), 1.00 at 310 (1.82), 1.05 at 320 (1.86), 1.10 at
+330 (1.90), 1.15 at 340 (1.99), 1.25 at 360 (2.15), 1.35 at 400 (2.33).
+
+Both parts of the acceptance rule logged on 2026-10-15 fail:
+- The best point is on the grid edge (CdA 0.95).
+- Leave one circuit out, two held-out laps are outside 0.5 s: China -0.73 s and Miami +0.61 s
+  (Australia -0.15 s, Canada +0.34 s). On the first, coarser grid all four passed; with more
+  points on the flat ridge the fit picks slightly different points each time.
+
+Reading: the circuits disagree with each other by more than the fit can resolve. At any one
+ridge point the four lap errors spread by about 0.7 s (at CdA 1.05, 320 kW: China -0.39 s,
+Miami +0.32 s). A single two-parameter car cannot match all four pole laps closer than that.
+Likely causes, none tested: different teams set the four poles, wind and track grip differ,
+and the pole laps need not be energy-optimal. Widening the grid again would chase a minimum
+that the data do not determine, so the grid is not widened further.
+
+Decisions, made before any Strategy Lab re-run:
+- The calibration is reported as failing the rule as written, with the reason above. The
+  calibration uncertainty is stated as about +/-0.7 s per lap (the between-circuit spread).
+- Instead of one calibrated car, the Strategy Lab is re-run at both ends of the ridge, so the
+  result shows what depends on the drag/power split:
+  low-drag end, CdA 0.95 and 300 kW (configs/car_2026_cal_low.yaml), the lowest-error point;
+  high-drag end, CdA 1.35 and 400 kW (configs/car_2026_cal_high.yaml), as logged on
+  2026-10-15. Both reproduce real pole within about 0.7 s, against 2.2-3.6 s for the
+  original car.
+- Same predictions and thresholds as the 2026-10-05 entry. Stages run: nominal, no taper,
+  the gradient method, simple rules, the legal-car sweep, and the corrected 2026 race rules.
+  The starting-charge check is skipped (it changed laps by at most 0.17 s before).
+- A verdict is called robust only if it is the same for the original car and both
+  calibrated cars. Results go to results/strategy_cal_low and results/strategy_cal_high;
+  results/strategy is not changed.

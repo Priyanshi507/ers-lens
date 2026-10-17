@@ -557,3 +557,27 @@ Decisions, made before the calibration runs (scripts/calibrate_car.py):
   the edge of the grid, the grid is widened before anything else.
 - Then the Strategy Lab is re-run with the calibrated car, with the same predictions and
   thresholds, reported next to the original results. Nothing committed is edited.
+
+## 2026-10-15 (later): First calibration grid; drag and power are not separately identifiable
+
+First grid (6 CdA x 5 ICE powers, 120 coarse solves, results/calibration/grid.csv): the lowest
+total squared run error, 1.86 s^2, is at CdA 1.05 and 320 kW ICE wheel power, against 7.27 s^2
+for the current car (0.95, 400 kW). Leave one circuit out, the fit on three circuits lands
+within 0.10 s (Australia), 0.39 s (China), 0.32 s (Miami) and 0.07 s (Canada) of the held-out
+pole lap, against 2.2-3.2 s for the current car, which passes the 0.5 s criterion. But the
+best point is on the edge of the grid (320 kW), so by the rule logged earlier the grid is
+widened before the fit is used.
+
+The error surface is a ridge, not a bowl. The best power for each drag value: CdA 1.05 at
+320 kW (1.86 s^2), 1.15 at 340 kW (1.99), 1.25 at 360 kW (2.15), 1.35 at 400 kW (2.33). Pole
+lap times fix a combination of drag and wheel power, not each one. More drag with more power
+gives the same lap as less of both.
+
+Decisions, made before the widened grid and before any Strategy Lab re-run:
+- Widen the grid to CdA 0.95-1.15 in steps of 0.05 and ICE wheel power 280-340 kW in steps
+  of 10 kW. The calibrated car is the lowest-error point over the combined grid, accepted if
+  it is not on the grid edge and every leave-one-out lap error is within 0.5 s.
+- Because the split along the ridge cannot be measured, the Strategy Lab is re-run at two
+  cars: the calibrated car, and a high-drag car on the ridge, CdA 1.35 with its best power
+  from the first grid (400 kW). A result is reported as robust only if its verdict is the
+  same for both cars; otherwise both are reported and the dependence is stated.

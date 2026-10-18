@@ -65,6 +65,17 @@ def race_rules(car: CarParams, event: str, path: str = "configs/rules_2026_races
     return car.with_(**{k: float(v) for k, v in rules[event].items()})
 
 
+def quali_rules(car: CarParams, event: str, path: str = "configs/rules_2026_races.yaml") -> CarParams:
+    """The race rules with the event's qualifying recharge limit, for fits to pole laps."""
+    import yaml
+
+    with open(path) as f:
+        limit = yaml.safe_load(f)["qualifying"].get(event)
+    if limit is None:
+        raise KeyError(f"no 2026 qualifying recharge limit recorded for {event}; add it with a source")
+    return race_rules(car, event, path).with_(harvest_per_lap_j=float(limit))
+
+
 def rules_sensitivity(path: str = "configs/rules_2026_races.yaml") -> dict:
     import yaml
 

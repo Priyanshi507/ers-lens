@@ -1,9 +1,10 @@
 """Fit straight-mode drag and ICE wheel power to real pole laps, checked on a held-out circuit.
 
 The track caps speed at the real trace wherever the driver is off full throttle, so the fit
-target is the time on each full-throttle run of the pole lap. The car's energy use on that lap
-is not observable; the fit assumes the pole lap runs close to the energy-optimal strategy,
-which is stated as a limitation wherever the calibrated car is used.
+target is the time on each full-throttle run of the pole lap, solved under the event's
+qualifying recharge limit. The car's energy use on that lap is not observable; the fit assumes
+the pole lap runs close to the energy-optimal strategy, which is stated as a limitation
+wherever the calibrated car is used.
 
 Each grid point solves every circuit on a coarse DP grid; results are appended to
 results/calibration/grid.csv, so the script can be stopped and resumed. Then each circuit in
@@ -13,6 +14,7 @@ turn is held out: the parameters with the lowest error on the other circuits are
     python scripts/calibrate_car.py                   # full grid, then results/calibration/calibration.md
     python scripts/calibrate_car.py --cda 0.95 1.00 1.05 --ice 280 290 300   # extra grid points (kW)
     python scripts/calibrate_car.py --report          # rewrite calibration.md from grid.csv only
+    python scripts/calibrate_car.py --out results/calibration_q   # separate folder for a new run
 """
 import argparse
 import csv
@@ -25,7 +27,7 @@ from erslens.ingest import _car_data, _session
 from erslens.optimal import grid_with, race_car, solve
 from erslens.params import load_car_params
 from erslens.physics import braking_envelope
-from erslens.strategy import race_rules
+from erslens.strategy import quali_rules
 from erslens.track import track_from_reference
 
 EVENTS = ["Australia", "China", "Miami", "Canada"]
@@ -68,7 +70,7 @@ def load(year):
 
 def run_errors(event, track, spans, dt_real, base, cda, ice_w):
     """Model minus real time on each full-throttle run, and on the whole lap."""
-    car = race_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG, cda_straight=cda, ice_power_w=ice_w)
+    car = quali_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG, cda_straight=cda, ice_power_w=ice_w)
     rc = race_car(car)
     sol = solve(track, car, grid=grid_with(rc, 0.5, 81), soc0_fracs=(0.5,))
     k = int(np.argmin(braking_envelope(track, rc)))
@@ -78,13 +80,16 @@ def run_errors(event, track, spans, dt_real, base, cda, ice_w):
 
 
 def main():
+    global OUT
     ap = argparse.ArgumentParser()
     ap.add_argument("--year", type=int, default=2026)
     ap.add_argument("--time-one", action="store_true")
     ap.add_argument("--report", action="store_true")
+    ap.add_argument("--out", default=str(OUT), help="folder for grid.csv and calibration.md")
     ap.add_argument("--cda", nargs="+", type=float, default=CDA)
     ap.add_argument("--ice", nargs="+", type=float, default=[w / 1e3 for w in ICE_W], help="kW")
     args = ap.parse_args()
+    OUT = Path(args.out)
     if args.report:
         report(OUT / "grid.csv")
         return

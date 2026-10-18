@@ -74,7 +74,23 @@ def test_race_rules_apply_sourced_values_and_reject_unknown_events():
     from erslens.strategy import race_rules
 
     aus = race_rules(CarParams(), "Australia")
-    assert aus.harvest_per_lap_j == 9e6 and aus.superclip_max_w == 250e3
+    assert aus.harvest_per_lap_j == 8e6 and aus.superclip_max_w == 250e3
     assert race_rules(CarParams(), "Miami").superclip_max_w == 350e3
     with pytest.raises(KeyError):
         race_rules(CarParams(), "Monaco")
+
+
+def test_quali_rules_change_only_the_recharge_limit():
+    import dataclasses
+
+    import pytest
+
+    from erslens.strategy import quali_rules, race_rules
+
+    limits = {"Australia": 7e6, "China": 9e6, "Miami": 8e6, "Canada": 6e6}
+    for event, limit in limits.items():
+        q, r = quali_rules(CarParams(), event), race_rules(CarParams(), event)
+        assert q.harvest_per_lap_j == limit
+        assert dataclasses.replace(q, harvest_per_lap_j=r.harvest_per_lap_j) == r
+    with pytest.raises(KeyError):
+        quali_rules(CarParams(), "Monaco")

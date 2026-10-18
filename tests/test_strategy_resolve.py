@@ -63,7 +63,7 @@ def test_variant_setup_rebuilds_each_case():
     assert sweep_car.cda_straight == pytest.approx(car.cda_straight * 0.8) and sweep_car.mass_kg == car.mass_kg
     assert variant_setup("soc0_0.3", "nominal", "Miami", car) == (car, 0.3)
     nt, _ = variant_setup("rules_no_taper", "nominal", "Miami", car)
-    assert nt.harvest_per_lap_j == 9e6 and nt == no_taper(nt)
+    assert nt.harvest_per_lap_j == 8.5e6 and nt == no_taper(nt)
     d250, _ = variant_setup("rules_deploy250", "nominal", "Canada", car)
     assert d250.deploy_max_w == 250e3
     with pytest.raises(ValueError):

@@ -3,7 +3,7 @@
 Off full throttle the track caps speed at the real trace, so any time the model gains over the
 real lap is gained under full throttle. This splits each full-throttle run below and above
 200 km/h: a gain at low speed points at traction or total power, a gain at high speed at drag.
-Writes results/strategy/correlation.md.
+Writes <out>/correlation.md (default results/strategy).
 
     python scripts/strategy_correlation.py --events Australia China Miami Canada
 """
@@ -16,7 +16,7 @@ from erslens.ingest import _car_data, _session
 from erslens.optimal import race_car, solve_refined
 from erslens.params import load_car_params
 from erslens.physics import braking_envelope
-from erslens.strategy import race_rules
+from erslens.strategy import quali_rules
 from erslens.track import track_from_reference
 
 QUALI_FUEL_KG = 2.0
@@ -43,9 +43,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--events", nargs="+", default=["Australia", "China", "Miami", "Canada"])
     ap.add_argument("--year", type=int, default=2026)
+    ap.add_argument("--car", default="configs/car_2026.yaml")
+    ap.add_argument("--out", default="results/strategy")
     ap.add_argument("--ds", type=float, default=5.0)
     args = ap.parse_args()
-    base = load_car_params("configs/car_2026.yaml")
+    base = load_car_params(args.car)
     out = ["Optimum at qualifying fuel vs the real pole lap it was built from. "
            "Gain = real time minus simulated time; positive = model faster.", ""]
     summary = ["| Circuit | Real lap (from trace) | Model lap | Gain at full throttle < 200 km/h | "
@@ -63,7 +65,7 @@ def main():
         v_real = np.interp(grid, df["distance_m"], df["speed_kmh"]) / 3.6
         flat = np.interp(grid, df["distance_m"], df["throttle"]) >= FULL_THROTTLE
 
-        car = race_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG)
+        car = quali_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG)
         sol = solve_refined(track, car)
         # The solver starts the lap at the slowest point; undo that roll to line up with the real trace.
         k = int(np.argmin(braking_envelope(track, race_car(car))))
@@ -86,7 +88,7 @@ def main():
         print(summary[-1], flush=True)
 
     text = "\n".join(out + summary + ["", "Full-throttle runs of at least 100 m:", ""] + detail)
-    Path("results/strategy/correlation.md").write_text(text + "\n")
+    Path(args.out, "correlation.md").write_text(text + "\n")
     print("\n" + text)
 
 

@@ -618,3 +618,44 @@ Decisions, made before any Strategy Lab re-run:
 - A verdict is called robust only if it is the same for the original car and both
   calibrated cars. Results go to results/strategy_cal_low and results/strategy_cal_high;
   results/strategy is not changed.
+
+## 2026-10-18: The energy rules used so far were wrong; correction logged before any re-run
+
+A re-check of the FIA's per-session recharge limits (sources in configs/rules_2026_races.yaml)
+found two errors in the rules used since 2026-10-07:
+1. Race limits. The model used 9 MJ per lap at every race. That is the limit with Overtake
+   mode active; without it the limits were 8 MJ (Australia), 8.5 MJ (China), 8.5 MJ (Miami)
+   and 8 MJ (Canada). The source cited for 9 MJ described the Overtake limit.
+2. Qualifying limits. The calibration, plausibility and correlation scripts fit pole laps but
+   applied the race rules. Qualifying limits were 7 MJ (Australia), 9 MJ (China), 8 MJ
+   (Miami) and 6 MJ (Canada). The 2026-10-15 check found the optimum harvesting at its limit,
+   so the model car had 1-3 MJ per lap more energy than the real car at three of the four
+   pole laps. Part of "the model car is too fast" may be this, not drag or engine power.
+
+Everything committed stands as recorded and is not edited. What it affects:
+- Calibration (2026-10-15, 2026-10-17) and both calibrated cars: fitted under the wrong
+  limits, so they are superseded once the re-run below exists.
+- Strategy Lab corrected-rules stage (all three cars): the "rules" rows used 9 MJ. The
+  existing "rules_h8" rows (8 MJ) are the correct limit for Australia and Canada; for China
+  and Miami the correct 8.5 MJ lies between "rules_h8" and "rules". No verdict from this stage
+  is reported until it is re-run.
+- Unaffected: findings 1-6 in the README (they use no recharge limit), and every stage run
+  with configs/car_2026.yaml alone (nominal, no taper, gradient, simple rules, sweep).
+
+Fix: race limits corrected in place (git history keeps the old values); a qualifying limit per
+event added; erslens.strategy.quali_rules applies it; the three pole-lap scripts use it and
+take --out so earlier results are not overwritten. Overtake mode (+0.5 MJ while active) is
+still not modelled; race values are without it.
+
+Decisions, made before any re-run:
+- Check first: strategy_plausibility.py with the qualifying limits. China's limit did not
+  change, so China must reproduce its 2026-10-15 value (optimum 3.28 s faster than pole); any
+  other value means a code error, and nothing else runs until it is found.
+- Re-run the calibration grid with the qualifying limits, same points as before (both grids),
+  into results/calibration_q. Same fit target and the same acceptance rule as 2026-10-15
+  (best point not on the grid edge, every leave-one-out lap within 0.5 s). If the best point
+  is on an edge, the grid is widened once in that direction, and the result is reported
+  whichever way it falls.
+- Then the Strategy Lab is re-run at both ends of the new ridge with the corrected race rules,
+  same predictions and thresholds, into new folders. A verdict is called robust only if it is
+  the same for the original car and both new calibrated cars.

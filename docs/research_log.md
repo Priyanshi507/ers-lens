@@ -659,3 +659,37 @@ Decisions, made before any re-run:
 - Then the Strategy Lab is re-run at both ends of the new ridge with the corrected race rules,
   same predictions and thresholds, into new folders. A verdict is called robust only if it is
   the same for the original car and both new calibrated cars.
+
+## 2026-10-19: Plausibility check with the qualifying limits passes; the energy error was small
+
+Before the patch was applied, the --refine pass and strategy_evaluate.py finished for both
+2026-10-17 calibrated cars (results/strategy_cal_low, results/strategy_cal_high). Those cars
+were fitted under the wrong limits, so their verdicts are kept as a record and not reported.
+
+Check (scripts/strategy_plausibility.py --out results/strategy_q): China, whose limit did not
+change, reproduces its 2026-10-15 value exactly (optimum 88.780 s, -3.284 s), so the code
+change did nothing else. With the qualifying limits the optimum is slower by 0.131 s
+(Australia, 7 MJ), 0.075 s (Miami, 8 MJ) and 0.629 s (Canada, 6 MJ), as expected from a smaller
+feasible set. It is still faster than real pole at every circuit, by 3.484 s, 3.284 s,
+2.140 s and 1.946 s.
+
+Reading: the wrong recharge limits explain at most 0.63 s of the 2-3.5 s gap, and under 0.15 s
+at three circuits. The rest still points at drag and ICE wheel power, as on 2026-10-15. The
+calibration is re-run as logged on 2026-10-18, into results/calibration_q, with the same grid
+points and acceptance rule.
+
+## 2026-10-20: Noise in the coarse calibration solves; a check added while the grid runs
+
+Written while the widened part of results/calibration_q is still running. The first grid has
+finished (best point CdA 1.05, 320 kW, 1.71 s^2, on the grid edge, so the widened part runs
+as logged). Some coarse-grid lap errors are not monotone in ICE power, which they should be:
+Canada at CdA 1.05 gives +1.170 s at 300 kW, +0.062 s at 310 kW and +0.586 s at 320 kW, and
+at CdA 1.10 +1.421 s, +0.312 s and +0.857 s. Calibration solves use the coarse DP grid
+(0.5 m/s, 81 charge levels) and, unlike the Strategy Lab, have no convergence check, so
+errors of this size may be solver noise rather than physics. That could also explain why the
+leave-one-out picks moved between grids on 2026-10-17.
+
+Decision, made before the final calibration report: after the grid finishes, the best point
+for each CdA and the leave-one-out picks are re-solved on the fine grid (0.125 m/s, 321 charge
+levels). The calibration is judged on the fine-grid errors, with the same acceptance rule. The
+coarse-grid report is kept next to it.

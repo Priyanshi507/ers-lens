@@ -68,11 +68,16 @@ def load(year):
     return data
 
 
-def run_errors(event, track, spans, dt_real, base, cda, ice_w):
+def calibration_car(base, event, cda, ice_w):
+    return quali_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG, cda_straight=cda, ice_power_w=ice_w)
+
+
+def run_errors(event, track, spans, dt_real, base, cda, ice_w, sol=None):
     """Model minus real time on each full-throttle run, and on the whole lap."""
-    car = quali_rules(base, event).with_(fuel_kg=QUALI_FUEL_KG, cda_straight=cda, ice_power_w=ice_w)
+    car = calibration_car(base, event, cda, ice_w)
     rc = race_car(car)
-    sol = solve(track, car, grid=grid_with(rc, 0.5, 81), soc0_fracs=(0.5,))
+    if sol is None:
+        sol = solve(track, car, grid=grid_with(rc, 0.5, 81), soc0_fracs=(0.5,))
     k = int(np.argmin(braking_envelope(track, rc)))
     dt_sim = np.roll(np.asarray(sol.out["dt"]), k)
     per_run = [float(dt_sim[i:j].sum() - dt_real[i:j].sum()) for i, j in spans]

@@ -693,3 +693,15 @@ Decision, made before the final calibration report: after the grid finishes, the
 for each CdA and the leave-one-out picks are re-solved on the fine grid (0.125 m/s, 321 charge
 levels). The calibration is judged on the fine-grid errors, with the same acceptance rule. The
 coarse-grid report is kept next to it.
+
+## 2026-10-20 (later): Coarse calibration under qualifying limits; fine-grid check next
+
+Coarse grid finished (results/calibration_q, 236 points, qualifying limits). Lowest total
+squared run error 1.66 s^2 at CdA 1.00 and 310 kW, not on the grid edge. The ridge is flatter
+than under the race limits: best power per drag value 0.95 at 300 kW (1.67), 1.00 at 310
+(1.66), 1.05 at 320 (1.71), 1.10 at 340 (1.75), 1.15 at 360 (1.86), 1.25 at 380 (1.90), 1.35 at
+400 (1.97). Leave one circuit out: Australia -0.199 s, China -1.071 s, Miami +0.820 s, Canada
++0.918 s, so three of four held-out laps are outside 0.5 s and the rule fails on the coarse
+grid. Not judged yet: per the entry above, the verdict uses the fine-grid re-solve
+(scripts/calibrate_fine.py, candidates taken from the coarse grid only, results in
+results/calibration_q/fine.csv and fine.md).

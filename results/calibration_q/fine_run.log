@@ -1,0 +1,74 @@
+11 candidates: 0.95/290 kW, 0.95/300 kW, 1.00/300 kW, 1.00/310 kW, 1.00/330 kW, 1.05/320 kW, 1.10/340 kW, 1.15/360 kW, 1.25/380 kW, 1.35/400 kW, 1.45/400 kW
+Australia  CdA 0.95 ICE 290 kW: model minus real +0.002 s (DP-replay -0.013 s)
+China      CdA 0.95 ICE 290 kW: model minus real -0.295 s (DP-replay +0.013 s)
+Miami      CdA 0.95 ICE 290 kW: model minus real +0.465 s (DP-replay +0.001 s)
+Canada     CdA 0.95 ICE 290 kW: model minus real +0.717 s (DP-replay +0.012 s)
+Australia  CdA 0.95 ICE 300 kW: model minus real -0.561 s (DP-replay +0.092 s)
+China      CdA 0.95 ICE 300 kW: model minus real -0.643 s (DP-replay +0.007 s)
+Miami      CdA 0.95 ICE 300 kW: model minus real +0.134 s (DP-replay -0.002 s)
+Canada     CdA 0.95 ICE 300 kW: model minus real +0.456 s (DP-replay +0.006 s)
+Australia  CdA 1.00 ICE 300 kW: model minus real +0.016 s (DP-replay +0.004 s)
+China      CdA 1.00 ICE 300 kW: model minus real -0.302 s (DP-replay +0.009 s)
+Miami      CdA 1.00 ICE 300 kW: model minus real +0.552 s (DP-replay -0.002 s)
+Canada     CdA 1.00 ICE 300 kW: model minus real +0.664 s (DP-replay +0.005 s)
+Australia  CdA 1.00 ICE 310 kW: model minus real -0.299 s (DP-replay -0.001 s)
+China      CdA 1.00 ICE 310 kW: model minus real -0.642 s (DP-replay +0.006 s)
+Miami      CdA 1.00 ICE 310 kW: model minus real +0.220 s (DP-replay +0.002 s)
+Canada     CdA 1.00 ICE 310 kW: model minus real +0.409 s (DP-replay +0.005 s)
+Australia  CdA 1.00 ICE 330 kW: model minus real -0.946 s (DP-replay +0.025 s)
+China      CdA 1.00 ICE 330 kW: model minus real -1.283 s (DP-replay +0.005 s)
+Miami      CdA 1.00 ICE 330 kW: model minus real -0.375 s (DP-replay +0.006 s)
+Canada     CdA 1.00 ICE 330 kW: model minus real -0.087 s (DP-replay +0.006 s)
+Australia  CdA 1.05 ICE 320 kW: model minus real -0.280 s (DP-replay +0.021 s)
+China      CdA 1.05 ICE 320 kW: model minus real -0.632 s (DP-replay +0.008 s)
+Miami      CdA 1.05 ICE 320 kW: model minus real +0.291 s (DP-replay +0.002 s)
+Canada     CdA 1.05 ICE 320 kW: model minus real +0.384 s (DP-replay +0.007 s)
+Australia  CdA 1.10 ICE 340 kW: model minus real -0.556 s (DP-replay +0.025 s)
+China      CdA 1.10 ICE 340 kW: model minus real -0.954 s (DP-replay +0.007 s)
+Miami      CdA 1.10 ICE 340 kW: model minus real +0.115 s (DP-replay +0.007 s)
+Canada     CdA 1.10 ICE 340 kW: model minus real +0.205 s (DP-replay +0.006 s)
+Australia  CdA 1.15 ICE 360 kW: model minus real -0.995 s (DP-replay +0.064 s)
+China      CdA 1.15 ICE 360 kW: model minus real -1.209 s (DP-replay +0.005 s)
+Miami      CdA 1.15 ICE 360 kW: model minus real -0.067 s (DP-replay +0.006 s)
+Canada     CdA 1.15 ICE 360 kW: model minus real -0.098 s (DP-replay +0.006 s)
+Australia  CdA 1.25 ICE 380 kW: model minus real -0.700 s (DP-replay +0.013 s)
+China      CdA 1.25 ICE 380 kW: model minus real -1.228 s (DP-replay +0.007 s)
+Miami      CdA 1.25 ICE 380 kW: model minus real +0.181 s (DP-replay +0.005 s)
+Canada     CdA 1.25 ICE 380 kW: model minus real -0.077 s (DP-replay +0.007 s)
+Australia  CdA 1.35 ICE 400 kW: model minus real -0.619 s (DP-replay +0.024 s)
+China      CdA 1.35 ICE 400 kW: model minus real -1.209 s (DP-replay +0.015 s)
+Miami      CdA 1.35 ICE 400 kW: model minus real -0.205 s (DP-replay +0.041 s)
+Canada     CdA 1.35 ICE 400 kW: model minus real -0.066 s (DP-replay +0.008 s)
+Australia  CdA 1.45 ICE 400 kW: model minus real +0.013 s (DP-replay +0.029 s)
+China      CdA 1.45 ICE 400 kW: model minus real -0.630 s (DP-replay +0.019 s)
+Miami      CdA 1.45 ICE 400 kW: model minus real +0.441 s (DP-replay +0.019 s)
+Canada     CdA 1.45 ICE 400 kW: model minus real +0.385 s (DP-replay +0.006 s)
+
+# Calibration candidates on the fine DP grid
+
+Fine grid 0.125 m/s, 321 charge levels; same target and acceptance rule as the coarse grid.
+
+| CdA | ICE wheel power | Fine squared run error | Coarse | Worst DP-replay gap |
+|---|---|---|---|---|
+| 0.95 | 290 kW | 1.64 | 1.72 | 0.013 s |
+| 0.95 | 300 kW | 1.68 | 1.67 | 0.092 s (not converged) |
+| 1.00 | 300 kW | 1.66 | 1.76 | 0.009 s |
+| 1.00 | 310 kW | 1.60 | 1.66 | 0.006 s |
+| 1.00 | 330 kW | 2.05 | 1.86 | 0.025 s |
+| 1.05 | 320 kW | 1.61 | 1.71 | 0.021 s |
+| 1.10 | 340 kW | 1.79 | 1.75 | 0.025 s |
+| 1.15 | 360 kW | 2.02 | 1.86 | 0.064 s (not converged) |
+| 1.25 | 380 kW | 2.01 | 1.90 | 0.013 s |
+| 1.35 | 400 kW | 2.02 | 1.97 | 0.041 s |
+| 1.45 | 400 kW | 2.10 | 2.34 | 0.029 s |
+
+## Leave one circuit out, fine grid
+
+| Held-out circuit | CdA | ICE wheel power | Held-out lap error | Within 0.5 s |
+|---|---|---|---|---|
+| Australia | 0.95 | 300 kW | -0.561 s | no |
+| China | 1.00 | 310 kW | -0.642 s | no |
+| Miami | 1.00 | 300 kW | +0.552 s | no |
+| Canada | 0.95 | 290 kW | +0.717 s | no |
+
+Best on the fine grid: CdA 1.00, 310 kW.

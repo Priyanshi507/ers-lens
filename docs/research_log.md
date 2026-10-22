@@ -705,3 +705,44 @@ than under the race limits: best power per drag value 0.95 at 300 kW (1.67), 1.0
 grid. Not judged yet: per the entry above, the verdict uses the fine-grid re-solve
 (scripts/calibrate_fine.py, candidates taken from the coarse grid only, results in
 results/calibration_q/fine.csv and fine.md).
+
+## 2026-10-22: Fine-grid calibration fails the acceptance rule; the circuits disagree
+
+Fine-grid re-solve of the 11 coarse-grid candidates (scripts/calibrate_fine.py,
+results/calibration_q/fine.md). Lowest total squared run error 1.60 s^2 at CdA 1.00 and
+310 kW, not the lowest or highest candidate drag. The ridge stays flat: 1.60-2.10 s^2 from
+CdA 0.95 to 1.45. Fine and coarse totals differ by up to 0.24 s^2, which moves the ranking
+along the ridge but does not remove it. Two candidates miss the 0.05 s convergence rule
+(0.95/300 kW at Australia, 0.092 s; 1.15/360 kW at Australia, 0.064 s); all others converge.
+
+Leave one circuit out on the fine grid, all four held-out laps are outside 0.5 s: Australia
+-0.561 s (fit 0.95/300 kW, the non-converged Australia solve, so uncertain by about 0.09 s),
+China -0.642 s, Miami +0.552 s, Canada +0.717 s (all converged). The rule fails on three
+converged held-out laps whatever the Australia value is, so the calibration fails as written.
+
+Reading: the coarse-grid noise logged on 2026-10-20 was real but was not the cause. The
+circuits disagree with each other. At every candidate China's model lap is faster than
+real (-0.30 to -1.28 s); it is closest at 0.95/290 kW and 1.00/300 kW (-0.30 s) and among
+the furthest at CdA 1.15-1.35 (-1.21 to -1.23 s). Miami and Canada go the other way. At the
+low-drag candidates 0.95/290, 0.95/300, 1.00/300, 1.00/310 and 1.05/320 kW they are slower
+than real (+0.13 to +0.72 s); at 1.15/360, 1.25/380 and 1.35/400 kW they are close to real
+(-0.21 to +0.18 s). So the circuits prefer different points on the ridge,
+not one point with scatter. Possible causes, none tested: different teams set the four poles,
+wind and grip, pole laps that are not energy-optimal, and speed-dependent physics the model
+lacks (the two circuits that prefer more drag are the ones with the longest full-throttle
+running). This is recorded as an observation only.
+
+Decisions, made before any Strategy Lab run with these cars:
+- The calibration is reported as failing the acceptance rule, with a between-circuit
+  uncertainty of about +/-0.7 s per lap, as on 2026-10-17.
+- The Strategy Lab is re-run at both ends of the new ridge, with the corrected race rules
+  (configs/rules_2026_races.yaml as of 2026-10-18): the lowest-error fine point, CdA 1.00 and
+  310 kW (configs/car_2026_q_low.yaml), and the same high-drag point as before, CdA 1.35 and
+  400 kW (configs/car_2026_q_high.yaml, fine error 2.02 s^2, converged), so the high end stays
+  comparable with the 2026-10-17 runs.
+- Same stages, predictions and thresholds as the 2026-10-17 entry (starting-charge check
+  skipped), then --refine for results that fail the convergence rule, into
+  results/strategy_q_low and results/strategy_q_high. A verdict is called robust only if it is
+  the same for the original car and both new calibrated cars.
+- The 2026-10-17 cars' runs (results/strategy_cal_low, results/strategy_cal_high) stay as a
+  record of cars fitted under the wrong limits and are not used for any verdict.

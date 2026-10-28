@@ -1,0 +1,355 @@
+Request for URL https://api.jolpi.ca/ergast/f1/2026/2/qualifying.json failed; using cached response
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 540, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 638, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 1478, in getresponse
+    response.begin()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 343, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 304, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1251, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1103, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/retry.py", line 510, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 542, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 373, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 311, in _resend
+    response = self._send_and_cache(request, actions, cached_response, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 279, in _send_and_cache
+    response = super().send(request, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/fastf1/req.py", line 112, in send
+    return super().send(request, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 742, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+Request for URL https://api.jolpi.ca/ergast/f1/2026/4/qualifying.json failed; using cached response
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 470, in _make_request
+    self._validate_conn(conn)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 1125, in _validate_conn
+    conn.connect()
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 878, in connect
+    wrapped_socket, is_verified = _ssl_wrap_socket_and_match_hostname(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 1080, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+               ^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 437, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 481, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1041, in _create
+    self.do_handshake()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1319, in do_handshake
+    self._sslobj.do_handshake()
+TimeoutError: _ssl.c:993: The handshake operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/retry.py", line 510, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 494, in _make_request
+    raise new_e
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 472, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 373, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 311, in _resend
+    response = self._send_and_cache(request, actions, cached_response, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 279, in _send_and_cache
+    response = super().send(request, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/fastf1/req.py", line 112, in send
+    return super().send(request, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 742, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+Request for URL https://api.jolpi.ca/ergast/f1/2026/5/qualifying.json failed; using cached response
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 470, in _make_request
+    self._validate_conn(conn)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 1125, in _validate_conn
+    conn.connect()
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 878, in connect
+    wrapped_socket, is_verified = _ssl_wrap_socket_and_match_hostname(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 1080, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+               ^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 437, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 481, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1041, in _create
+    self.do_handshake()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1319, in do_handshake
+    self._sslobj.do_handshake()
+TimeoutError: _ssl.c:993: The handshake operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/retry.py", line 510, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 494, in _make_request
+    raise new_e
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 472, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 373, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 311, in _resend
+    response = self._send_and_cache(request, actions, cached_response, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 279, in _send_and_cache
+    response = super().send(request, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/fastf1/req.py", line 112, in send
+    return super().send(request, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 742, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.jolpi.ca', port=443): Read timed out. (read timeout=5.0)
+Australia  nominal        nominal   lap 77.581 s clip 0.39 (2180.8 s)
+China      nominal        nominal   lap 91.876 s clip 0.49 (7276.2 s)
+Miami      nominal        nominal   lap 88.244 s clip 0.39 (489.4 s)
+Canada     nominal        nominal   lap 72.528 s clip 0.00 (384.0 s)
+Australia  no_taper       nominal   lap 77.471 s clip 0.00 (65.0 s)
+China      no_taper       nominal   lap 91.879 s clip 0.00 (473.2 s)
+Miami      no_taper       nominal   lap 88.175 s clip 0.00 (468.5 s)
+Canada     no_taper       nominal   lap 72.522 s clip 0.00 (384.5 s)
+Australia  m2             nominal   lap 79.443 s clip -0.72 (20.3 s)
+China      m2             nominal   lap 93.137 s clip -0.67 (20.9 s)
+Miami      m2             nominal   lap 91.724 s clip -0.72 (20.5 s)
+Canada     m2             nominal   lap 74.183 s clip -1.16 (16.8 s)
+Australia  sweep          i0d0m0    lap 77.106 s clip 0.00 (17.2 s)
+Australia  sweep          i0d0m1    lap 77.378 s clip 0.34 (110.3 s)
+Australia  sweep          i0d0m2    lap 77.626 s clip 0.32 (128.6 s)
+Australia  sweep          i0d1m0    lap 78.720 s clip 0.29 (17.4 s)
+Australia  sweep          i0d1m1    lap 78.940 s clip 0.25 (109.6 s)
+Australia  sweep          i0d1m2    lap 79.173 s clip 0.00 (109.7 s)
+Australia  sweep          i0d2m0    lap 80.483 s clip 0.00 (17.4 s)
+Australia  sweep          i0d2m1    lap 80.709 s clip 0.18 (17.6 s)
+Australia  sweep          i0d2m2    lap 80.872 s clip 0.24 (17.4 s)
+Australia  sweep          i1d0m0    lap 76.024 s clip 0.00 (109.9 s)
+Australia  sweep          i1d0m1    lap 76.306 s clip 0.04 (128.4 s)
+Australia  sweep          i1d0m2    lap 76.593 s clip 0.00 (128.4 s)
+Australia  sweep          i1d1m0    lap 77.362 s clip 0.53 (128.3 s)
+Australia  sweep          i1d1m1    lap 77.633 s clip 0.00 (730.8 s)
+Australia  sweep          i1d1m2    lap 77.907 s clip 0.44 (127.9 s)
+Australia  sweep          i1d2m0    lap 78.916 s clip 0.17 (103.5 s)
+Australia  sweep          i1d2m1    lap 79.150 s clip 0.22 (894.3 s)
+Australia  sweep          i1d2m2    lap 79.386 s clip 0.30 (307.4 s)
+Australia  sweep          i2d0m0    lap 75.190 s clip 0.14 (18.0 s)
+Australia  sweep          i2d0m1    lap 75.454 s clip 0.00 (112.6 s)
+Australia  sweep          i2d0m2    lap 75.722 s clip 0.00 (128.3 s)
+Australia  sweep          i2d1m0    lap 76.382 s clip 0.00 (127.9 s)
+Australia  sweep          i2d1m1    lap 76.634 s clip 0.00 (128.0 s)
+Australia  sweep          i2d1m2    lap 76.890 s clip 0.00 (128.3 s)
+Australia  sweep          i2d2m0    lap 77.679 s clip 0.16 (128.0 s)
+Australia  sweep          i2d2m1    lap 77.920 s clip 0.10 (128.1 s)
+Australia  sweep          i2d2m2    lap 78.176 s clip 0.27 (124.9 s)
+China      sweep          i0d0m0    lap 91.291 s clip 0.10 (133.6 s)
+China      sweep          i0d0m1    lap 91.706 s clip 0.10 (133.2 s)
+China      sweep          i0d0m2    lap 92.117 s clip 0.39 (133.1 s)
+China      sweep          i0d1m0    lap 92.725 s clip 0.00 (133.4 s)
+China      sweep          i0d1m1    lap 93.141 s clip 0.00 (133.5 s)
+China      sweep          i0d1m2    lap 93.500 s clip 0.35 (133.6 s)
+China      sweep          i0d2m0    lap 94.161 s clip 0.34 (133.8 s)
+China      sweep          i0d2m1    lap 94.548 s clip 0.25 (134.2 s)
+China      sweep          i0d2m2    lap 94.888 s clip 0.00 (133.6 s)
+China      sweep          i1d0m0    lap 90.276 s clip 0.00 (133.5 s)
+China      sweep          i1d0m1    lap 90.663 s clip 0.00 (133.3 s)
+China      sweep          i1d0m2    lap 91.084 s clip 0.00 (133.6 s)
+China      sweep          i1d1m0    lap 91.566 s clip 0.00 (133.4 s)
+China      sweep          i1d1m1    lap 91.942 s clip 0.38 (133.5 s)
+China      sweep          i1d1m2    lap 92.318 s clip 0.28 (133.7 s)
+China      sweep          i1d2m0    lap 92.909 s clip 0.00 (133.5 s)
+China      sweep          i1d2m1    lap 93.266 s clip 0.17 (133.6 s)
+China      sweep          i1d2m2    lap 93.643 s clip 0.42 (133.6 s)
+China      sweep          i2d0m0    lap 89.099 s clip 0.28 (18.2 s)
+China      sweep          i2d0m1    lap 89.804 s clip 0.24 (146.2 s)
+China      sweep          i2d0m2    lap 90.228 s clip 0.23 (737.5 s)
+China      sweep          i2d1m0    lap 90.579 s clip 0.32 (133.0 s)
+China      sweep          i2d1m1    lap 90.995 s clip 0.00 (133.0 s)
+China      sweep          i2d1m2    lap 91.322 s clip 0.00 (133.7 s)
+China      sweep          i2d2m0    lap 91.853 s clip 0.46 (1968.7 s)
+China      sweep          i2d2m1    lap 92.222 s clip 0.54 (4140.5 s)
+China      sweep          i2d2m2    lap 92.568 s clip 0.09 (3383.4 s)
+Miami      sweep          i0d0m0    lap 87.485 s clip 0.00 (155.9 s)
+Miami      sweep          i0d0m1    lap 87.804 s clip 0.21 (144.1 s)
+Miami      sweep          i0d0m2    lap 88.099 s clip 0.00 (149.4 s)
+Miami      sweep          i0d1m0    lap 89.174 s clip 0.00 (151.8 s)
+Miami      sweep          i0d1m1    lap 89.475 s clip 0.00 (148.8 s)
+Miami      sweep          i0d1m2    lap 89.726 s clip 0.54 (144.9 s)
+Miami      sweep          i0d2m0    lap 91.002 s clip 0.58 (155.1 s)
+Miami      sweep          i0d2m1    lap 91.266 s clip 0.58 (161.0 s)
+Miami      sweep          i0d2m2    lap 91.472 s clip 0.26 (161.4 s)
+Miami      sweep          i1d0m0    lap 86.573 s clip 0.36 (151.1 s)
+Miami      sweep          i1d0m1    lap 86.864 s clip 0.00 (767.7 s)
+Miami      sweep          i1d0m2    lap 87.150 s clip 0.33 (3833.4 s)
+Miami      sweep          i1d1m0    lap 88.017 s clip 0.00 (4046.7 s)
+Miami      sweep          i1d1m1    lap 88.331 s clip 0.00 (4445.7 s)
+Miami      sweep          i1d1m2    lap 88.592 s clip 0.00 (4441.0 s)
+Miami      sweep          i1d2m0    lap 89.659 s clip 0.00 (3822.9 s)
+Miami      sweep          i1d2m1    lap 89.923 s clip 0.35 (3569.7 s)
+Miami      sweep          i1d2m2    lap 90.145 s clip 0.26 (3628.1 s)
+Miami      sweep          i2d0m0    lap 85.868 s clip 0.00 (2595.1 s)
+Miami      sweep          i2d0m1    lap 86.148 s clip 0.00 (152.4 s)
+Miami      sweep          i2d0m2    lap 86.417 s clip 0.00 (157.3 s)
+Miami      sweep          i2d1m0    lap 87.131 s clip 0.55 (155.1 s)
+Miami      sweep          i2d1m1    lap 87.430 s clip 0.00 (151.9 s)
+Miami      sweep          i2d1m2    lap 87.680 s clip 0.00 (152.5 s)
+Miami      sweep          i2d2m0    lap 88.578 s clip 0.00 (151.8 s)
+Miami      sweep          i2d2m1    lap 88.855 s clip 0.55 (158.7 s)
+Miami      sweep          i2d2m2    lap 89.104 s clip 0.09 (165.4 s)
+Canada     sweep          i0d0m0    lap 72.145 s clip 0.00 (18.1 s)
+Canada     sweep          i0d0m1    lap 72.529 s clip 0.13 (117.9 s)
+Canada     sweep          i0d0m2    lap 72.865 s clip 0.00 (157.1 s)
+Canada     sweep          i0d1m0    lap 73.271 s clip 0.29 (15.9 s)
+Canada     sweep          i0d1m1    lap 73.618 s clip 0.00 (16.1 s)
+Canada     sweep          i0d1m2    lap 73.943 s clip 0.00 (15.6 s)
+Canada     sweep          i0d2m0    lap 74.434 s clip 0.00 (16.2 s)
+Canada     sweep          i0d2m1    lap 74.753 s clip 0.01 (16.3 s)
+Canada     sweep          i0d2m2    lap 75.048 s clip 0.16 (16.2 s)
+Canada     sweep          i1d0m0    lap 71.236 s clip 0.00 (115.7 s)
+Canada     sweep          i1d0m1    lap 71.596 s clip 0.00 (127.7 s)
+Canada     sweep          i1d0m2    lap 71.934 s clip 0.00 (134.9 s)
+Canada     sweep          i1d1m0    lap 72.242 s clip 0.27 (130.5 s)
+Canada     sweep          i1d1m1    lap 72.589 s clip 0.00 (118.4 s)
+Canada     sweep          i1d1m2    lap 72.924 s clip 0.09 (124.4 s)
+Canada     sweep          i1d2m0    lap 73.306 s clip 0.48 (122.3 s)
+Canada     sweep          i1d2m1    lap 73.633 s clip 0.00 (125.4 s)
+Canada     sweep          i1d2m2    lap 73.953 s clip 0.36 (135.8 s)
+Canada     sweep          i2d0m0    lap 70.517 s clip 0.00 (744.5 s)
+Canada     sweep          i2d0m1    lap 70.866 s clip 0.10 (3182.7 s)
+Canada     sweep          i2d0m2    lap 71.189 s clip 0.00 (3449.5 s)
+Canada     sweep          i2d1m0    lap 71.403 s clip 0.40 (2586.5 s)
+Canada     sweep          i2d1m1    lap 71.738 s clip 0.28 (2991.6 s)
+Canada     sweep          i2d1m2    lap 72.064 s clip 0.02 (4259.5 s)
+Canada     sweep          i2d2m0    lap 72.368 s clip 0.08 (3664.3 s)
+Canada     sweep          i2d2m1    lap 72.689 s clip 0.00 (2415.7 s)
+Canada     sweep          i2d2m2    lap 73.009 s clip 0.38 (3632.4 s)
+All results in results/strategy_q_low/runs.csv
+Australia  rules          nominal   lap 77.890 s clip 0.34 (13376.8 s)
+Australia  rules_no_taper nominal   lap 77.861 s clip 0.44 (9965.0 s)
+Australia  rules_h8       nominal   lap 77.890 s clip 0.34 (486.5 s)
+China      rules          nominal   lap 91.997 s clip 0.48 (583.0 s)
+China      rules_no_taper nominal   lap 91.939 s clip 0.50 (560.9 s)
+China      rules_h8       nominal   lap 92.145 s clip 0.00 (596.6 s)
+Miami      rules          nominal   lap 88.244 s clip 0.39 (574.3 s)
+Miami      rules_no_taper nominal   lap 88.175 s clip 0.00 (970.7 s)
+Miami      rules_h8       nominal   lap 88.388 s clip 0.00 (2971.7 s)
+Miami      rules_deploy250 nominal   lap 88.783 s clip 0.23 (19720.7 s)
+Canada     rules          nominal   lap 72.577 s clip 0.00 (32279.5 s)
+Canada     rules_no_taper nominal   lap 72.564 s clip 0.00 (52888.8 s)
+Canada     rules_h8       nominal   lap 72.577 s clip 0.00 (34204.9 s)
+Canada     rules_deploy250 nominal   lap 73.131 s clip 0.37 (26310.1 s)
+All results in results/strategy_q_low/runs.csv
+6 results fail the convergence rule
+Australia  sweep          i0d0m0|refined dv=0.125 soc=321 lap 77.006 s clip 0.36 (82.1 s)
+Australia  sweep          i0d0m0|refined dv=0.125 soc=641 lap 76.979 s clip 0.49 (158.3 s)
+Australia  sweep          i0d0m2|refined dv=0.125 soc=321 lap 77.561 s clip 0.34 (524.6 s)
+Australia  sweep          i0d2m0|refined dv=0.125 soc=321 lap 80.369 s clip 0.00 (74.6 s)
+Australia  sweep          i1d1m0|refined dv=0.125 soc=321 lap 77.302 s clip 0.36 (23455.1 s)
+Australia  sweep          i2d2m0|refined dv=0.125 soc=321 lap 77.618 s clip 0.20 (42450.0 s)
+China      sweep          i2d0m0|refined dv=0.125 soc=321 lap 89.112 s clip 0.00 (540.1 s)
+China      sweep          i2d0m0|refined dv=0.125 soc=641 lap 89.074 s clip 0.00 (1067.0 s)
+China      sweep          i2d0m0|refined dv=0.0625 soc=321 lap 89.102 s clip 0.00 (1086.3 s)
+All results in results/strategy_q_low/runs.csv

@@ -802,3 +802,38 @@ Decisions, made before the run below:
 - strategy_evaluate.py no longer says the per-race rules were "logged 2026-10-07"; the label now
   points to this log. Output only; no numbers change.
 - Nothing above is reported as a finding until that run is in.
+
+## 2026-10-28 (later): Original car under the corrected per-race rules; final robustness verdicts
+
+Run as logged above (results/strategy_rules_q: the original car's other rows copied from
+results/strategy, then --rules with the 2026-10-18 limits, then --refine). Check passed: the
+copied verdicts S1-S7 are identical to results/strategy/verdicts.md, so the copy and the code
+are unchanged. All 14 new per-race results converge (largest gap 0.015 s); none needed
+refinement.
+
+Original car, per-race rules: S1 held (clip ratio 0.00 at all four circuits), S3 held (3 of 4;
+Australia 0.51 does not clip, just over the 0.50 threshold), S4 held (26-35 km/h). Under the old
+9 MJ rows S3 had been 2 of 4, so the correction moved this verdict.
+
+Final verdicts under the per-race rules:
+
+| Prediction | Original car | Low end | High end | Robust? |
+|---|---|---|---|---|
+| S1 | held | held | held | yes, held |
+| S3 | held (3 of 4) | held (4 of 4) | not held (1 of 4) | no |
+| S4 | held (26-35 km/h) | held (21-30 km/h) | not held (16-25 km/h) | no |
+
+Summary of the Strategy Lab, all three cars (this entry and the one above):
+- Robust, held: the optimal strategy clips on the longest straight (S1), with the car-file
+  limit and with the per-race limits; with the car-file limit it still clips without the
+  MGU-K taper (S3).
+- Robust, not held: the optimum beats the best tuned simple rule by 1.7-3.7 s, not under 0.3 s
+  (S5); the gradient method does not reach the DP optimum (S6); the optimal speed peak is
+  never inside the observed range, and lies after it at Australia, China and Miami for every
+  car (S7, exploratory).
+- Depends on the drag/power split, so not reported as a finding: clipping across the legal
+  sweep (S2), the deployment speed gap (S4), and clipping without the taper under the per-race
+  limits (S3). In each case the high-drag, high-power end is the one that fails.
+These verdicts are what the Strategy Lab reports. The calibration itself failed its acceptance
+rule (2026-10-22), so lap times from these cars carry the between-circuit uncertainty of about
++/-0.7 s per lap.

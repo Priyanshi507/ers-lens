@@ -1,0 +1,37 @@
+| Check | Result | Detail |
+|---|---|---|
+| Convergence rule (<= 0.05 s) | held | 138 of 138 M1 results converged, 5 after grid refinement; 0 excluded |
+| S1 | held | Australia 0.00, China 0.13, Miami 0.00, Canada 0.00 |
+| S2 | held | Australia 25 of 27 (93%), China 27 of 27 (100%), Miami 27 of 27 (100%), Canada 27 of 27 (100%); excluded cars counted as not clipping |
+| S3 | held | 3 of 4 circuits clip without the taper: Australia 0.51, China 0.29, Miami 0.00, Canada 0.00 |
+| S4 | held | Australia 26 km/h lower, China 36 km/h lower, Miami 29 km/h lower, Canada 30 km/h lower |
+| S5 | NOT held | Australia optimum faster by 2.026 s, China optimum faster by 1.724 s, Miami optimum faster by 1.824 s, Canada optimum faster by 1.670 s |
+| S6 | NOT held | Australia M2-M1 +0.963 s, r=0.68, China M2-M1 +0.455 s, r=0.70, Miami M2-M1 +0.446 s, r=0.68, Canada M2-M1 +0.344 s, r=0.79 |
+|  | S7 Australia | optimum 975 m, observed IQR 703-752 m |
+|  | S7 China | optimum 925 m, observed IQR 558-662 m |
+|  | S7 Miami | optimum 1070 m, observed IQR 571-677 m |
+|  | S7 Canada | optimum 715 m, observed IQR 521-584 m |
+| S7 (exploratory) | NOT held | 0 of 4 inside |
+| S1 (corrected rules) | held | Australia 0.00, China 0.00, Miami 0.00, Canada 0.00 |
+| S3 (corrected rules) | held | 3 of 4 clip without the taper: Australia 0.51, China 0.00, Miami 0.00, Canada 0.00 |
+| S4 (corrected rules) | held | Australia 26 km/h, China 35 km/h, Miami 29 km/h, Canada 32 km/h |
+| Starting charge | sensitivity | Australia 0.103 s between 30% and 70%, Canada 0.169 s between 30% and 70%, China 0.049 s between 30% and 70%, Miami 0.034 s between 30% and 70% |
+
+**Per-race 2026 rules** (configs/rules_2026_races.yaml as it stood when these rows were run; see the research log). Same thresholds as above.
+
+| Variant | Circuit | Clip ratio | Clips? | Deploy speed gap | Lap vs original | Convergence |
+|---|---|---|---|---|---|---|
+| rules | Australia | 0.00 | yes | 26 km/h | +0.186 s | 0.015 s |
+| rules | China | 0.00 | yes | 35 km/h | +0.016 s | 0.004 s |
+| rules | Miami | 0.00 | yes | 29 km/h | +0.000 s | 0.003 s |
+| rules | Canada | 0.00 | yes | 32 km/h | +0.038 s | 0.000 s |
+| rules_no_taper | Australia | 0.51 | no | 23 km/h | +0.048 s | 0.004 s |
+| rules_no_taper | China | 0.00 | yes | 32 km/h | -0.116 s | 0.005 s |
+| rules_no_taper | Miami | 0.00 | yes | 28 km/h | -0.267 s | 0.002 s |
+| rules_no_taper | Canada | 0.00 | yes | 32 km/h | -0.052 s | 0.000 s |
+| rules_h8 | Australia | 0.00 | yes | 26 km/h | +0.186 s | 0.015 s |
+| rules_h8 | China | 0.12 | yes | 37 km/h | +0.184 s | 0.004 s |
+| rules_h8 | Miami | 0.00 | yes | 31 km/h | +0.095 s | 0.005 s |
+| rules_h8 | Canada | 0.00 | yes | 32 km/h | +0.038 s | 0.000 s |
+| rules_deploy250 | Miami | 0.00 | yes | 22 km/h | +0.556 s | 0.005 s |
+| rules_deploy250 | Canada | 0.25 | yes | 24 km/h | +0.553 s | 0.001 s |

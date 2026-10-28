@@ -1,0 +1,17 @@
+Australia  rules          nominal   lap 75.156 s clip 0.00 (481.3 s)
+Australia  rules_no_taper nominal   lap 75.019 s clip 0.51 (472.4 s)
+Australia  rules_h8       nominal   lap 75.156 s clip 0.00 (473.4 s)
+China      rules          nominal   lap 89.260 s clip 0.00 (490.7 s)
+China      rules_no_taper nominal   lap 89.128 s clip 0.00 (603.7 s)
+China      rules_h8       nominal   lap 89.428 s clip 0.12 (18581.2 s)
+Miami      rules          nominal   lap 85.834 s clip 0.00 (20590.6 s)
+Miami      rules_no_taper nominal   lap 85.567 s clip 0.00 (578.2 s)
+Miami      rules_h8       nominal   lap 85.929 s clip 0.00 (580.8 s)
+Miami      rules_deploy250 nominal   lap 86.390 s clip 0.00 (504.5 s)
+Canada     rules          nominal   lap 70.348 s clip 0.00 (2331.0 s)
+Canada     rules_no_taper nominal   lap 70.258 s clip 0.00 (503.2 s)
+Canada     rules_h8       nominal   lap 70.348 s clip 0.00 (460.8 s)
+Canada     rules_deploy250 nominal   lap 70.864 s clip 0.25 (483.6 s)
+All results in results/strategy_rules_q/runs.csv
+0 results fail the convergence rule
+All results in results/strategy_rules_q/runs.csv

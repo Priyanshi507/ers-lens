@@ -112,8 +112,8 @@ def main():
 
     if (runs.variant == "rules").any():
         rules = get("rules")
-        extra += ["", "**Corrected 2026 race rules** (configs/rules_2026_races.yaml; logged 2026-10-07, "
-                  "before these runs). Same thresholds as above.", "",
+        extra += ["", "**Per-race 2026 rules** (configs/rules_2026_races.yaml as it stood when these rows "
+                  "were run; see the research log). Same thresholds as above.", "",
                   "| Variant | Circuit | Clip ratio | Clips? | Deploy speed gap | Lap vs original | Convergence |",
                   "|---|---|---|---|---|---|---|"]
         for variant in ("rules", "rules_no_taper", "rules_h8", "rules_deploy250"):

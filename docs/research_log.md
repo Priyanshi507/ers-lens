@@ -746,3 +746,59 @@ Decisions, made before any Strategy Lab run with these cars:
   the same for the original car and both new calibrated cars.
 - The 2026-10-17 cars' runs (results/strategy_cal_low, results/strategy_cal_high) stay as a
   record of cars fitted under the wrong limits and are not used for any verdict.
+
+## 2026-10-28: Strategy Lab at both ends of the new ridge; which verdicts are robust
+
+Both runs finished as logged on 2026-10-22: results/strategy_q_low (CdA 1.00, 310 kW) and
+results/strategy_q_high (CdA 1.35, 400 kW), with --refine. Convergence rule: low end 129 of
+130 M1 results (5 after refinement; China sweep i2d0m0 excluded), high end 128 of 130 (2 after
+refinement; China sweep i1d0m0 and China rules_no_taper excluded). No verdict below depends on
+the excluded results: the high-end S2 fails on Australia (18 of 27), where nothing is
+excluded, and the high-end S3 under race rules is at most 2 of 4 even if China clips.
+
+Same stages, predictions and thresholds as 2026-10-05. Original car from results/strategy.
+
+| Prediction | Original car | Low end | High end | Robust? |
+|---|---|---|---|---|
+| S1 nominal optimum clips | held | held | held | yes, held |
+| S2 clips in >= 80% of sweep cars | held (93-100%) | held (81-100%) | not held (Australia 67%) | no |
+| S3 still clips without the taper | held (3 of 4) | held (4 of 4) | held (3 of 4) | yes, held |
+| S4 deployment >= 20 km/h below full-throttle speed | held (26-36) | held (21-31) | not held (16-24) | no |
+| S5 optimum within 0.3 s of best simple rule | not held (1.67-2.03 s) | not held (2.82-3.67 s) | not held (2.17-2.67 s) | yes, not held |
+| S6 M1 and M2 agree | not held | not held | not held | yes, not held (cause logged 2026-10-07) |
+| S7 peak position inside observed IQR | 0 of 4 | 0 of 4 | 0 of 4 | yes, not held |
+
+S7 detail: in all three cars the optimal speed peak lies after the observed range at
+Australia, China and Miami. At Canada it lies after the range for the original and high-end
+cars (715 m, 610 m) and before it for the low-end car (510 m; IQR 521-584 m).
+
+Per-race 2026 rules (limits as corrected on 2026-10-18), new cars only:
+
+| Prediction | Low end | High end |
+|---|---|---|
+| S1 | held | held |
+| S3 | held (4 of 4) | not held (1 of 4, China excluded) |
+| S4 | held (21-30 km/h) | not held (16-25 km/h) |
+
+The original car's per-race rows in results/strategy were run with the old 9 MJ limits
+(2026-10-18 entry), so they cannot be used here. S3 and S4 under race rules already differ
+between the two ends, so they are not robust whatever the original car gives. Only S1 under
+race rules still waits on the original car.
+
+Reading: at every point tested, the optimal strategy clips on the longest straight, and with
+the car-file energy limit it still clips without the MGU-K taper. How widespread clipping is
+across legal cars (S2), and how far below full-throttle speed energy is spent (S4), depend on
+the drag/power split: the high-drag, high-power end clips less and deploys closer to top speed.
+Under the per-race limits the high-drag end clips without the taper at only one circuit, so
+"clipping is not just the taper" is robust only with the car-file limit. Why the high-drag end
+behaves this way is not tested. The negative results (S5, S6, S7) hold for every car.
+
+Decisions, made before the run below:
+- Re-run the original car's per-race rules stage with the 2026-10-18 limits into
+  results/strategy_rules_q, starting from a copy of its other rows (unaffected by the
+  correction, per 2026-10-18), then --refine and strategy_evaluate.py. The copied verdicts
+  (S1-S7) must reproduce results/strategy/verdicts.md exactly; any difference is a code error
+  and nothing is reported until it is found.
+- strategy_evaluate.py no longer says the per-race rules were "logged 2026-10-07"; the label now
+  points to this log. Output only; no numbers change.
+- Nothing above is reported as a finding until that run is in.

@@ -3,7 +3,8 @@ name: site
 on:
   push:
     branches: [main]
-    paths: ["site/**", "scripts/export_site.py", "tests/test_export_site.py", ".github/workflows/site.yml"]
+    paths: ["site/**", "scripts/export_site.py", "scripts/export_strategy.py", "tests/test_export_site.py",
+            "tests/test_export_strategy.py", ".github/workflows/site.yml"]
   workflow_dispatch:
 
 permissions:
@@ -28,7 +29,7 @@ jobs:
           pip install -r requirements-lock.txt
           pip install -e . --no-deps
       - name: Exporter and published data
-        run: python -m pytest -q tests/test_export_site.py
+        run: python -m pytest -q tests/test_export_site.py tests/test_export_strategy.py
 
   deploy:
     needs: test

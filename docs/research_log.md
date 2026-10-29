@@ -837,3 +837,30 @@ Summary of the Strategy Lab, all three cars (this entry and the one above):
 These verdicts are what the Strategy Lab reports. The calibration itself failed its acceptance
 rule (2026-10-22), so lap times from these cars carry the between-circuit uncertainty of about
 +/-0.7 s per lap.
+
+## 2026-10-29: Strategy Lab page; two diagnostics re-checked on all three cars (exploratory)
+
+Added the Strategy Lab page to the Explorer (site/strategy.html, data from
+scripts/export_strategy.py). The exporter recomputes every number from the saved optimal
+profiles and stops if any of the 24 profiles (3 cars, 4 circuits, 2 energy limits) fails to
+reproduce its runs.csv lap time and end-of-lap charge to 0.001 s and 0.001 MJ; all do. For the
+original car it also reproduces the 2026-10-10 diagnostics (speed peak to braking point 290,
+405, 200, 315 m; real medians from 209, 229, 464, 613 clipping laps; bang-bang shares), checked
+in tests/test_export_strategy.py.
+
+The two 2026-10-10 diagnostics were run on the original car only. Re-checked on all three cars,
+after every verdict was recorded:
+- Bang-bang: on every car and both energy limits, 0.7-4.7% of full-throttle points sit between
+  zero and the MGU-K cap, so 95-99% are at one or the other. Same result for every car.
+- Speed peak to braking point against the middle half of real clipping laps (lined up at the
+  braking point, as on 2026-10-10). Original car: shorter at all four circuits with either
+  limit, as logged. Low-drag end: inside at Australia and China, shorter at Miami, longer at
+  Canada (car-file limit); inside at China only with the per-race limits. High-drag end: inside
+  at China and Canada (car-file limit), and also at Australia with the per-race limits; shorter
+  at Miami. Only Miami is shorter for every car. "Real cars clip for longer than the optimum"
+  (2026-10-10) is therefore a property of the original car, not a robust result; the README
+  sentence is corrected.
+- Battery at the speed peak: within 0.3 MJ of empty at Australia, Miami and Canada for every
+  car, but 1.0-1.2 MJ at China, where the optimum still cuts power. At China the cut is a choice
+  about where energy buys most time, not a shortage. Recorded as an observation only; not
+  pre-registered and not tested.

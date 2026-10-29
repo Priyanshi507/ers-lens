@@ -161,3 +161,56 @@ select { min-width: 11rem; }
   select { min-width: 9rem; }
 }
 .note:empty { display: none; }
+
+/* Page switcher shared by the explorer and the Strategy Lab. */
+.pages { display: flex; gap: 1.25rem; margin: 0 0 1.25rem; font: 500 0.95rem/1 var(--display); }
+.pages a { color: var(--ink-soft); text-decoration: none; padding-bottom: 0.3rem; }
+.pages a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 -3px 0 var(--battery); }
+
+/* Strategy Lab */
+.panel-main { border-left-color: var(--battery); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--grid); border-radius: 3px; overflow: hidden; }
+.seg button {
+  min-height: 2.5rem; padding: 0.35rem 0.75rem; border: 0; border-right: 1px solid var(--grid);
+  background: var(--paper); color: var(--ink); font: 500 0.95rem var(--body); cursor: pointer;
+}
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--battery); color: #fff; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.5rem 1rem; margin: 0 0 1rem; }
+.stats div { padding: 0.5rem 0.65rem; background: var(--paper); }
+.stats dt { color: var(--ink-soft); font-size: 0.8rem; }
+.stats dd { margin: 0.15rem 0 0; font: 600 1.15rem/1.2 var(--display); }
+
+.chart-speed { height: 13rem; }
+.chart-power { height: 15rem; }
+.chart-soc { height: 10rem; }
+.chart-straight, .chart-real { height: 20rem; }
+.chart-bang { height: 11rem; }
+.chart-sweep { height: 20rem; }
+.key-cap { border-top: 2px dashed var(--ink-soft); height: 0; width: 1.2rem; }
+
+.table-wrap { overflow-x: auto; }
+.verdict-table, .small-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.verdict-table th, .verdict-table td, .small-table th, .small-table td {
+  padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top;
+}
+.verdict-table thead th, .small-table thead th { font: 600 0.9rem/1.2 var(--display); border-bottom: 2px solid var(--ink); }
+.verdict-table .sub { display: block; color: var(--ink-soft); font: 400 0.78rem var(--body); }
+.verdict-table tbody th { font-weight: 400; min-width: 16rem; }
+.verdict-table .code { display: inline-block; min-width: 2.2rem; color: var(--ink-soft); font-weight: 600; }
+.verdict-table .group th { padding-top: 1rem; font: 600 0.85rem var(--display); color: var(--ink-soft); border-bottom: 1px solid var(--ink-soft); }
+.verdict-table td, .small-table td { white-space: nowrap; }
+.is-held { color: var(--battery); font-weight: 600; }
+.is-not { color: var(--clip); font-weight: 600; }
+.is-mixed { color: var(--caution); font-weight: 600; }
+.verdict-table td[title] { cursor: help; }
+.small-table { max-width: 36rem; margin-top: 1rem; }
+
+@media (max-width: 40rem) {
+  .seg button { padding: 0.35rem 0.55rem; font-size: 0.88rem; }
+  .chart-straight, .chart-real, .chart-sweep { height: 16rem; }
+  .verdict-table tbody th { min-width: 12rem; }
+}
+.lab .answer-main strong { white-space: normal; }

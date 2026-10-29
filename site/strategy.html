@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERS-Lens Strategy Lab: the fastest way to spend a 2026 battery</title>
+<meta name="description" content="Lap-time-optimal electric energy deployment for 2026 Formula 1 cars, solved by dynamic programming and compared with real race laps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body class="lab">
+<header class="masthead">
+  <p class="wordmark"><a href="https://github.com/Priyanshi507/ers-lens">ERS-Lens</a></p>
+  <nav class="pages" aria-label="Pages"><a href="index.html">Clipping explorer</a><a href="strategy.html" aria-current="page">Strategy Lab</a></nav>
+  <h1>What is the fastest way to spend the battery?</h1>
+  <p class="lede">For each circuit, dynamic programming finds the lap-time-optimal electric power at every 5 m of track under the 2026 energy rules, with the battery ending the lap no emptier than it started. Every optimum is replayed in the lap simulator and kept only if the two agree within 0.05 s.</p>
+</header>
+
+<main>
+  <section class="answer" aria-live="polite">
+    <p id="answer-main" class="answer-main">Loading the Strategy Lab…</p>
+    <p id="answer-detail" class="answer-detail"></p>
+  </section>
+
+  <section class="panel" id="verdicts">
+    <h2>Seven predictions, three cars</h2>
+    <p class="note">The predictions were written down before any code. The car could not be calibrated to a single drag and engine-power value, because the four pole laps prefer different points on a ridge of equally good fits. So every prediction was tested on three cars, and a result counts as robust only if all three agree. Hover over a cell for the measured values.</p>
+    <div class="table-wrap"><table class="verdict-table" id="verdict-table"></table></div>
+  </section>
+
+  <section class="panel panel-main" id="lap">
+    <h2>One optimal lap</h2>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Circuit" id="pick-circuit"></div>
+      <div class="seg" role="group" aria-label="Car" id="pick-car"></div>
+      <div class="seg" role="group" aria-label="Energy limit" id="pick-limits"></div>
+      <button type="button" id="share">Copy link to this view</button>
+    </div>
+    <p id="lap-summary" class="lap-summary" aria-live="polite"></p>
+    <dl class="stats" id="lap-stats"></dl>
+    <div class="chart chart-speed"><canvas id="speed-chart" role="img" aria-label="Optimal speed along the lap"></canvas></div>
+    <div class="chart chart-power"><canvas id="power-chart" role="img" aria-label="Optimal electric power along the lap, with the MGU-K limit"></canvas></div>
+    <div class="chart chart-soc"><canvas id="soc-chart" role="img" aria-label="Battery charge along the lap"></canvas></div>
+    <p class="legend"><span class="key key-flat"></span>Longest straight <span class="key key-peak"></span>Speed peak <span class="key key-cap"></span>MGU-K limit at that speed</p>
+  </section>
+
+  <section class="panel" id="straight">
+    <h2>The longest straight, three cars</h2>
+    <p class="note" id="straight-note"></p>
+    <div class="chart chart-straight"><canvas id="straight-chart" role="img" aria-label="Electric power on the longest straight for the three cars"></canvas></div>
+  </section>
+
+  <section class="panel" id="real">
+    <h2>The optimum against real race laps</h2>
+    <p class="note" id="real-note"></p>
+    <div class="chart chart-real"><canvas id="real-chart" role="img" aria-label="Speed approaching the braking point: real clipping laps and the optimum"></canvas></div>
+    <div class="table-wrap"><table class="small-table" id="real-table"></table></div>
+  </section>
+
+  <section class="panel" id="bang">
+    <h2>All or nothing</h2>
+    <p class="note" id="bang-note"></p>
+    <div class="chart chart-bang"><canvas id="bang-chart" role="img" aria-label="Share of full-throttle running at the MGU-K limit, at zero, or in between"></canvas></div>
+  </section>
+
+  <section class="panel" id="sweep">
+    <h2>27 legal cars per circuit</h2>
+    <p class="note" id="sweep-note"></p>
+    <div class="chart chart-sweep"><canvas id="sweep-chart" role="img" aria-label="Clip ratio of the 27 legal-sweep cars at each circuit"></canvas></div>
+  </section>
+
+  <section class="panel limits">
+    <h2>What this can't tell you</h2>
+    <p>These are model cars, not real ones. The calibration failed its own acceptance test, so modelled lap times carry about ±0.7 s per lap of uncertainty between circuits, and the pole laps are assumed to be close to energy-optimal. Overtake mode, slipstream and traffic are not modelled. Real batteries are not observable, so comparisons with real laps are exploratory.</p>
+    <p><a href="https://github.com/Priyanshi507/ers-lens/blob/main/docs/research_log.md">Every prediction, check and failure is in the research log</a></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Built by <a href="https://github.com/Priyanshi507">Priyanshi Sharma</a> from the ERS-Lens Strategy Lab and public FastF1 timing data. Not affiliated with Formula 1 or any team. Data generated <span id="generated">—</span>.</p>
+</footer>
+
+<script src="vendor/chart-4.4.1.umd.min.js"></script>
+<script type="module" src="strategy.js"></script>
+</body>
+</html>

@@ -176,11 +176,14 @@ the same for all three.
 
 Clipping is what the optimizer chooses, not only a side effect of the regulation taper. This
 fits the reasoning recorded before the tests: near top speed, drag absorbs power roughly as
-v³, so a joule deployed there buys little time. On the original car the optimum is
-bang-bang (96-99% of full-throttle points at the MGU-K cap or at zero), and real cars reach their speed peak earlier than the optimum at every
-circuit, so they clip for longer (exploratory: the battery is not observable). The car
+v³, so a joule deployed there buys little time. The optimum is bang-bang on every car
+(95-99% of full-throttle points at the MGU-K cap or at zero). Compared with real race laps,
+lined up at the braking point, the original car's optimum peaks too late at every circuit,
+but the two calibrated cars land inside the middle half of real laps at one to three of
+four circuits, so that comparison is not robust (exploratory: the battery is not observable). The car
 calibration failed its own acceptance test, so modelled lap times carry about ±0.7 s per lap
 of between-circuit uncertainty, and the pole laps are assumed to be close to energy-optimal.
+Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
 Reproduce: `python scripts/strategy_run.py --car configs/car_2026_q_low.yaml --out results/strategy_q_low`,
 then `--rules` and `--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low/runs.csv`

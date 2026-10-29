@@ -150,10 +150,47 @@ seven were also recorded in the research log beforehand.
 | Time lost tracks the electric power drop (Spearman ≥ 0.4) | Not held (0.30); the check ignored clipping duration, against which Spearman is 0.54–0.88 |
 | Parameter ambiguity in time lost is under 10% | Not held (about 17%) |
 
+### 8. Strategy Lab: the lap-time-optimal strategy clips
+
+What is the fastest way to spend and recover electric energy on a 2026 lap, and does it clip?
+Dynamic programming over battery state of charge finds the optimum for one charge-neutral lap
+under the 2026 energy rules (MGU-K cap and speed taper, 4 MJ window, per-lap recharge limit).
+Every result is checked: the optimizer's predicted lap time must match a replay in the lap
+simulator to within 0.05 s, or the result is not used. Seven predictions were recorded on
+2026-10-05, before any code.
+
+The model car could not be calibrated to one drag and engine-power value: the four pole laps
+prefer different points on a ridge of equally good fits. So every prediction was tested on
+three cars (the original car and both ends of that ridge), and a verdict counts only if it is
+the same for all three.
+
+| Prediction | Result on all three cars |
+| --- | --- |
+| S1: the optimum clips on the longest straight (power at the speed peak ≤ 50% of its earlier mean) | **Held**, with the car-file and the per-race 2026 recharge limits |
+| S3: it still clips with the MGU-K speed taper removed, at ≥ 3 of 4 circuits | **Held** with the car-file limit; with the per-race limits only on two of three cars |
+| S2: the optimum clips for ≥ 80% of 27 legal cars at every circuit | Depends on the car: fails at the high-drag end (Australia 67%) |
+| S4: energy is deployed ≥ 20 km/h below the mean full-throttle speed | Depends on the car: 16-24 km/h at the high-drag end |
+| S5: the optimum is within 0.3 s of the best tuned simple rule | **Not held**: the optimum is 1.7-3.7 s faster |
+| S6: gradient descent through the JAX simulator matches the DP optimum | **Not held**: it stalls in local optima |
+| S7: the optimal speed-peak position lies in the range seen on real laps | **Not held** (0 of 4 circuits, every car) |
+
+Clipping is what the optimizer chooses, not only a side effect of the regulation taper. This
+fits the reasoning recorded before the tests: near top speed, drag absorbs power roughly as
+v³, so a joule deployed there buys little time. On the original car the optimum is
+bang-bang (96-99% of full-throttle points at the MGU-K cap or at zero), and real cars reach their speed peak earlier than the optimum at every
+circuit, so they clip for longer (exploratory: the battery is not observable). The car
+calibration failed its own acceptance test, so modelled lap times carry about ±0.7 s per lap
+of between-circuit uncertainty, and the pole laps are assumed to be close to energy-optimal.
+Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
+Reproduce: `python scripts/strategy_run.py --car configs/car_2026_q_low.yaml --out results/strategy_q_low`,
+then `--rules` and `--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low/runs.csv`
+
 ## Repository
 
 ```
 configs/car_2026.yaml       car and regulation parameters (sources noted per value)
+configs/rules_2026_races.yaml  per-race and qualifying recharge limits (sources noted)
+configs/car_2026_q_*.yaml   the two ends of the calibration ridge (finding 8)
 src/erslens/
     physics.py              forces, braking envelope, MGU-K speed taper (single shared implementation)
     simulate.py             lap simulator with 2026 energy rules (NumPy)
@@ -165,6 +202,10 @@ src/erslens/
     synthstraight.py        simulated straights for the ML experiment (JAX)
     gaussnet.py             neural network with calibrated Gaussian uncertainty (JAX, Optax)
     ingest.py               FastF1 loading, track and elevation profiles
+    optimal.py              Strategy Lab method M1: dynamic programming over state of charge
+    gradopt.py              Strategy Lab method M2: gradient descent through the JAX simulator
+    simple.py               simple deployment rules, tuned by exhaustive search
+    strategy.py             S1-S7 measurements, legal-car sweep, per-race rules, convergence rule
 scripts/
     derate_analysis.py      quality checks and full-throttle speed-loss detection
     multi_race.py           clipping across races, before/after comparison
@@ -176,7 +217,10 @@ scripts/
     ml_robustness.py        finding 5: seeds and capacity/data control
     laptime_real.py         finding 6 on real races
     laptime_stress.py       finding 6: accuracy when the method's assumptions are broken
-tests/                      50 automated tests (physics invariants, estimators, quality checks)
+    calibrate_car.py        finding 8: fit drag and engine power to pole laps
+    strategy_run.py         finding 8: all Strategy Lab stages
+    strategy_evaluate.py    finding 8: verdicts S1-S7
+tests/                      90 automated tests (physics invariants, estimators, optimizers, verdict logic)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
 ```

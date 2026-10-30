@@ -942,3 +942,26 @@ of the laps Jolpica times, lap starts are rebuilt from Jolpica's lap times (ligh
 OpenF1, then each driver's cumulative lap times; pit laps from Jolpica). This applies to
 Australia only. Timeouts from OpenF1 are now retried. The comparison rule recorded above is
 unchanged, and the source check is re-run on all seven races.
+
+## 2026-10-30 (later): Source check result; OpenF1 used only with its own lap table
+
+Result (results/source_check/comparison.md): 45 of 46 checks passed. At the six races where
+OpenF1's own lap table was used (China, Japan, Miami, Canada, Austria, Belgium) every check
+passed, most by a wide margin: clean laps within 2% (Austria 975 against 959, the rest within 3
+laps), share of laps clipping within 0.015, normalised clipping share within 0.004, median speed
+lost equal or 1 km/h apart, median time lost within 0.003 s at the three reported races, and the
+same reporting decision at all six. The before/after comparison gives 34.2% against 34.2%,
+p = 0.571 (FastF1: 34.7% against 34.1%, p = 0.51).
+
+The one failure is Australia, the only race whose laps were rebuilt from Jolpica lap times:
+148 clean laps against FastF1's 227 (35% fewer). Its other checks passed (clipping share 0.959
+against 0.974, median time lost 0.115 against 0.133 s), so the laps that survive look right, but
+the rebuild loses too many laps. The cause is not investigated here.
+
+Decision, made before any data from the 11 new races is loaded, and a deviation from the rule
+recorded above ("at every one of the seven races"): the Jolpica rebuild is removed. OpenF1 is
+used only with its own lap table, the method that passed every check at all six races where it
+was used. A race whose OpenF1 lap table holds less than 90% of the laps Jolpica times is listed
+in not_loaded.csv and reported as not loaded. The probe of 2026-10-30 found complete OpenF1 lap
+tables for every new race from Monaco to Bahrain; Singapore and the United States were not
+reached by the probe and are checked by this rule when they run. E1-E3 are unchanged.

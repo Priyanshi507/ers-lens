@@ -23,8 +23,9 @@ import pandas as pd
 
 BASE = "https://api.openf1.org/v1"
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
-# When OpenF1's lap table holds less than this share of the laps Jolpica times, lap starts are
-# rebuilt from Jolpica's lap times (the 2026 Australian race: 45 of about 1,000 laps).
+# A race whose OpenF1 lap table holds less than this share of the laps Jolpica times is not
+# loaded (the 2026 Australian race: 45 of 1,003). Rebuilding its laps from Jolpica lap times was
+# tried and failed the source check (research log, 2026-10-30), so it is not used.
 MIN_LAP_COVERAGE = 0.9
 CACHE = Path("data/cache/openf1")
 # The free tier allows 30 requests a minute.
@@ -114,37 +115,15 @@ def jolpica_laps(year: int, event_date: pd.Timestamp) -> pd.DataFrame:
     return laps.sort_values(["driver_number", "lap_number"]).reset_index(drop=True)
 
 
-def laps_from_jolpica(jl: pd.DataFrame, lights_out: pd.Timestamp) -> pd.DataFrame:
-    """OpenF1-style lap rows rebuilt from lap times: each lap starts when the driver's previous laps add up to."""
-    out = []
-    for num, g in jl.groupby("driver_number"):
-        g = g.sort_values("lap_number")
-        consecutive = g["lap_number"].to_numpy() == np.arange(1, len(g) + 1)
-        if not consecutive.all():
-            g = g.iloc[:consecutive.argmin()]  # after a missing lap the cumulative start times are unknown
-        starts = lights_out + pd.to_timedelta(np.r_[0.0, np.cumsum(g["seconds"].to_numpy())[:-1]], unit="s")
-        pit_out = np.r_[True, g["pit_in"].to_numpy()[:-1]]
-        out.append(pd.DataFrame({"driver_number": num, "lap_number": g["lap_number"].to_numpy(),
-                                 "date_start": [t.isoformat() for t in starts], "lap_duration": g["seconds"].to_numpy(),
-                                 "is_pit_out_lap": pit_out, "pit_in": g["pit_in"].to_numpy()}))
-    return pd.concat(out, ignore_index=True)
-
-
 @lru_cache(maxsize=8)
-def race_laps(key: int) -> tuple[pd.DataFrame, str]:
-    """All laps of a session, and where their timing came from ("openf1" or "jolpica")."""
+def race_laps(key: int) -> pd.DataFrame:
+    """All laps of a race session; refuses a race whose OpenF1 lap table is incomplete."""
     laps = pd.DataFrame(get("laps", ("session_key", key)))
-    if key not in KEY_EVENT:
-        return laps, "openf1"
-    year, event_date = KEY_EVENT[key]
-    jl = jolpica_laps(year, event_date)
-    if len(laps) >= MIN_LAP_COVERAGE * len(jl):
-        return laps, "openf1"
-    first = laps.loc[laps["lap_number"] == 1, "date_start"].dropna() if len(laps) else pd.Series(dtype=object)
-    if first.empty:
-        raise LookupError(f"OpenF1 has {len(laps)} of {len(jl)} laps and no lights-out time")
-    print(f"OpenF1 lap table has {len(laps)} of {len(jl)} laps; lap starts rebuilt from Jolpica lap times")
-    return laps_from_jolpica(jl, _utc(first).min()), "jolpica"
+    if key in KEY_EVENT:
+        timed = len(jolpica_laps(*KEY_EVENT[key]))
+        if len(laps) < MIN_LAP_COVERAGE * timed:
+            raise LookupError(f"OpenF1 lap table has {len(laps)} of the {timed} laps Jolpica times")
+    return laps
 
 
 def _utc(values) -> pd.Series:
@@ -182,7 +161,7 @@ def drivers(key: int) -> pd.DataFrame:
 def lap_windows(laps: pd.DataFrame) -> pd.DataFrame:
     """Start and end time of every lap with a known start; the end is the next lap's start if the duration is missing."""
     laps = laps[laps["date_start"].notna()].sort_values("lap_number").copy()
-    laps["start"] = _utc(laps["date_start"]).to_numpy()
+    laps["start"] = pd.to_datetime(laps["date_start"], utc=True, format="ISO8601")
     nxt = laps["start"].shift(-1)
     dur = pd.to_timedelta(laps["lap_duration"], unit="s")
     laps["end"] = (laps["start"] + dur).where(laps["lap_duration"].notna(), nxt)
@@ -233,16 +212,13 @@ def driver_race(key: int, acronym: str) -> pd.DataFrame:
     if row.empty:
         return pd.DataFrame()
     number = int(row["driver_number"].iloc[0])
-    table, timing = race_laps(key)
+    table = race_laps(key)
     laps = table[table["driver_number"] == number] if len(table) else table
     car = _car(key, number)
     if laps.empty or car.empty:
         return pd.DataFrame()
-    if timing == "jolpica":
-        pit_laps = set(laps.loc[laps["pit_in"], "lap_number"].astype(int))
-    else:
-        pit_laps = {int(p["lap_number"]) for p in get("pit", ("session_key", key), ("driver_number", number))
-                    if p.get("lap_number") is not None}
+    pit_laps = {int(p["lap_number"]) for p in get("pit", ("session_key", key), ("driver_number", number))
+                if p.get("lap_number") is not None}
     stints = get("stints", ("session_key", key), ("driver_number", number))
     frames = []
     for lap in lap_windows(laps).itertuples(index=False):

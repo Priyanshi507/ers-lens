@@ -72,7 +72,21 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     car = load_car_params("configs/car_2026.yaml")
-    laps = pd.concat([analyse_event(args.year, ev, car) for ev in args.events], ignore_index=True)
+    from fastf1.exceptions import DataNotLoadedError
+
+    frames, not_loaded = [], []
+    for ev in args.events:
+        try:
+            frames.append(analyse_event(args.year, ev, car))
+        except DataNotLoadedError as err:
+            print(f"SKIPPED {ev}: timing data could not be loaded ({err})")
+            not_loaded.append({"event": ev, "reason": str(err)})
+    pd.DataFrame(not_loaded, columns=["event", "reason"]).to_csv(out / "not_loaded.csv", index=False)
+    if not_loaded:
+        print(f"NOT LOADED ({len(not_loaded)}): {', '.join(r['event'] for r in not_loaded)}")
+    if not frames:
+        raise SystemExit("No race could be loaded; check the network connection to livetiming.formula1.com")
+    laps = pd.concat(frames, ignore_index=True)
     laps.to_csv(out / "laptime_per_lap.csv", index=False)
 
     laps["model_failure"] = laps["t_loss_s"] < -SIM_ERROR_90_S

@@ -895,3 +895,12 @@ E3. At every new race that passes the reporting rule, the median time lost per l
 No prediction is made about how many new races pass the reporting rule. A race failing E1 or
 E3 is reported as a failure of the finding, not dropped. The README and the site are updated
 only after the results are logged here.
+
+## 2026-10-30 (later): First attempt at the season test could not download the new races
+
+The first run stopped at Monaco: every FastF1 request for the new races failed (session info,
+timing, car and position data), while the seven original races loaded from the local cache.
+No new-race data was analysed. multi_race.py and laptime_real.py now record a race whose data
+cannot be loaded in not_loaded.csv and continue with the others, instead of stopping the run.
+A race in not_loaded.csv is a download failure, not a result, and is re-run before E1-E3 are
+judged. Nothing about the analysis changed.

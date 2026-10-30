@@ -104,10 +104,18 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     _, change_date = event_info(args.year, args.change_event)
 
-    rows, all_laps = [], []
+    from fastf1.exceptions import DataNotLoadedError
+
+    rows, all_laps, not_loaded = [], [], []
     for ev in args.events:
         print(f"\n=== {ev} ===")
-        row, laps = analyse_event(args.year, ev, out, args.session)
+        try:
+            row, laps = analyse_event(args.year, ev, out, args.session)
+        except DataNotLoadedError as err:
+            # A download failure is not a result: record it and keep going, so one race cannot stop the run.
+            print(f"SKIPPED {ev}: timing data could not be loaded ({err})")
+            not_loaded.append({"event": ev, "reason": str(err)})
+            continue
         row["period"] = "after" if pd.Timestamp(row["date"]) >= change_date else "before"
         rows.append(row)
         if len(laps):
@@ -115,6 +123,9 @@ def main():
             all_laps.append(laps)
         print({k: (round(v, 2) if isinstance(v, float) else v) for k, v in row.items()})
 
+    pd.DataFrame(not_loaded, columns=["event", "reason"]).to_csv(out / "not_loaded.csv", index=False)
+    if not_loaded:
+        print(f"\nNOT LOADED ({len(not_loaded)}): {', '.join(r['event'] for r in not_loaded)}")
     summary = pd.DataFrame(rows).sort_values("date")
     summary["used"] = summary["clean_laps"] >= MIN_LAPS
     summary.to_csv(out / "race_summary.csv", index=False)

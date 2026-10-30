@@ -1009,3 +1009,31 @@ the longest straight crosses the line; it is not shown. Britain, Hungary and the
 lost almost every lap to the quality checks; the reasons were not examined.
 
 README findings 3, 6 and 7 are updated with these results.
+
+## 2026-10-31: Strategy Lab on GPU, step 1: benchmark plan and predictions, before any timing
+
+Aim: find out how much faster the existing Strategy Lab runs on a GPU, with no change to the
+solver, before building anything on top of it (whole-race strategy needs many more solves).
+scripts/gpu_benchmark.py times, for the low-drag calibrated car (configs/car_2026_q_low.yaml)
+at Australia, China, Miami and Canada:
+- one backward pass of the dynamic program on the fine grid (0.125 m/s, 321 charge levels),
+  after compilation, median of 3 runs;
+- one complete solve_refined call, compilation included, exactly as the Strategy Lab runs it.
+Tracks are the cached qualifying reference laps saved by scripts/export_tracks.py, so the GPU
+machine (a free Kaggle notebook) solves the same circuits.
+
+Checks, before any speed-up is reported:
+- The CPU run reproduces the committed results/strategy_q_low/runs.csv nominal lap times to
+  0.001 s (Australia 77.581, China 91.876, Miami 88.244, Canada 72.528 s), so the saved tracks
+  are the ones every result used.
+- GPU and CPU lap times agree to 0.001 s at every circuit. If not, no speed-up is reported until
+  the cause is found.
+- The solver runs in float64 throughout; the GPU model is recorded, because some GPUs (Kaggle's
+  T4) run float64 at a small fraction of their float32 speed. The P100 is used where available.
+
+Predictions (CPU: Apple M4 MacBook Air, JAX CPU backend):
+G1. On the GPU, the fine-grid backward pass is at least 10 times faster than on the CPU at
+    every circuit.
+G2. A complete solve, compilation included, is at least 3 times faster on the GPU at every
+    circuit (compilation and the many small host-side steps dilute the gain).
+Whatever the numbers, they are reported, and step 2 (batching with vmap) is planned from them.

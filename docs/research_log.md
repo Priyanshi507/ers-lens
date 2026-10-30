@@ -904,3 +904,25 @@ No new-race data was analysed. multi_race.py and laptime_real.py now record a ra
 cannot be loaded in not_loaded.csv and continue with the others, instead of stopping the run.
 A race in not_loaded.csv is a download failure, not a result, and is re-run before E1-E3 are
 judged. Nothing about the analysis changed.
+
+## 2026-10-30 (later): Why the downloads failed, and a second data source checked before use
+
+The failures were not local: since about 15 October 2026 the F1 live-timing archive that FastF1
+reads (livetiming.formula1.com/static) answers HTTP 401 without an F1 TV subscription (FastF1
+issue #978, open, no fix). Confirmed here: that URL returns 401 while other sites load.
+
+OpenF1 (api.openf1.org) serves its own recording of the same timing feed, free for 2023 onward.
+erslens.openf1 rebuilds the ingest tables from it (selected with ERSLENS_SOURCE=openf1), following
+FastF1's conventions: lap telemetry interpolated to the exact lap start and end, distance
+integrated from speed as FastF1 does, position in tenths of a metre, the reference lap the
+fastest qualifying lap not deleted by race control. Nothing in the analysis changes.
+
+Check recorded before any OpenF1 run: the seven original races are re-run from OpenF1 into
+results/source_check and compared with the committed FastF1 results (scripts/compare_sources.py).
+OpenF1 is used for the season test only if, at every one of the seven races:
+- clean laps within 10% of FastF1's count;
+- share of laps clipping within 0.03, and normalised clipping share within 0.02;
+- median speed lost within 1 km/h;
+- share of measurable laps within 0.05, the same reporting decision, and, at reported races,
+  median time lost within 0.02 s.
+If any check fails, the cause is found before OpenF1 data is used, and the failure is logged here.

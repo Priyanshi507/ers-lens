@@ -111,7 +111,7 @@ def main():
         print(f"\n=== {ev} ===")
         try:
             row, laps = analyse_event(args.year, ev, out, args.session)
-        except DataNotLoadedError as err:
+        except (DataNotLoadedError, LookupError) as err:
             # A download failure is not a result: record it and keep going, so one race cannot stop the run.
             print(f"SKIPPED {ev}: timing data could not be loaded ({err})")
             not_loaded.append({"event": ev, "reason": str(err)})

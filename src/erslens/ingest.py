@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -8,6 +9,20 @@ from .track import Track, track_from_reference
 
 
 POS_UNIT_M = 0.1
+
+
+def source() -> str:
+    """Timing-data source: "fastf1" (default) or "openf1" (see erslens.openf1)."""
+    value = os.environ.get("ERSLENS_SOURCE", "fastf1").lower()
+    if value not in ("fastf1", "openf1"):
+        raise ValueError(f"ERSLENS_SOURCE must be fastf1 or openf1, not {value!r}")
+    return value
+
+
+def _openf1_key(year: int, event: str | int, kind: str) -> int:
+    from . import openf1
+
+    return openf1.session_key(year, event_info(year, event)[1], kind)
 
 
 @lru_cache(maxsize=4)
@@ -37,6 +52,10 @@ def _car_data(lap) -> pd.DataFrame:
 def load_driver_race(year: int, event: str | int, driver: str, kind: str = "R",
                      cache_dir: str | Path = "data/cache") -> pd.DataFrame:
     """All of one driver's laps as a single telemetry table, keyed by lap number."""
+    if source() == "openf1":
+        from . import openf1
+
+        return openf1.driver_race(_openf1_key(year, event, kind), driver)
     session = _session(year, event, kind, cache_dir)
     laps = session.laps.pick_drivers(driver)
     frames = []
@@ -59,11 +78,21 @@ def reference_track(year: int, event: str | int, driver: str | None = None,
                     kind: str = "Q", cache_dir: str | Path = "data/cache",
                     ds: float = 5.0) -> Track:
     """Build a Track from a fast lap (qualifying by default: least traffic and lift-and-coast)."""
+    name = f"{year}_{str(event).lower().replace(' ', '_')}"
+    if source() == "openf1":
+        if driver is not None:
+            raise NotImplementedError("a named reference driver is only supported with FastF1")
+        from . import openf1
+
+        df, elevation = openf1.reference_lap(_openf1_key(year, event, kind), POS_UNIT_M)
+        track = track_from_reference(name, df["distance_m"].to_numpy(), df["speed_kmh"].to_numpy(),
+                                     df["throttle"].to_numpy(), ds=ds)
+        track.elevation_m = None if elevation is None else np.interp(track.distance_m, df["distance_m"].to_numpy(), elevation)
+        return track
     session = _session(year, event, kind, cache_dir)
     laps = session.laps if driver is None else session.laps.pick_drivers(driver)
     lap = laps.pick_quicklaps().pick_fastest()
     df = _car_data(lap)
-    name = f"{year}_{str(event).lower().replace(' ', '_')}"
     track = track_from_reference(name, df["distance_m"].to_numpy(), df["speed_kmh"].to_numpy(),
                                  df["throttle"].to_numpy(), ds=ds)
     try:
@@ -90,6 +119,10 @@ def load_track(path: str | Path) -> Track:
 
 def race_drivers(year: int, event: str | int, kind: str = "R",
                  cache_dir: str | Path = "data/cache") -> list[str]:
+    if source() == "openf1":
+        from . import openf1
+
+        return [d for d in openf1.drivers(_openf1_key(year, event, kind))["name_acronym"] if isinstance(d, str)]
     session = _session(year, event, kind, cache_dir)
     return [d for d in session.results["Abbreviation"] if isinstance(d, str)]
 
@@ -103,5 +136,10 @@ def event_info(year: int, event: str | int) -> tuple[str, pd.Timestamp]:
 
 def driver_teams(year: int, event: str | int, kind: str = "R",
                  cache_dir: str | Path = "data/cache") -> dict[str, str]:
+    if source() == "openf1":
+        from . import openf1
+
+        d = openf1.drivers(_openf1_key(year, event, kind))
+        return d.set_index("name_acronym")["team_name"].to_dict()
     session = _session(year, event, kind, cache_dir)
     return session.results.set_index("Abbreviation")["TeamName"].to_dict()

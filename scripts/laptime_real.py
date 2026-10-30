@@ -78,7 +78,7 @@ def main():
     for ev in args.events:
         try:
             frames.append(analyse_event(args.year, ev, car))
-        except DataNotLoadedError as err:
+        except (DataNotLoadedError, LookupError) as err:
             print(f"SKIPPED {ev}: timing data could not be loaded ({err})")
             not_loaded.append({"event": ev, "reason": str(err)})
     pd.DataFrame(not_loaded, columns=["event", "reason"]).to_csv(out / "not_loaded.csv", index=False)

@@ -1,0 +1,47 @@
+Monaco Grand Prix: 960 laps analysed
+Barcelona Grand Prix: 633 laps analysed
+British Grand Prix: 18 laps analysed
+Hungarian Grand Prix: 0 laps analysed
+Dutch Grand Prix: 4 laps analysed
+Italian Grand Prix: 539 laps analysed
+Spanish Grand Prix: 636 laps analysed
+Azerbaijan Grand Prix: 582 laps analysed
+Bahrain Grand Prix: 510 laps analysed
+Singapore Grand Prix: 271 laps analysed
+United States Grand Prix: 700 laps analysed
+
+                   event       date  clean_laps  measurable_share  laps  failure_share clipping_share  t_loss_median_s  t_loss_q25_s  t_loss_q75_s  valid
+       Monaco Grand Prix 2026-06-07         960             0.976   937          0.000       0.003202             0.00         0.000         0.000   True
+    Barcelona Grand Prix 2026-06-14         633             0.831   526          0.000            0.0             0.00         0.000         0.000   True
+      British Grand Prix 2026-07-05          18             1.000    18          0.000       0.055556             0.00         0.000         0.000  False
+        Dutch Grand Prix 2026-08-23           4             0.750     3          0.000            0.0             0.00         0.000         0.000  False
+      Italian Grand Prix 2026-09-06         539             0.985   531          0.245       0.219451             0.00         0.000         0.000  False
+      Spanish Grand Prix 2026-09-13         636             0.978   622          0.006       0.886731             0.04         0.000         0.099   True
+   Azerbaijan Grand Prix 2026-09-26         582             1.000   582          0.000       0.001718             0.00         0.000         0.000   True
+      Bahrain Grand Prix 2026-10-04         510             0.975   497          0.000        0.10664             0.00         0.000         0.000   True
+    Singapore Grand Prix 2026-10-11         271             0.996   270          0.000            0.0             0.00         0.000         0.000   True
+United States Grand Prix 2026-10-25         700             0.981   687          0.003       0.913869             0.06         0.009         0.153   True
+
+Time lost to clipping relative to the race median, valid circuits only (s per lap; + = loses more):
+                 laps  vs_race_median_s
+team                                   
+Cadillac           87            -0.042
+Racing Bulls      130            -0.040
+McLaren           130            -0.034
+Williams          107            -0.031
+Mercedes          140            -0.017
+Haas F1 Team      110            -0.001
+Alpine            103             0.024
+Audi              128             0.028
+Red Bull Racing   110             0.041
+Ferrari           101             0.064
+Aston Martin       85             0.076
+
+Post-fix diagnostics against the L1-L3 criteria (not a test: L1-L3 were already tested and not held before these fixes):
+  misses    L1  valid circuits' median loss in 0.05-0.50 s: Monaco 0.000, Barcelona 0.000, Spanish 0.040, Azerbaijan 0.000, Bahrain 0.000, Singapore 0.000, United States 0.060
+  misses    L2  time loss vs power drop, Spearman >= 0.4: rho = -0.23 on 852 laps
+  meets     L3  median ambiguity range < 10%: median width 9.1%
+
+Not reported (needs >= 20 measured laps, >= 50% of clean laps measurable, <= 20% model failures): British (100% of 18 clean laps measurable, 0% failures), Dutch (75% of 4 clean laps measurable, 0% failures), Italian (99% of 539 clean laps measurable, 24% failures)
+
+Saved results/laptime_season/laptime_per_lap.csv, laptime_per_race.csv, laptime_team_vs_race.csv, laptime_per_race.png

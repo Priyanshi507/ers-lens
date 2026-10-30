@@ -1,0 +1,109 @@
+/Users/priyanshisharma/projects/ers-lens/src/erslens/openf1.py:188: PerformanceWarning: Adding/subtracting object-dtype array to TimedeltaArray not vectorized.
+  laps["end"] = (laps["start"] + dur).where(laps["lap_duration"].notna(), nxt)
+/Users/priyanshisharma/projects/ers-lens/src/erslens/openf1.py:188: PerformanceWarning: Adding/subtracting object-dtype array to TimedeltaArray not vectorized.
+  laps["end"] = (laps["start"] + dur).where(laps["lap_duration"].notna(), nxt)
+Request for URL https://raw.githubusercontent.com/theOehrly/f1schedule/master/schedule_2026.json failed; using cached response
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 540, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 638, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 1478, in getresponse
+    response.begin()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 343, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 312, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/retry.py", line 510, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/util/util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 540, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 638, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 1478, in getresponse
+    response.begin()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 343, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 312, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+urllib3.exceptions.ProtocolError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 311, in _resend
+    response = self._send_and_cache(request, actions, cached_response, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests_cache/session.py", line 279, in _send_and_cache
+    response = super().send(request, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/fastf1/req.py", line 112, in send
+    return super().send(request, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/priyanshisharma/projects/ers-lens/.venv/lib/python3.12/site-packages/requests/adapters.py", line 711, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+=== Australia ===
+OpenF1 lap table has 45 of 1003 laps; lap starts rebuilt from Jolpica lap times
+{'event': 'Australian Grand Prix', 'date': datetime.date(2026, 3, 8), 'straight_m': 1260, 'candidate_laps': 848, 'clean_laps': 148, 'drivers': 18, 'clip_share': 0.96, 'clip_s_mean': 4.74, 'clip_s_lo': 4.54, 'clip_s_hi': 4.92, 'clip_frac_mean': 0.33, 'drop_kmh_median': 16.0, 'period': 'before'}
+
+=== China ===
+{'event': 'Chinese Grand Prix', 'date': datetime.date(2026, 3, 15), 'straight_m': 1320, 'candidate_laps': 813, 'clean_laps': 258, 'drivers': 18, 'clip_share': 0.93, 'clip_s_mean': 5.6, 'clip_s_lo': 5.35, 'clip_s_hi': 5.83, 'clip_frac_mean': 0.37, 'drop_kmh_median': 14.0, 'period': 'before'}
+
+=== Japan ===
+{'event': 'Japanese Grand Prix', 'date': datetime.date(2026, 3, 29), 'straight_m': 730, 'candidate_laps': 930, 'clean_laps': 52, 'drivers': 14, 'clip_share': 0.85, 'clip_s_mean': 3.12, 'clip_s_lo': 2.71, 'clip_s_hi': 3.48, 'clip_frac_mean': 0.33, 'drop_kmh_median': 7.0, 'period': 'before'}
+
+=== Miami ===
+{'event': 'Miami Grand Prix', 'date': datetime.date(2026, 5, 3), 'straight_m': 1265, 'candidate_laps': 863, 'clean_laps': 496, 'drivers': 22, 'clip_share': 0.96, 'clip_s_mean': 6.02, 'clip_s_lo': 5.86, 'clip_s_hi': 6.18, 'clip_frac_mean': 0.42, 'drop_kmh_median': 15.0, 'period': 'after'}
+
+=== Canada ===
+{'event': 'Canadian Grand Prix', 'date': datetime.date(2026, 5, 24), 'straight_m': 1020, 'candidate_laps': 1055, 'clean_laps': 655, 'drivers': 21, 'clip_share': 0.98, 'clip_s_mean': 4.68, 'clip_s_lo': 4.58, 'clip_s_hi': 4.76, 'clip_frac_mean': 0.39, 'drop_kmh_median': 16.0, 'period': 'after'}
+
+=== Austria ===
+{'event': 'Austrian Grand Prix', 'date': datetime.date(2026, 6, 28), 'straight_m': 725, 'candidate_laps': 1181, 'clean_laps': 975, 'drivers': 22, 'clip_share': 0.82, 'clip_s_mean': 1.85, 'clip_s_lo': 1.79, 'clip_s_hi': 1.91, 'clip_frac_mean': 0.22, 'drop_kmh_median': 5.0, 'period': 'after'}
+
+=== Belgium ===
+{'event': 'Belgian Grand Prix', 'date': datetime.date(2026, 7, 19), 'straight_m': 1840, 'candidate_laps': 712, 'clean_laps': 284, 'drivers': 20, 'clip_share': 0.96, 'clip_s_mean': 7.01, 'clip_s_lo': 6.69, 'clip_s_hi': 7.35, 'clip_frac_mean': 0.34, 'drop_kmh_median': 12.0, 'period': 'after'}
+
+                event       date  straight_m  candidate_laps  clean_laps  drivers  clip_share  clip_s_mean  clip_s_lo  clip_s_hi  clip_frac_mean  drop_kmh_median period  used
+Australian Grand Prix 2026-03-08        1260             848         148       18        0.96         4.74       4.54       4.92            0.33             16.0 before  True
+   Chinese Grand Prix 2026-03-15        1320             813         258       18        0.93         5.60       5.35       5.83            0.37             14.0 before  True
+  Japanese Grand Prix 2026-03-29         730             930          52       14        0.85         3.12       2.71       3.48            0.33              7.0 before  True
+     Miami Grand Prix 2026-05-03        1265             863         496       22        0.96         6.02       5.86       6.18            0.42             15.0  after  True
+  Canadian Grand Prix 2026-05-24        1020            1055         655       21        0.98         4.68       4.58       4.76            0.39             16.0  after  True
+  Austrian Grand Prix 2026-06-28         725            1181         975       22        0.82         1.85       1.79       1.91            0.22              5.0  after  True
+   Belgian Grand Prix 2026-07-19        1840             712         284       20        0.96         7.01       6.69       7.35            0.34             12.0  after  True
+
+Share of longest straight spent clipping (race-level means): before 34.2% (3 events) vs after 34.2% (4 events); exact permutation one-sided p = 0.571
+
+Saved results/source_check/multi/R/race_summary.csv, multi_race.png, per-lap CSVs

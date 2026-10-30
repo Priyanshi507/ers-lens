@@ -965,3 +965,47 @@ was used. A race whose OpenF1 lap table holds less than 90% of the laps Jolpica 
 in not_loaded.csv and reported as not loaded. The probe of 2026-10-30 found complete OpenF1 lap
 tables for every new race from Monaco to Bahrain; Singapore and the United States were not
 reached by the probe and are checked by this rule when they run. E1-E3 are unchanged.
+
+## 2026-10-31: Season test results; E1 and E3 not held
+
+Run as logged (OpenF1, own lap tables; results/multi_season, results/laptime_season). All 11
+new races loaded. Australia was not loaded (incomplete OpenF1 lap table), as the rule says.
+
+| Race | Measured straight | Clean laps | Laps clipping >= 3 km/h | Share of straight clipping | Time lost per lap (median) |
+| --- | --- | --- | --- | --- | --- |
+| Monaco | 510 m | 960 | 4% | 1% | 0.00 s |
+| Barcelona | 415 m | 633 | 5% | 0% | 0.00 s |
+| Britain | 1535 m | 18 | (fewer than 20 clean laps) | | not reported |
+| Hungary | 405 m | 0 | (no clean laps) | | not run |
+| Netherlands | 675 m | 4 | (fewer than 20 clean laps) | | not reported |
+| Italy | 1240 m | 539 | 54% | 5% | not reported (24% model failures) |
+| Spain (Madrid) | 865 m | 636 | 92% | 19% | 0.04 s |
+| Azerbaijan | 680 m | 582 | 1% | 0% | 0.00 s |
+| Bahrain | 700 m | 510 | 23% | 6% | 0.00 s |
+| Singapore | 590 m | 271 | 0% | 0% | 0.00 s |
+| United States | 975 m | 700 | 93% | 32% | 0.06 s |
+
+- E1 (at least 80% of clean laps clip at every new race with at least 20 clean laps): NOT HELD.
+  It holds at 2 of 8 races (Spain 92%, United States 93%); the other six range from 0% to 54%.
+- E2 (no significant before/after difference with all races): held as written, p = 0.121
+  (35.0% of the straight before, 2 races; 16.7% after, 12 races). With FastF1's Australia added
+  as a sensitivity check, p = 0.062, still held. Not informative: every race with almost no
+  clipping is after Miami, so the comparison is confounded by circuit and says nothing about
+  the rule changes.
+- E3 (median time lost 0.05-0.50 s at every new race that passes the reporting rule): NOT
+  HELD. It holds at 1 of 7 (United States 0.06 s); Spain is 0.04 s and the other five 0.00 s.
+
+So finding 3 ("clipping is near-universal") and finding 6's range do not survive outside the
+original seven races. The seven were not a fair sample of the calendar.
+
+Exploratory, after the verdicts and not tested: the share of laps clipping rises with the
+length of the measured straight (Spearman 0.84 over the 14 races with at least 20 clean laps).
+Every measured straight of 850 m or more clips on at least 54% of laps (6 of 7 above 90%);
+below 850 m only Japan (85%) and Austria (82%) clip widely. Several circuits' measured straight
+is short because the method skips any straight that touches the start/finish line (lap distance
+resets there), which at Baku, Bahrain and Barcelona is the main straight. This is consistent
+with clipping being a long-straight effect, and with the method being unable to see it where
+the longest straight crosses the line; it is not shown. Britain, Hungary and the Netherlands
+lost almost every lap to the quality checks; the reasons were not examined.
+
+README findings 3, 6 and 7 are updated with these results.

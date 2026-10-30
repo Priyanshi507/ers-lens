@@ -51,7 +51,7 @@ power, so it returns the same answer for every car in finding 1. On 40 simulated
 with 4 Hz sampling, whole-km/h rounding and noise: correlation **0.992** with the true
 power drop, mean error **19.5 kW** on a 328 kW mean, no false detections.
 
-### 3. Seven races: clipping is near-universal, and the Miami rule changes did not change it
+### 3. Clipping is common on long straights, not on every circuit
 
 | Race (2026) | Period | Clean laps | Laps clipping ≥3 km/h | Clipping time | Median power drop |
 | --- | --- | --- | --- | --- | --- |
@@ -68,6 +68,31 @@ spent 34.7% of the straight losing speed at full throttle before the FIA's Miami
 34.1% after (exact permutation test with races as the unit, p = 0.51).
 
 ![Clipping before and after the Miami rule changes](docs/multi_race_R.png)
+
+**Out-of-sample test: the seven-race result does not hold across the calendar.** Why those
+seven races were chosen was never recorded, so the finding was re-tested on the 11 other 2026
+races held so far, with predictions logged before any of their data was loaded (research log,
+2026-10-30). Prediction E1 (at least 80% of clean laps clip at every new race) **failed**: it
+held at 2 of 8 measurable races.
+
+| Race (2026) | Measured straight | Clean laps | Laps clipping ≥3 km/h | Clipping time |
+| --- | --- | --- | --- | --- |
+| United States | 975 m | 700 | 93% | 3.5 s |
+| Spain (Madrid) | 865 m | 636 | 92% | 1.9 s |
+| Italy | 1240 m | 539 | 54% | 0.8 s |
+| Bahrain | 700 m | 510 | 23% | 0.5 s |
+| Barcelona | 415 m | 633 | 5% | 0.0 s |
+| Monaco | 510 m | 960 | 4% | 0.0 s |
+| Azerbaijan | 680 m | 582 | 1% | 0.0 s |
+| Singapore | 590 m | 271 | 0% | 0.0 s |
+
+Britain (18), the Netherlands (4) and Hungary (0 clean laps) had too few laps to measure.
+The before/after comparison with all races (E2) is still not significant (p = 0.12), but it
+is no longer informative: every race with almost no clipping comes after Miami, so circuit
+and rule period cannot be separated. Exploratory, not tested: clipping rises with the length
+of the measured straight (Spearman 0.84 over 14 races). At Baku, Bahrain and Barcelona the
+main straight crosses the start/finish line, which the method has to skip, so the straight
+it measures there is a short one.
 
 ### 4. Most 2026 public telemetry needs cleaning first
 
@@ -131,12 +156,18 @@ in Australia). The method refuses to report circuits it cannot measure honestly:
 (only 30% of laps have enough running before the speed peak), Spa (61% of laps
 physically implausible) and Japan (too few laps). Team comparisons are exploratory and not
 claimed.
+
+Out of sample (prediction E3, logged before the data was loaded), the 0.05–0.50 s range
+**failed**: of the seven new circuits that pass the reporting rule, only the United States
+(0.06 s) is inside it; Spain is 0.04 s and Monaco, Barcelona, Azerbaijan, Bahrain and Singapore
+0.00 s. Italy is not reported (24% of laps physically implausible). Time lost to clipping is
+material only where the measured straight is long.
 Reproduce: `python scripts/laptime_real.py --events Australia China Japan Miami Canada Austria Belgium`
 
 ### 7. Hypotheses tested
 
-None of the nine hypotheses below held as first tested. All were stated before their tests;
-seven were also recorded in the research log beforehand.
+Of the twelve hypotheses below, only one held as first tested, and it is not informative.
+All were stated before their tests; ten were also recorded in the research log beforehand.
 
 | Hypothesis | Result |
 | --- | --- |
@@ -149,6 +180,9 @@ seven were also recorded in the research log beforehand.
 | Median time lost per lap at every measurable circuit is 0.05–0.50 s | Not held on first run (Austria, Spa failed); after fixes, met at the four reported circuits |
 | Time lost tracks the electric power drop (Spearman ≥ 0.4) | Not held (0.30); the check ignored clipping duration, against which Spearman is 0.54–0.88 |
 | Parameter ambiguity in time lost is under 10% | Not held (about 17%) |
+| E1: at least 80% of clean laps clip at every new race (11 races, out of sample) | Not held (2 of 8 measurable races) |
+| E2: still no before/after Miami difference with all races | Held (p = 0.12), but confounded by circuit |
+| E3: median time lost 0.05–0.50 s at every new reported circuit | Not held (1 of 7) |
 
 ### 8. Strategy Lab: the lap-time-optimal strategy clips
 
@@ -248,7 +282,11 @@ python scripts/laptime_real.py --events Australia China Japan Miami Canada Austr
 ```
 
 Raw telemetry is Formula 1 timing data downloaded through [FastF1](https://github.com/theOehrly/Fast-F1)
-and is not redistributed here.
+and is not redistributed here. Since mid-October 2026 F1's timing archive requires an F1 TV
+subscription ([FastF1 #978](https://github.com/theOehrly/Fast-F1/issues/978)), so races not
+already cached are read from [OpenF1](https://openf1.org/)'s free recording of the same feed:
+set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on every check
+(`python scripts/compare_sources.py`, research log 2026-10-30).
 
 ## Limitations
 

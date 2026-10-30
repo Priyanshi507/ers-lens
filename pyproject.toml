@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "erslens"
 version = "0.1.0"
 description = "Estimating hidden 2026 F1 battery (ERS) state from public telemetry"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = ["numpy", "pandas", "pyarrow", "pyyaml", "matplotlib"]
 
 [project.optional-dependencies]

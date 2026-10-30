@@ -864,3 +864,34 @@ after every verdict was recorded:
   car, but 1.0-1.2 MJ at China, where the optimum still cuts power. At China the cut is a choice
   about where energy buys most time, not a shortage. Recorded as an observation only; not
   pre-registered and not tested.
+
+## 2026-10-30: Out-of-sample test on every other 2026 race, predictions recorded before any data
+
+Findings 3 and 6 used seven races (Australia, China, Japan, Miami, Canada, Austria, Belgium).
+The reason for that choice was never recorded, and four other races had already happened
+(Monaco, Barcelona, Britain, Hungary). A reader cannot rule out that the seven were picked
+because they worked. So both findings are now tested on every 2026 race not yet analysed:
+Monaco, Barcelona, Britain, Hungary, Netherlands, Italy, Spain (Madrid), Azerbaijan, Bahrain,
+Singapore and the United States (11 races, all held before this entry). No data from these
+races has been loaded for findings 3 or 6. Italy was used once before, for the held-out
+deployment test in finding 7; that test does not involve the quantities below.
+
+Everything is unchanged from the original runs: the detector, the quality checks, the
+longest-interior-straight rule, the reporting rule for time lost (at least 20 measured laps,
+at most 20% model failures, at least 50% of clean laps measurable), and the car parameters.
+Results go to new folders (results/multi_season, results/laptime_season); the committed
+seven-race results are not edited. Every race run is listed with its outcome, including
+races the method cannot measure.
+
+Predictions:
+E1. At every new race with at least 20 clean laps, at least 80% of clean laps clip by at
+    least 3 km/h (the seven-race range was 82-98%).
+E2. With all races, before against after the Miami changes, the normalised clipping share
+    still shows no significant difference (exact permutation test, races as the unit,
+    p >= 0.05), as in finding 3.
+E3. At every new race that passes the reporting rule, the median time lost per lap is
+    0.05-0.50 s (the range met by the four reported circuits).
+
+No prediction is made about how many new races pass the reporting rule. A race failing E1 or
+E3 is reported as a failure of the finding, not dropped. The README and the site are updated
+only after the results are logged here.

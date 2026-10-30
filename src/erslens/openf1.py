@@ -22,11 +22,16 @@ import numpy as np
 import pandas as pd
 
 BASE = "https://api.openf1.org/v1"
+JOLPICA = "https://api.jolpi.ca/ergast/f1"
+# When OpenF1's lap table holds less than this share of the laps Jolpica times, lap starts are
+# rebuilt from Jolpica's lap times (the 2026 Australian race: 45 of about 1,000 laps).
+MIN_LAP_COVERAGE = 0.9
 CACHE = Path("data/cache/openf1")
 # The free tier allows 30 requests a minute.
 MIN_INTERVAL_S = 2.1
 SESSION_NAME = {"R": "Race", "Q": "Qualifying"}
 _last_request = [0.0]
+KEY_EVENT: dict[int, tuple[int, pd.Timestamp]] = {}
 
 
 def _url(endpoint: str, filters: list[tuple[str, object]]) -> str:
@@ -35,11 +40,10 @@ def _url(endpoint: str, filters: list[tuple[str, object]]) -> str:
     return f"{BASE}/{endpoint}" + ("?" + "&".join(parts) if parts else "")
 
 
-def get(endpoint: str, *filters: tuple[str, object], cache_dir: Path = CACHE) -> list[dict]:
+def _fetch(url: str, path: Path, empty_on_404):
+    """GET with a cache file, the free-tier request spacing, and retries on throttling, server errors and timeouts."""
     import requests
 
-    url = _url(endpoint, list(filters))
-    path = Path(cache_dir) / f"{endpoint}_{hashlib.sha1(url.encode()).hexdigest()[:16]}.json"
     if path.exists():
         return json.loads(path.read_text())
     for attempt in range(6):
@@ -47,9 +51,13 @@ def get(endpoint: str, *filters: tuple[str, object], cache_dir: Path = CACHE) ->
         if wait > 0:
             time.sleep(wait)
         _last_request[0] = time.monotonic()
-        res = requests.get(url, timeout=120)
-        if res.status_code == 404:
-            data = []  # OpenF1 answers 404 when a filter matches nothing
+        try:
+            res = requests.get(url, timeout=120)
+        except requests.exceptions.RequestException:
+            time.sleep(15 * (attempt + 1))
+            continue
+        if res.status_code == 404 and empty_on_404 is not None:
+            data = empty_on_404
             break
         if res.status_code in (429, 500, 502, 503, 504):
             time.sleep(10 * (attempt + 1))
@@ -58,10 +66,85 @@ def get(endpoint: str, *filters: tuple[str, object], cache_dir: Path = CACHE) ->
         data = res.json()
         break
     else:
-        raise RuntimeError(f"OpenF1 kept failing for {url}")
+        raise RuntimeError(f"kept failing for {url}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data))
     return data
+
+
+def get(endpoint: str, *filters: tuple[str, object], cache_dir: Path = CACHE) -> list[dict]:
+    url = _url(endpoint, list(filters))
+    path = Path(cache_dir) / f"{endpoint}_{hashlib.sha1(url.encode()).hexdigest()[:16]}.json"
+    return _fetch(url, path, empty_on_404=[])  # OpenF1 answers 404 when a filter matches nothing
+
+
+def jolpica(path: str, cache_dir: Path = CACHE) -> dict:
+    url = f"{JOLPICA}/{path}"
+    return _fetch(url, Path(cache_dir) / f"jolpica_{hashlib.sha1(url.encode()).hexdigest()[:16]}.json", None)
+
+
+def lap_seconds(text: str) -> float:
+    m, _, sec = text.rpartition(":")
+    return round(int(m or 0) * 60 + float(sec), 3)
+
+
+def jolpica_laps(year: int, event_date: pd.Timestamp) -> pd.DataFrame:
+    """Every timed race lap from Jolpica: driver number, lap number, lap time, and whether the car pitted on it."""
+    races = jolpica(f"{year}.json")["MRData"]["RaceTable"]["Races"]
+    day = pd.Timestamp(event_date).date().isoformat()
+    match = [r for r in races if r["date"] == day]
+    if len(match) != 1:
+        raise LookupError(f"no Jolpica race on {day}")
+    rnd = match[0]["round"]
+    result = jolpica(f"{year}/{rnd}/results.json?limit=100")["MRData"]["RaceTable"]["Races"][0]["Results"]
+    number = {r["Driver"]["driverId"]: int(r["number"]) for r in result}
+    rows, offset = [], 0
+    while True:
+        page = jolpica(f"{year}/{rnd}/laps.json?limit=100&offset={offset}")["MRData"]
+        for lap in page["RaceTable"]["Races"][0]["Laps"] if page["RaceTable"]["Races"] else []:
+            rows += [{"driver_number": number[t["driverId"]], "lap_number": int(lap["number"]),
+                      "seconds": lap_seconds(t["time"])} for t in lap["Timings"]]
+        offset += int(page["limit"])
+        if offset >= int(page["total"]):
+            break
+    stops = jolpica(f"{year}/{rnd}/pitstops.json?limit=100")["MRData"]["RaceTable"]["Races"]
+    pits = {(number[p["driverId"]], int(p["lap"])) for p in (stops[0]["PitStops"] if stops else [])}
+    laps = pd.DataFrame(rows)
+    laps["pit_in"] = [(d, n) in pits for d, n in zip(laps["driver_number"], laps["lap_number"])]
+    return laps.sort_values(["driver_number", "lap_number"]).reset_index(drop=True)
+
+
+def laps_from_jolpica(jl: pd.DataFrame, lights_out: pd.Timestamp) -> pd.DataFrame:
+    """OpenF1-style lap rows rebuilt from lap times: each lap starts when the driver's previous laps add up to."""
+    out = []
+    for num, g in jl.groupby("driver_number"):
+        g = g.sort_values("lap_number")
+        consecutive = g["lap_number"].to_numpy() == np.arange(1, len(g) + 1)
+        if not consecutive.all():
+            g = g.iloc[:consecutive.argmin()]  # after a missing lap the cumulative start times are unknown
+        starts = lights_out + pd.to_timedelta(np.r_[0.0, np.cumsum(g["seconds"].to_numpy())[:-1]], unit="s")
+        pit_out = np.r_[True, g["pit_in"].to_numpy()[:-1]]
+        out.append(pd.DataFrame({"driver_number": num, "lap_number": g["lap_number"].to_numpy(),
+                                 "date_start": [t.isoformat() for t in starts], "lap_duration": g["seconds"].to_numpy(),
+                                 "is_pit_out_lap": pit_out, "pit_in": g["pit_in"].to_numpy()}))
+    return pd.concat(out, ignore_index=True)
+
+
+@lru_cache(maxsize=8)
+def race_laps(key: int) -> tuple[pd.DataFrame, str]:
+    """All laps of a session, and where their timing came from ("openf1" or "jolpica")."""
+    laps = pd.DataFrame(get("laps", ("session_key", key)))
+    if key not in KEY_EVENT:
+        return laps, "openf1"
+    year, event_date = KEY_EVENT[key]
+    jl = jolpica_laps(year, event_date)
+    if len(laps) >= MIN_LAP_COVERAGE * len(jl):
+        return laps, "openf1"
+    first = laps.loc[laps["lap_number"] == 1, "date_start"].dropna() if len(laps) else pd.Series(dtype=object)
+    if first.empty:
+        raise LookupError(f"OpenF1 has {len(laps)} of {len(jl)} laps and no lights-out time")
+    print(f"OpenF1 lap table has {len(laps)} of {len(jl)} laps; lap starts rebuilt from Jolpica lap times")
+    return laps_from_jolpica(jl, _utc(first).min()), "jolpica"
 
 
 def _utc(values) -> pd.Series:
@@ -86,7 +169,10 @@ def session_key(year: int, event_date: pd.Timestamp, kind: str) -> int:
                 if s["session_name"] == SESSION_NAME[kind]]
     if len(sessions) != 1:
         raise LookupError(f"{meeting['meeting_name']}: {len(sessions)} OpenF1 sessions named {SESSION_NAME[kind]}")
-    return int(sessions[0]["session_key"])
+    key = int(sessions[0]["session_key"])
+    if kind == "R":
+        KEY_EVENT[key] = (year, pd.Timestamp(event_date))
+    return key
 
 
 def drivers(key: int) -> pd.DataFrame:
@@ -147,12 +233,16 @@ def driver_race(key: int, acronym: str) -> pd.DataFrame:
     if row.empty:
         return pd.DataFrame()
     number = int(row["driver_number"].iloc[0])
-    laps = pd.DataFrame(get("laps", ("session_key", key), ("driver_number", number)))
+    table, timing = race_laps(key)
+    laps = table[table["driver_number"] == number] if len(table) else table
     car = _car(key, number)
     if laps.empty or car.empty:
         return pd.DataFrame()
-    pit_laps = {int(p["lap_number"]) for p in get("pit", ("session_key", key), ("driver_number", number))
-                if p.get("lap_number") is not None}
+    if timing == "jolpica":
+        pit_laps = set(laps.loc[laps["pit_in"], "lap_number"].astype(int))
+    else:
+        pit_laps = {int(p["lap_number"]) for p in get("pit", ("session_key", key), ("driver_number", number))
+                    if p.get("lap_number") is not None}
     stints = get("stints", ("session_key", key), ("driver_number", number))
     frames = []
     for lap in lap_windows(laps).itertuples(index=False):

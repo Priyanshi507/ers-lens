@@ -926,3 +926,19 @@ OpenF1 is used for the season test only if, at every one of the seven races:
 - share of measurable laps within 0.05, the same reporting decision, and, at reported races,
   median time lost within 0.02 s.
 If any check fails, the cause is found before OpenF1 data is used, and the failure is logged here.
+
+## 2026-10-30 (later): First source check ran on one race with broken lap data; fixed before re-running
+
+The first OpenF1 run of the source check analysed only Australia: the shell passed the seven
+race names as one argument, which FastF1 read as Australia. Australia gave 4 clean laps against
+FastF1's 227, so the check failed as it should. Cause: OpenF1's lap table for the 2026
+Australian race holds 45 of the race's laps (Jolpica times 1,003). Every other 2026 race has
+a complete OpenF1 lap table (Jolpica and OpenF1 counts within 1% from China to Bahrain), the
+pole lap is present in every OpenF1 qualifying table, and car data is complete, including
+Australia's (31,180 samples for one driver).
+
+Fix, made before any other OpenF1 result exists: when OpenF1's lap table holds less than 90%
+of the laps Jolpica times, lap starts are rebuilt from Jolpica's lap times (lights-out from
+OpenF1, then each driver's cumulative lap times; pit laps from Jolpica). This applies to
+Australia only. Timeouts from OpenF1 are now retried. The comparison rule recorded above is
+unchanged, and the source check is re-run on all seven races.

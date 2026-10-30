@@ -90,3 +90,33 @@ def test_unknown_source_is_rejected(monkeypatch):
         source()
     monkeypatch.delenv("ERSLENS_SOURCE")
     assert source() == "fastf1"
+
+
+def test_jolpica_lap_times_parse():
+    assert openf1.lap_seconds("1:23.046") == 83.046
+    assert openf1.lap_seconds("59.912") == 59.912
+
+
+def test_laps_rebuilt_from_jolpica_start_at_lights_out_and_add_up():
+    jl = pd.DataFrame({"driver_number": [1, 1, 1, 16, 16, 16], "lap_number": [1, 2, 3, 1, 2, 4],
+                       "seconds": [90.0, 80.0, 81.0, 91.0, 80.5, 80.0], "pit_in": [False, True, False] * 2})
+    out = openf1.laps_from_jolpica(jl, T0)
+    d1 = out[out.driver_number == 1]
+    assert list(pd.to_datetime(d1["date_start"])) == [T0, T0 + pd.Timedelta(90, unit="s"), T0 + pd.Timedelta(170, unit="s")]
+    assert list(d1["is_pit_out_lap"]) == [True, False, True]
+    # Lap 3 is missing for driver 16, so lap 4's start cannot be known and it is dropped.
+    assert list(out[out.driver_number == 16]["lap_number"]) == [1, 2]
+    w = openf1.lap_windows(d1)
+    assert (w["end"] - w["start"]).dt.total_seconds().tolist() == [90.0, 80.0, 81.0]
+
+
+def test_incomplete_openf1_laps_fall_back_to_jolpica(monkeypatch):
+    openf1.race_laps.cache_clear()
+    openf1.KEY_EVENT[777] = (2026, pd.Timestamp("2026-03-08"))
+    few = [{"driver_number": 1, "lap_number": 1, "date_start": T0.isoformat(), "lap_duration": None, "is_pit_out_lap": True}]
+    monkeypatch.setattr(openf1, "get", lambda *a, **k: few)
+    jl = pd.DataFrame({"driver_number": [1] * 10, "lap_number": range(1, 11), "seconds": [80.0] * 10, "pit_in": [False] * 10})
+    monkeypatch.setattr(openf1, "jolpica_laps", lambda year, date: jl)
+    laps, timing = openf1.race_laps(777)
+    assert timing == "jolpica" and len(laps) == 10
+    openf1.race_laps.cache_clear()

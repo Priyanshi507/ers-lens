@@ -1,0 +1,78 @@
+{
+ "device": {
+  "platform": "cpu",
+  "device": "cpu",
+  "n_devices": 1,
+  "jax": "0.11.2",
+  "python": "3.12.14",
+  "machine": "arm64",
+  "processor": "arm"
+ },
+ "car": "configs/car_2026_q_low.yaml",
+ "events": {
+  "Australia": {
+   "backward": {
+    "first_call_s": 71.073,
+    "median_s": 69.9078,
+    "runs_s": [
+     70.3809,
+     72.575,
+     69.9078,
+     69.1409,
+     64.7125
+    ],
+    "states_per_point": 4684032,
+    "track_points": 1039,
+    "value_checksum": 19143640.110976093
+   }
+  },
+  "China": {
+   "backward": {
+    "first_call_s": 66.499,
+    "median_s": 64.3845,
+    "runs_s": [
+     64.1925,
+     64.3845,
+     65.2164,
+     65.8103,
+     63.755
+    ],
+    "states_per_point": 4684032,
+    "track_points": 1080,
+    "value_checksum": 22559647.603688233
+   }
+  },
+  "Miami": {
+   "backward": {
+    "first_call_s": 62.83,
+    "median_s": 64.1583,
+    "runs_s": [
+     62.9464,
+     62.7858,
+     65.3538,
+     64.2808,
+     64.1583
+    ],
+    "states_per_point": 4684032,
+    "track_points": 1068,
+    "value_checksum": 21736795.109541483
+   }
+  },
+  "Canada": {
+   "backward": {
+    "first_call_s": 50.836,
+    "median_s": 51.6311,
+    "runs_s": [
+     50.8356,
+     50.7875,
+     52.1529,
+     51.6311,
+     52.0868
+    ],
+    "states_per_point": 4684032,
+    "track_points": 862,
+    "value_checksum": 17901112.413794987
+   }
+  }
+ }
+}

@@ -41,3 +41,12 @@ def test_float32_timing_really_runs_in_float32(tmp_path):
     path = tmp_path / "demo.npz"
     save_track(demo_circuit(), path)
     assert time_parts(str(path), "configs/car_2026_q_low.yaml", repeats=1, dtype="float32")["step_s"] > 0
+
+
+def test_charge_last_layout_gives_the_same_step(tmp_path):
+    from step_cost import same_result_across_layouts, time_parts
+
+    path = tmp_path / "demo.npz"
+    save_track(demo_circuit(), path)
+    assert same_result_across_layouts(str(path), "configs/car_2026_q_low.yaml") < 1e-9
+    assert time_parts(str(path), "configs/car_2026_q_low.yaml", repeats=1, layout="vus")["step_s"] > 0

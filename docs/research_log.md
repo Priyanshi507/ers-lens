@@ -1157,3 +1157,30 @@ float32 (step_cost.py --parts --dtype float32). If float64 throughput is the lim
 be many times faster on the T4, whose float32 rate is 32 times its float64 rate. These float32 runs
 are for timing only; no float32 result is used until a separate pre-registered test shows that
 float32 keeps the solver's lap times within 0.001 s of float64.
+
+### 2026-10-31: float32 against float64 on the T4, and a layout test
+
+step_cost.py --parts on the T4, float32 then float64 in the same session (Australia, median of 20):
+
+| Part | float64 | float32 | float32 speed-up |
+|---|---|---|---|
+| Transition | 7.71 ms | 1.26 ms | 6.1x |
+| Interpolation | 3.61 ms | 5.28 ms | 0.7x (slower) |
+| Whole step | 13.12 ms | 8.42 ms | 1.6x |
+
+- The transition is limited by float64 throughput: float32 runs it six times faster.
+- The interpolation is not limited by arithmetic: float32 does not speed it up. The same float64
+  interpolation measured 2.50 ms in an earlier session, so this part also varies by about 40%
+  between sessions; its float32 slowdown may be partly that.
+- So float32 alone would make the whole step only 1.6x faster, because the interpolation then
+  dominates. Precision is not the first thing to change.
+- In both precisions the whole step costs more than its parts together (13.1 against 11.3 ms;
+  8.4 against 6.5 ms).
+
+A likely reason the interpolation is slow: the solver's arrays are ordered (speed, charge, command),
+with the command last, so neighbouring threads on the GPU hold different commands, land on
+different speeds, and read table cells far apart in memory. Ordering them (speed, command, charge)
+instead puts neighbouring charges side by side, which read neighbouring cells. The result is the
+same: step_cost.py checks the two orders against each other on a value table that varies in both
+speed and charge, and on the demo circuit the largest difference is exactly 0. Prediction, written
+before the T4 run: with charge last the interpolation is faster on the T4, and so is the whole step.

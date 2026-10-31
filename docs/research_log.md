@@ -1247,3 +1247,22 @@ at 0.088 s per point. So both orders are timed again on the M4 in one sitting, a
 old, new (Australia and Canada, 3 repeats each). If the new order is slower in both rounds, the
 solver chooses the order by device: charge last on a GPU, command last on a CPU. The results are
 bit-for-bit the same either way, so this changes speed only.
+
+### 2026-10-31: A/B on the M4: the two orders run at the same speed
+
+Old (a34f1f8) and new code on the M4 in one sitting, alternating, backward pass median of 3:
+
+| Round | Australia old / new | Canada old / new |
+|---|---|---|
+| 1 | 27.85 / 27.91 s | 24.24 / 23.31 s |
+| 2 | 31.07 / 29.81 s | 26.36 / 23.41 s |
+
+The orders differ by less than the round-to-round spread, with the new one no slower in any pair.
+So the slow run above (cpu_m4_quiet_charge_last.json, about 0.06 s per point) was the M4's state
+at that time, not the order, and that file is not used for comparisons. The solver keeps one order
+on every device; no per-device choice is needed.
+
+With the same code on both, from the A/B rounds and the T4 run (t4_charge_last.json): Australia
+27.9-29.8 s on the M4 against 7.50 s on the T4, Canada 23.3-23.4 s against 6.17 s, so a free T4
+runs the solver's backward pass about 3.7-4.0x faster than the M4 at the two circuits timed both
+ways. China and Miami were not in the A/B and are not quoted.

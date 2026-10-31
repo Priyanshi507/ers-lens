@@ -1123,3 +1123,21 @@ the true arithmetic floor is above 1.79 ms by an unknown factor. The interpolati
 table at scattered addresses. To find which part the time goes to, step_cost.py --parts times the
 transition, the interpolation and the whole step as separate compiled functions on the T4. No change
 to the solver is made until that is known.
+
+### 2026-10-31: Where one step's time goes on the T4
+
+step_cost.py --parts on the T4 (Australia, each part compiled alone, median of 20):
+
+| Part | Time |
+|---|---|
+| Transition (the physics step for every speed x charge x command) | 8.13 ms |
+| Interpolation of the next point's values (4 gathers per pair) | 2.50 ms |
+| Whole step, compiled alone | 13.66 ms |
+| Whole step inside the solver's scan (benchmark) | 12.10 ms |
+
+The transition is the biggest part: about 60% of the step, and alone it moves only about 150 MB
+(0.5 ms at 320 GB/s), so its time is float64 arithmetic. The whole step costs more than its two
+parts together (13.7 against 10.6 ms), so fusing them makes the step slower, not faster; one
+possible reason is that the fused kernel recomputes the transition for each of the interpolation's
+four corners. step_cost.py --hlo counts the per-pair operations in the T4's compiled step, which
+shows directly whether work is repeated, before any change to the solver is designed.

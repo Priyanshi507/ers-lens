@@ -4,7 +4,8 @@ XLA's own cost analysis of one step (one track point: every speed x charge x com
 grid) gives the arithmetic and the memory traffic. Dividing by the device's peak rates gives the
 least time each could take; the measured time per step comes from a gpu_benchmark.py result.
 --parts also times the step's three parts on their own (transition, interpolation, whole step),
-to find which one the time goes to.
+to find which one the time goes to. --hlo counts, in the compiled step, the operations that run
+once per (state, command) pair, by kind, to show which ones the device repeats.
 
     python scripts/step_cost.py --bench results/gpu_benchmark/kaggle_gpu.json --parts   # on the GPU
 """
@@ -58,9 +59,28 @@ def step_cost(track_path: str, car_path: str) -> dict:
     ca = c.cost_analysis()
     ca = ca[0] if isinstance(ca, list) else ca
     hlo = c.as_text()
-    return {"pairs": int(nv * ns * nu), "flops": float(ca["flops"]),
+    return {"hlo": hlo, "pairs": int(nv * ns * nu), "flops": float(ca["flops"]),
             "bytes": float(ca["bytes accessed"]), "transcendentals": float(ca.get("transcendentals", 0.0)),
             "fusions": len(re.findall(r"^\s*\S+ = \S+ fusion\(", hlo, re.M)), "track_points": int(tr.n)}
+
+
+PER_PAIR_OPS = ("divide", "sqrt", "rsqrt", "power", "exponential", "maximum", "minimum", "clamp",
+                "select", "compare", "multiply", "add", "subtract", "negate", "gather", "convert")
+
+
+def per_pair_ops(hlo: str, pairs: int) -> dict:
+    """Instructions in the optimized HLO whose result has one element per (state, command) pair.
+    Inside a fused kernel each runs once per pair, so the counts say what each pair costs."""
+    counts = {}
+    for m in re.finditer(r"= ([a-z]\d+)\[([\d,]*)\]\{?[^ ]* ([a-z-]+)\(", hlo):
+        dims = [int(d) for d in m.group(2).split(",") if d]
+        n = 1
+        for d in dims:
+            n *= d
+        if n == pairs and m.group(3) in PER_PAIR_OPS:
+            key = f"{m.group(1)} {m.group(3)}"
+            counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items(), key=lambda kv: -kv[1]))
 
 
 def _median_s(f, *args, repeats: int) -> float:
@@ -94,6 +114,7 @@ def main():
     ap.add_argument("--event", default="Australia")
     ap.add_argument("--car", default="configs/car_2026_q_low.yaml")
     ap.add_argument("--parts", action="store_true", help="also time the step's parts on their own")
+    ap.add_argument("--hlo", help="write the compiled step here and count its per-pair operations")
     ap.add_argument("--out")
     args = ap.parse_args()
     import jax
@@ -102,6 +123,7 @@ def main():
     device = jax.devices()[0]
     kind = getattr(device, "device_kind", device.platform)
     cost = step_cost(f"results/tracks/{args.event}.npz", args.car)
+    hlo = cost.pop("hlo")
     measured = bench["events"][args.event]["backward"]["median_s"] / cost["track_points"]
     out = {"device": kind, "platform": device.platform, "event": args.event, **cost,
            "measured_s_per_step": measured}
@@ -118,6 +140,11 @@ def main():
         parts = time_parts(f"results/tracks/{args.event}.npz", args.car)
         out["parts"] = parts
         print("  alone: " + ", ".join(f"{k[:-2]} {v * 1e3:.2f} ms" for k, v in parts.items()))
+    if args.hlo:
+        Path(args.hlo).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.hlo).write_text(hlo)
+        out["per_pair_ops"] = per_pair_ops(hlo, cost["pairs"])
+        print("  per pair: " + ", ".join(f"{k} x{v}" for k, v in out["per_pair_ops"].items()))
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(json.dumps(out, indent=1))

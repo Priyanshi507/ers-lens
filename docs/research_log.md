@@ -1233,3 +1233,17 @@ The gain inside the solver (1.7-1.8x) is larger than in the single step timed al
 the solver's figure is used from here on. Against the quiet M4 run the T4 is now 3.9-4.9x faster,
 but that M4 run used the old order; the M4 is timed again with the new code before any T4-against-M4
 figure is quoted.
+
+### 2026-10-31: On the M4 the new order may be slower; an A/B run decides
+
+The M4 timed with the new (charge-last) code, set up as for the quiet run (cpu_m4_quiet_charge_last.json):
+Australia 69.9, China 64.4, Miami 64.2, Canada 51.6 s per backward pass, about 0.060-0.067 s per
+track point, against 0.028-0.035 s in the quiet run with the old order. Taken at face value the new
+order is about twice as slow on the M4. On the 2-core x86 cloud machine used for development the
+two orders took about the same time (demo circuit: 106 s old, 102 s new).
+
+This cannot yet be told apart from the M4 itself: its first run was slowed about 3x by other load,
+at 0.088 s per point. So both orders are timed again on the M4 in one sitting, alternating old, new,
+old, new (Australia and Canada, 3 repeats each). If the new order is slower in both rounds, the
+solver chooses the order by device: charge last on a GPU, command last on a CPU. The results are
+bit-for-bit the same either way, so this changes speed only.

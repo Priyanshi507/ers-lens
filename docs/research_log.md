@@ -1107,3 +1107,19 @@ What follows for the next steps, if the T4 numbers agree:
 - Beyond that the arithmetic itself has to get cheaper. The T4 does 32 times more float32 than
   float64 work. Whether float32 keeps lap times within 0.001 s of the float64 results is a separate
   question, to be pre-registered and tested before any float32 result is used.
+
+### 2026-10-31: The T4 compiles the step differently, so the correction above does not hold there
+
+step_cost.py on the Kaggle T4 (results/gpu_benchmark/step_cost_t4.json): the GPU compiler fuses one
+step into 3 kernels, not 11-12, and counts 0.455 GFLOP and 0.318 GB per step. At the T4's peak rates
+that is at least 1.79 ms of float64 arithmetic and 0.99 ms of memory traffic, against 12.10 ms
+measured: 15% and 8%. So on the T4 the step is not near either limit as XLA counts it, and the
+conclusion of the entry above (written from the CPU compile) is withdrawn for the GPU. The CPU
+counts do not carry over to the GPU; only counts from the device itself are used from here on.
+
+The gap is not yet explained. XLA counts a float64 division or square root as one operation, but a
+GPU computes each with a sequence of instructions, and the step has several divisions per pair, so
+the true arithmetic floor is above 1.79 ms by an unknown factor. The interpolation also reads its
+table at scattered addresses. To find which part the time goes to, step_cost.py --parts times the
+transition, the interpolation and the whole step as separate compiled functions on the T4. No change
+to the solver is made until that is known.

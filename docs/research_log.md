@@ -1211,3 +1211,25 @@ solver tests pass. step_cost.py keeps the old order as vsu, to measure against.
 Prediction L1, written before the run: on the T4, with both orders run in one Kaggle session (the
 old code from commit a34f1f8), the solver's backward pass with charge last is at least 1.3x faster
 at every one of the four circuits, and the full solve gives the same lap times to 0.001 s.
+
+### 2026-10-31: L1 held: the solver is 1.7x faster on the T4, results bit-for-bit the same
+
+Both orders in one Kaggle session on the T4 (old code at commit a34f1f8, new at 6b52c27; median
+of 3 backward passes; result in results/gpu_benchmark/t4_charge_last.json):
+
+| Circuit | Backward pass old / new | Speed-up | Full solve old / new | Speed-up | Lap time |
+|---|---|---|---|---|---|
+| Australia | 12.44 / 7.50 s | 1.7x | 96 / 58 s | 1.7x | 77.581 s both |
+| China | 13.34 / 7.66 s | 1.7x | 101 / 61 s | 1.7x | 91.876 s both |
+| Miami | 13.34 / 7.62 s | 1.8x | 100 / 60 s | 1.7x | 88.244 s both |
+| Canada | 10.77 / 6.17 s | 1.7x | 81 / 49 s | 1.7x | 72.528 s both |
+
+L1 (at least 1.3x at every circuit, same lap times to 0.001 s): held. More than that, at every
+circuit the backward pass's value checksum, the lap time, the DP's own prediction and the harvest
+price are bit-for-bit equal to the first T4 run (kaggle_gpu.json), so the change is a pure speed-up.
+The old code timed in this session matches the first T4 session to within 1%.
+
+The gain inside the solver (1.7-1.8x) is larger than in the single step timed alone (1.42x); only
+the solver's figure is used from here on. Against the quiet M4 run the T4 is now 3.9-4.9x faster,
+but that M4 run used the old order; the M4 is timed again with the new code before any T4-against-M4
+figure is quoted.

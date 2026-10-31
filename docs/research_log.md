@@ -1037,3 +1037,20 @@ G1. On the GPU, the fine-grid backward pass is at least 10 times faster than on 
 G2. A complete solve, compilation included, is at least 3 times faster on the GPU at every
     circuit (compilation and the many small host-side steps dilute the gain).
 Whatever the numbers, they are reported, and step 2 (batching with vmap) is planned from them.
+
+### 2026-10-31: CPU run on the M4, before any GPU timing
+
+The track check passed. All four CPU lap times reproduce results/strategy_q_low/runs.csv to 0.001 s
+(Australia 77.581, China 91.876, Miami 88.244, Canada 72.528 s), so the saved tracks are the ones
+every Strategy Lab result used.
+
+The backward-pass times are not consistent with each other, though. The grid is the same at every
+circuit (grid_with depends only on the car), so the cost should scale with the number of track
+points. Australia, China and Miami take 0.088-0.089 s per point; Canada takes 0.028 s per point, and
+Australia's first call (0.065 s per point) was faster than its later runs. The likely cause is the
+machine, not the solver: the M4 MacBook Air has no fan and slows down when hot, and other work on the
+laptop competes for it. So cpu_m4.json is kept as recorded, and a second CPU run is added before any
+GPU number is seen: backward pass only (--skip-solve), 5 repeats, on mains power, Low Power Mode off,
+nothing else open, saved as cpu_m4_quiet.json. G1 is judged against both CPU files and both results
+are reported; if they disagree on whether G1 held, that is stated. G2 uses cpu_m4.json, the only run
+with full solves.

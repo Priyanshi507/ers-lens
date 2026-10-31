@@ -1141,3 +1141,19 @@ parts together (13.7 against 10.6 ms), so fusing them makes the step slower, not
 possible reason is that the fused kernel recomputes the transition for each of the interpolation's
 four corners. step_cost.py --hlo counts the per-pair operations in the T4's compiled step, which
 shows directly whether work is repeated, before any change to the solver is designed.
+
+### 2026-10-31: The T4's compiled step repeats nothing; next, float64 against float32 timing
+
+step_cost.py --hlo on the T4: per (state, command) pair the compiled step has 1 division, 1 square
+root, 4 gathers, and about 70 other float64 operations (20 multiplications, 13 additions,
+7 subtractions, 10 minimums, 12 selects, ...). That is the same single division and square root as
+the CPU compile, so no part of the physics is repeated in the compiled program, and the guess in the
+entry above (the fused kernel recomputing the transition for each interpolation corner) is not
+supported at this level. Code generation below the compiled program can still repeat work; this
+count cannot see that.
+
+Before any rewrite, one more measurement decides what limits the transition: the same parts timed in
+float32 (step_cost.py --parts --dtype float32). If float64 throughput is the limit, float32 should
+be many times faster on the T4, whose float32 rate is 32 times its float64 rate. These float32 runs
+are for timing only; no float32 result is used until a separate pre-registered test shows that
+float32 keeps the solver's lap times within 0.001 s of float64.

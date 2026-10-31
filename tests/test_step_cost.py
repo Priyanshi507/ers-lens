@@ -33,3 +33,11 @@ def test_per_pair_operations_are_counted():
   %d = f64[24]{0} sqrt(%z)
   %e = s32[24]{0} convert(%z)"""
     assert per_pair_ops(hlo, 24) == {"f64 divide": 2, "f64 sqrt": 1, "s32 convert": 1}
+
+
+def test_float32_timing_really_runs_in_float32(tmp_path):
+    from step_cost import time_parts
+
+    path = tmp_path / "demo.npz"
+    save_track(demo_circuit(), path)
+    assert time_parts(str(path), "configs/car_2026_q_low.yaml", repeats=1, dtype="float32")["step_s"] > 0

@@ -10,6 +10,7 @@ once per (state, command) pair, by kind, to show which ones the device repeats.
     python scripts/step_cost.py --bench results/gpu_benchmark/kaggle_gpu.json --parts   # on the GPU
 """
 import argparse
+import dataclasses
 import json
 import re
 import statistics
@@ -20,7 +21,8 @@ from pathlib import Path
 PEAKS = {"Tesla T4": (254.4e9, 320e9), "Tesla P100-PCIE-16GB": (4.7e12, 732e9)}
 
 
-def _setup(track_path: str, car_path: str):
+def _setup(track_path: str, car_path: str, dtype: str = "float64"):
+    import jax
     import jax.numpy as jnp
     import numpy as np
 
@@ -35,10 +37,13 @@ def _setup(track_path: str, car_path: str):
     st = static_track(tr, rc)
     p, mass = params_of(rc), rc.mass_kg + rc.fuel_kg
     unlimited = rc.with_(harvest_per_lap_j=np.inf)
-    V, S, U = (jnp.asarray(a) for a in (g.v_ms, g.soc_j, g.cmd_w))
+    V, S, U = (jnp.asarray(a, dtype=dtype) for a in (g.v_ms, g.soc_j, g.cmd_w))
+    p = jax.tree.map(lambda a: a.astype(dtype), p)
+    mass, ds = jnp.asarray(mass, dtype=dtype), jnp.asarray(st.ds, dtype=dtype)
+    st = dataclasses.replace(st, env=st.env.astype(dtype))
 
     def transition(target, straight):
-        return _transition(p, unlimited, st.ds, mass, V, S, U, target, straight)
+        return _transition(p, unlimited, ds, mass, V, S, U, target, straight)
 
     def interp(value_next, v_n, s_n):
         return _interp(value_next, g, v_n, s_n)
@@ -47,7 +52,7 @@ def _setup(track_path: str, car_path: str):
         v_n, s_n, e_in, dt = transition(target, straight)
         return (dt + price * e_in + interp(value_next, v_n, s_n)).min(axis=-1)
 
-    value_next = jnp.zeros((len(V), len(S)))
+    value_next = jnp.zeros((len(V), len(S)), dtype=dtype)
     return tr, st, (len(V), len(S), len(U)), transition, interp, step, value_next
 
 
@@ -95,14 +100,17 @@ def _median_s(f, *args, repeats: int) -> float:
     return statistics.median(runs)
 
 
-def time_parts(track_path: str, car_path: str, repeats: int = 20) -> dict:
+def time_parts(track_path: str, car_path: str, repeats: int = 20, dtype: str = "float64") -> dict:
     """Each part as its own compiled function. Run alone, transition and interpolation also write
-    their outputs to memory, which the fused step need not do."""
+    their outputs to memory, which the fused step need not do. dtype float32 is for timing only:
+    whether float32 keeps the solver's results is a separate, pre-registered test."""
     import jax
 
-    _, st, _, transition, interp, step, value_next = _setup(track_path, car_path)
+    _, st, _, transition, interp, step, value_next = _setup(track_path, car_path, dtype)
     target, straight = st.env[0], st.straight[0]
     v_n, s_n, _, _ = jax.jit(transition)(target, straight)
+    if v_n.dtype != dtype:
+        raise TypeError(f"transition ran in {v_n.dtype}, not {dtype}")
     return {"transition_s": _median_s(jax.jit(transition), target, straight, repeats=repeats),
             "interp_s": _median_s(jax.jit(interp), value_next, v_n, s_n, repeats=repeats),
             "step_s": _median_s(jax.jit(step), value_next, target, straight, 0.0, repeats=repeats)}
@@ -114,6 +122,8 @@ def main():
     ap.add_argument("--event", default="Australia")
     ap.add_argument("--car", default="configs/car_2026_q_low.yaml")
     ap.add_argument("--parts", action="store_true", help="also time the step's parts on their own")
+    ap.add_argument("--dtype", default="float64", choices=["float64", "float32"],
+                    help="precision for --parts timing (float32: timing only)")
     ap.add_argument("--hlo", help="write the compiled step here and count its per-pair operations")
     ap.add_argument("--out")
     args = ap.parse_args()
@@ -137,9 +147,9 @@ def main():
               f"from memory traffic {out['floor_memory_s'] * 1e3:.2f} ms "
               f"({100 * out['floor_memory_s'] / measured:.0f}% of measured)")
     if args.parts:
-        parts = time_parts(f"results/tracks/{args.event}.npz", args.car)
-        out["parts"] = parts
-        print("  alone: " + ", ".join(f"{k[:-2]} {v * 1e3:.2f} ms" for k, v in parts.items()))
+        parts = time_parts(f"results/tracks/{args.event}.npz", args.car, dtype=args.dtype)
+        out["parts" if args.dtype == "float64" else f"parts_{args.dtype}"] = parts
+        print(f"  alone ({args.dtype}): " + ", ".join(f"{k[:-2]} {v * 1e3:.2f} ms" for k, v in parts.items()))
     if args.hlo:
         Path(args.hlo).parent.mkdir(parents=True, exist_ok=True)
         Path(args.hlo).write_text(hlo)

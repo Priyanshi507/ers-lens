@@ -1054,3 +1054,37 @@ GPU number is seen: backward pass only (--skip-solve), 5 repeats, on mains power
 nothing else open, saved as cpu_m4_quiet.json. G1 is judged against both CPU files and both results
 are reported; if they disagree on whether G1 held, that is stated. G2 uses cpu_m4.json, the only run
 with full solves.
+
+### 2026-10-31: GPU benchmark results and verdicts
+
+GPU: the free Kaggle notebook offered only a Tesla T4 (no P100), JAX 0.11.2, one of its two GPUs
+used. Lap times agree with the CPU to 0.001 s at all four circuits, so the speed-ups below count.
+
+| Circuit | Backward pass: M4 first run / M4 quiet run / T4 | Speed-up vs first / quiet | Full solve: M4 / T4 | Speed-up |
+|---|---|---|---|---|
+| Australia | 92.1 / 29.0 / 12.6 s | 7.3x / 2.3x | 682 / 97 s | 7.1x |
+| China | 95.0 / 34.9 / 13.4 s | 7.1x / 2.6x | 706 / 101 s | 7.0x |
+| Miami | 93.5 / 37.0 / 13.3 s | 7.0x / 2.8x | 558 / 100 s | 5.6x |
+| Canada | 24.3 / 29.8 / 10.8 s | 2.3x / 2.8x | 182 / 81 s | 2.3x |
+
+G1 (backward pass at least 10x faster at every circuit): not held, against both CPU runs.
+G2 (full solve at least 3x faster at every circuit): not held. It held at three circuits and failed
+at Canada (2.3x). The three passes are also measured against the first CPU run, which the quiet run
+shows was slowed about three times at those circuits, so they overstate the gain.
+
+What the numbers show:
+- On the T4 the backward pass costs the same per track point at every circuit (0.0121-0.0125 s) and
+  repeats agree to within 1%, so the cost scales with track length as the code says it should.
+- The first M4 run was slowed about 3x at Australia, China and Miami; the quiet run (0.028-0.035 s per
+  point) matches the first run's Canada (0.028 s). Even the quiet run slowed as it went on, as a
+  fanless laptop does when it warms up. Fair summary: a free T4 is 2.3-2.8x faster than the M4 for
+  this solver, unchanged and in float64.
+- A full solve takes about 7.5 backward passes' time on both machines, so the backward pass is the
+  cost to cut; compilation is a small part.
+
+Not yet known, and the next step: why the gain is small. One backward pass evaluates about 4.9e9
+(state, command) pairs at Australia in 12.6 s on the T4, which by a rough count of the arithmetic
+per pair is far below the T4's float64 peak. That suggests the time goes to memory traffic in the
+interpolation (map_coordinates gathers) or to the per-point loop (lax.scan launching small kernels
+1039 times), not to float64 arithmetic. This is a hypothesis to be checked with the JAX profiler
+before any change to the solver.

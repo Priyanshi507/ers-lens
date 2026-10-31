@@ -1088,3 +1088,22 @@ per pair is far below the T4's float64 peak. That suggests the time goes to memo
 interpolation (map_coordinates gathers) or to the per-point loop (lax.scan launching small kernels
 1039 times), not to float64 arithmetic. This is a hypothesis to be checked with the JAX profiler
 before any change to the solver.
+
+### 2026-10-31: Correction, and what one solver step costs
+
+The entry above guessed that the T4 runs this solver far below its float64 peak. That guess was
+wrong. XLA's own cost analysis of one backward-pass step (scripts/step_cost.py, compiled on a CPU)
+counts 0.83 GFLOP and 1.66-1.73 GB of memory traffic per step: 4.68 million (state, command) pairs,
+about 180 floating-point operations and 370 bytes each, in 11-12 fused kernels. At the T4's peak
+rates (254.4 GFLOP/s float64, 320 GB/s) that is at least 3.3 ms of arithmetic and 5.2-5.4 ms of
+memory traffic per step, against 12.1 ms measured. So the T4 is already within a small factor of
+both limits, and kernel launches (about 12 per step) are too few to matter. A GPU compile can fuse
+differently, so step_cost.py is run on the T4 as well before anything is concluded.
+
+What follows for the next steps, if the T4 numbers agree:
+- A hand-written kernel that fuses the transition, the interpolation and the minimum (so the
+  4.68 million intermediate values never go to memory) removes most of the memory traffic but
+  cannot beat the float64 arithmetic floor: at best about 3.5x on the T4.
+- Beyond that the arithmetic itself has to get cheaper. The T4 does 32 times more float32 than
+  float64 work. Whether float32 keeps lap times within 0.001 s of the float64 results is a separate
+  question, to be pre-registered and tested before any float32 result is used.

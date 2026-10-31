@@ -21,7 +21,7 @@ from pathlib import Path
 PEAKS = {"Tesla T4": (254.4e9, 320e9), "Tesla P100-PCIE-16GB": (4.7e12, 732e9)}
 
 
-def _setup(track_path: str, car_path: str, dtype: str = "float64", layout: str = "vsu"):
+def _setup(track_path: str, car_path: str, dtype: str = "float64", layout: str = "vus"):
     import jax
     import jax.numpy as jnp
     import numpy as np
@@ -42,15 +42,15 @@ def _setup(track_path: str, car_path: str, dtype: str = "float64", layout: str =
     mass, ds = jnp.asarray(mass, dtype=dtype), jnp.asarray(st.ds, dtype=dtype)
     st = dataclasses.replace(st, env=st.env.astype(dtype))
 
-    # vsu: arrays shaped (speed, charge, command), the solver's own order; vus puts charge last, so
-    # neighbouring elements in memory share a speed and a command and read neighbouring table cells.
+    # vus: arrays shaped (speed, command, charge), the solver's order since 2026-10-31; vsu is the
+    # earlier (speed, charge, command), kept to measure the change.
     cmd_axis = {"vsu": -1, "vus": 1}[layout]
 
     def transition(target, straight):
-        if layout == "vsu":
+        if layout == "vus":
             return _transition(p, unlimited, ds, mass, V, S, U, target, straight)
-        carry = (V[:, None, None], S[None, None, :], 0.0)
-        (v_n, s_n, e_in), (_, _, _, _, dt) = _step(p, unlimited, ds, mass, carry, (U[None, :, None], target, straight))
+        carry = (V[:, None, None], S[None, :, None], 0.0)
+        (v_n, s_n, e_in), (_, _, _, _, dt) = _step(p, unlimited, ds, mass, carry, (U[None, None, :], target, straight))
         return v_n, s_n, e_in, dt
 
     def interp(value_next, v_n, s_n):
@@ -123,7 +123,7 @@ def same_result_across_layouts(track_path: str, car_path: str) -> float:
 
 
 def time_parts(track_path: str, car_path: str, repeats: int = 20, dtype: str = "float64",
-               layout: str = "vsu") -> dict:
+               layout: str = "vus") -> dict:
     """Each part as its own compiled function. Run alone, transition and interpolation also write
     their outputs to memory, which the fused step need not do. dtype float32 is for timing only:
     whether float32 keeps the solver's results is a separate, pre-registered test."""
@@ -147,7 +147,8 @@ def main():
     ap.add_argument("--parts", action="store_true", help="also time the step's parts on their own")
     ap.add_argument("--dtype", default="float64", choices=["float64", "float32"],
                     help="precision for --parts timing (float32: timing only)")
-    ap.add_argument("--layout", default="vsu", choices=["vsu", "vus"], help="array order for --parts timing")
+    ap.add_argument("--layout", default="vus", choices=["vus", "vsu"],
+                    help="array order for --parts timing: vus (the solver's) or vsu (the earlier one)")
     ap.add_argument("--hlo", help="write the compiled step here and count its per-pair operations")
     ap.add_argument("--out")
     args = ap.parse_args()
@@ -173,11 +174,10 @@ def main():
     if args.parts:
         track = f"results/tracks/{args.event}.npz"
         parts = time_parts(track, args.car, dtype=args.dtype, layout=args.layout)
-        name = "parts" + ("" if args.dtype == "float64" else f"_{args.dtype}") + ("" if args.layout == "vsu" else f"_{args.layout}")
+        name = "parts" + ("" if args.dtype == "float64" else f"_{args.dtype}") + f"_{args.layout}"
         out[name] = parts
-        if args.layout != "vsu":
-            out[f"max_diff_{args.layout}"] = diff = same_result_across_layouts(track, args.car)
-            print(f"  {args.layout} against vsu, largest difference in the step result: {diff:.3g}")
+        out["max_diff_vus_vsu"] = diff = same_result_across_layouts(track, args.car)
+        print(f"  vus against vsu, largest difference in the step result: {diff:.3g}")
         print(f"  alone ({args.dtype}, {args.layout}): " + ", ".join(f"{k[:-2]} {v * 1e3:.2f} ms" for k, v in parts.items()))
     if args.hlo:
         Path(args.hlo).parent.mkdir(parents=True, exist_ok=True)

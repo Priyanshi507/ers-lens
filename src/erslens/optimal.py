@@ -74,8 +74,11 @@ def start_at_slowest_point(track: Track, car: CarParams) -> Track:
 
 
 def _transition(p, car, ds, mass, V, S, U, target, straight):
-    carry = (V[:, None, None], S[None, :, None], 0.0)
-    (v_next, s_next, e_in), (_, _, _, _, dt) = _step(p, car, ds, mass, carry, (U[None, None, :], target, straight))
+    """Every (speed, command, charge) at one track point, in that order: charge last puts
+    neighbouring charges side by side, which read neighbouring value-table cells (1.4x faster on a
+    T4 than command last, identical results; research log 2026-10-31)."""
+    carry = (V[:, None, None], S[None, None, :], 0.0)
+    (v_next, s_next, e_in), (_, _, _, _, dt) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight))
     return v_next, s_next, e_in, dt
 
 
@@ -103,7 +106,7 @@ class _Compiled:
             def back(value_next, x):
                 target, straight = x
                 v_n, s_n, e_in, dt = _transition(p, unlimited, st.ds, mass, V, S, U, target, straight)
-                value = (dt + price * e_in + _interp(value_next, grid, v_n, s_n)).min(axis=-1)
+                value = (dt + price * e_in + _interp(value_next, grid, v_n, s_n)).min(axis=1)
                 return value, value
 
             _, values = jax.lax.scan(back, v_end, (st.env, st.straight), reverse=True)

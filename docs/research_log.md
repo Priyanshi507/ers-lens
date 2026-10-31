@@ -1184,3 +1184,30 @@ instead puts neighbouring charges side by side, which read neighbouring cells. T
 same: step_cost.py checks the two orders against each other on a value table that varies in both
 speed and charge, and on the demo circuit the largest difference is exactly 0. Prediction, written
 before the T4 run: with charge last the interpolation is faster on the T4, and so is the whole step.
+
+### 2026-10-31: Charge-last order: the step is faster, the interpolation alone is not
+
+step_cost.py on the T4, both orders in the same session (Australia, float64, median of 20):
+
+| Part | Command last (vsu) | Charge last (vus) |
+|---|---|---|
+| Transition | 8.19 ms | 7.66 ms |
+| Interpolation, alone | 2.12 ms | 3.89 ms |
+| Whole step | 12.69 ms | 8.94 ms (1.42x faster) |
+
+The largest difference between the two orders' step results on the T4 is exactly 0.
+
+Against the prediction in the entry above: the whole step is faster with charge last (held), but
+the interpolation run alone is slower, not faster (not held). So the gain does not come the way
+the entry guessed. Run alone, the interpolation reads its coordinates from memory; inside the step
+the GPU compiler fuses it with the transition, and that fused kernel is what the order speeds up.
+Why the fused kernel gains is not yet shown.
+
+Because the results are identical, the solver now uses charge last (optimal._transition, minimum
+over axis 1). On the demo circuit (CPU) the backward pass's value checksum, the lap time, the DP's
+own prediction and the harvest price are all bit-for-bit the same as before the change, and the
+solver tests pass. step_cost.py keeps the old order as vsu, to measure against.
+
+Prediction L1, written before the run: on the T4, with both orders run in one Kaggle session (the
+old code from commit a34f1f8), the solver's backward pass with charge last is at least 1.3x faster
+at every one of the four circuits, and the full solve gives the same lap times to 0.001 s.

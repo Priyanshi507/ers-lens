@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 EVENTS = ("Australia", "China", "Miami", "Canada")
 CARS = {"original": "configs/car_2026.yaml", "low": "configs/car_2026_q_low.yaml",
@@ -45,10 +46,10 @@ def superclip_metrics(out: dict, ds: float, cap_w: float) -> dict:
             "peak_superclip_kw": float(sc.max() / 1e3)}
 
 
-def plan(cars: dict, events, quick: bool):
+def plan(cars: dict, events, quick: bool, caps=None):
     for e in events:
         for name in cars:
-            for cap in (SWEEP_W if name == "original" and not quick else BOTH_RULES_W):
+            for cap in caps or (SWEEP_W if name == "original" and not quick else BOTH_RULES_W):
                 yield e, name, cap
 
 
@@ -59,6 +60,10 @@ def main():
     ap.add_argument("--demo", action="store_true", help="synthetic demo circuit with the original car")
     ap.add_argument("--quick", action="store_true", help="coarse grid and the two rules only: smoke test")
     ap.add_argument("--out", default="results/fia_fix")
+    ap.add_argument("--caps", nargs="+", type=float, help="caps in kW for every car (default: sweep / both rules)")
+    ap.add_argument("--assume-recharge-mj", type=float,
+                    help="race recharge limit for events with no sourced rules in configs/rules_2026_races.yaml; "
+                         "each use is listed in <out>/assumptions.csv")
     ap.add_argument("--refine", action="store_true",
                     help="re-solve every solve that failed the convergence rule on the finer grids of "
                          "REFINE_LADDER, into refined.csv; runs.csv and the verdicts are not changed")
@@ -77,10 +82,23 @@ def main():
     (out_dir / "profiles").mkdir(parents=True, exist_ok=True)
     path = out_dir / "runs.csv"
 
+    assumed = {}
+
+    def rules_for(e, base):
+        if e == "demo":
+            return base
+        try:
+            return race_rules(base, e)
+        except KeyError:
+            if args.assume_recharge_mj is None:
+                raise
+            assumed[e] = args.assume_recharge_mj
+            return base.with_(harvest_per_lap_j=args.assume_recharge_mj * 1e6)
+
     def solve_row(e, name, cap, grid_kw):
         base = load_car_params(CARS[name] if e != "demo" else CARS["original"])
         track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
-        car = (base if e == "demo" else race_rules(base, e)).with_(superclip_max_w=cap)
+        car = rules_for(e, base).with_(superclip_max_w=cap)
         t = time.perf_counter()
         sol = solve_refined(track, car, **grid_kw)
         seconds = time.perf_counter() - t
@@ -118,7 +136,10 @@ def main():
         writer = csv.DictWriter(f, fieldnames=FIELDS)
         if new:
             writer.writeheader()
-        for e, name, cap in plan(cars, events, args.quick):
+        caps = [c * 1e3 for c in args.caps] if args.caps else None
+        for e in events:
+            rules_for(e, load_car_params(CARS["original"]))
+        for e, name, cap in plan(cars, events, args.quick, caps):
             if (e, name, cap / 1e3) in done:
                 continue
             r, sol, o = solve_row(e, name, cap, grid)
@@ -130,6 +151,9 @@ def main():
                                 **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt")})
             print(f"{e} {name} {cap / 1e3:.0f} kW: lap {r['lap_s']:.3f} s, superclip {r['superclip_s']:.2f} s "
                   f"(longest {r['longest_superclip_s']:.2f} s), {seconds:.0f} s", flush=True)
+    if assumed:
+        pd.DataFrame([{"event": e, "recharge_mj": v, "source": "assumed (--assume-recharge-mj)"}
+                      for e, v in assumed.items()]).to_csv(out_dir / "assumptions.csv", index=False)
     print(f"All results in {path}")
 
 

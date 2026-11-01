@@ -28,3 +28,17 @@ def test_failed_solves_count_against_the_predictions():
         rows += [run(f"e{i}", "c", 250.0, 80.0, 2.0, 3.0), run(f"e{i}", "c", 350.0, 79.9, 1.5, 3.5, ok)]
     v = verdicts(pd.DataFrame(rows))
     assert v["F1"] == (11, 12, False) and v["F2"] == (11, 12, True) and v["F3"] == (11, 12, True)
+
+
+def test_calendar_verdicts_count_failed_solves_against():
+    from fia_fix_verdicts import calendar_verdicts
+
+    rows, split = [], []
+    for i in range(10):
+        ok = i != 0
+        rows += [run(f"e{i}", "original", 250.0, 80.0, 2.0, 3.0), run(f"e{i}", "original", 350.0, 79.9, 1.5, 3.5, ok)]
+        split += [{"event": f"e{i}", "car": "original", "cap_kw": 250.0, "below_200_kmh_mj": 1.0, "longest_straight_mj": 0.5},
+                  {"event": f"e{i}", "car": "original", "cap_kw": 350.0, "below_200_kmh_mj": 1.2 if i < 8 else 0.9,
+                   "longest_straight_mj": 0.4}]
+    v = calendar_verdicts(pd.DataFrame(rows), pd.DataFrame(split))
+    assert v["C1"] == (9, 10, True) and v["C2"] == (7, 10, False) and v["C3"] == (9, 10, False)

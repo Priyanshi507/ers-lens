@@ -1439,3 +1439,21 @@ whole-straights run (Bahrain stays at 760 m, so Bahrain's short straight was not
 slightly different point. R1, R2 and R3 come out the same: 3 of 3 held, 3 of 10 not held, 0.80
 held. The defect was real (shown on the demo circuit) but affected no 2026 race. README finding 3
 updated with the whole-straights result.
+
+## 2026-11-01: Does the FIA-fix result hold on every circuit? Predictions C1-C3
+
+The same-circuit experiment used four circuits. Here it is repeated on all 17 circuits of 2026
+whose qualifying data loads, original car only, caps 250 and 350 kW (scripts/fia_fix.py --caps
+250 350, results/fia_fix_calendar). Reference tracks for the 13 new circuits are built from
+OpenF1 (export_tracks.py, which now keeps the four existing track files untouched). Race recharge
+limits are sourced for Australia, China, Miami and Canada only (configs/rules_2026_races.yaml);
+for the other 13 an assumed 8.5 MJ is used, the most common sourced race value, and every such
+event is listed in results/fia_fix_calendar/assumptions.csv. Check before the verdicts: the four
+original circuits must reproduce results/fia_fix to 0.001 s.
+
+Predictions, a pair counting only when both solves pass the convergence rule:
+C1. Super-clipping harvests more energy under 350 kW at 80% or more of the 17 circuits.
+C2. Super-clipping energy below 200 km/h is higher under 350 kW at 80% or more of them.
+C3. No circuit's optimal lap is slower by more than 0.02 s under 350 kW.
+No prediction for the longest straight; it is reported. Circuits with no long straight (Monaco,
+Singapore) are kept: the rule applies there too.

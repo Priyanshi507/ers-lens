@@ -19,8 +19,16 @@ def main():
     args = ap.parse_args()
     Path(args.out).mkdir(parents=True, exist_ok=True)
     for e in args.events:
-        track = reference_track(args.year, e)
-        save_track(track, Path(args.out) / f"{e}.npz")
+        path = Path(args.out) / f"{e}.npz"
+        if path.exists():
+            print(f"{e}: kept {path} (every result so far used it)")
+            continue
+        try:
+            track = reference_track(args.year, e)
+        except Exception as err:  # one event's missing data must not stop the others
+            print(f"SKIPPED {e}: {err}")
+            continue
+        save_track(track, path)
         print(f"{e}: {track.n} points, {track.distance_m[-1]:.0f} m")
 
 

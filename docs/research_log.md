@@ -1266,3 +1266,40 @@ With the same code on both, from the A/B rounds and the T4 run (t4_charge_last.j
 27.9-29.8 s on the M4 against 7.50 s on the T4, Canada 23.3-23.4 s against 6.17 s, so a free T4
 runs the solver's backward pass about 3.7-4.0x faster than the M4 at the two circuits timed both
 ways. China and Miami were not in the A/B and are not quoted.
+
+## 2026-11-01: Did the FIA's Miami fix change super-clipping? Same circuits, both rules
+
+Question (the SSAC27 paper's title): from the Miami Grand Prix the FIA raised the peak power a
+car may harvest while accelerating at full throttle (super-clipping) from 250 to 350 kW, aimed at
+shortening super-clipping (sources in configs/rules_2026_races.yaml). The real races cannot
+answer this on their own: each circuit ran under one rule, and the before/after comparison of
+finding 3 is confounded by circuit (E2, 2026-10-31). So the Strategy Lab solves each circuit under
+both caps with everything else equal: the event's race recharge limit, the same car, the same
+track. Any difference is the rule's, by construction.
+
+Design (scripts/fia_fix.py, results/fia_fix): Australia, China, Miami and Canada; the three cars
+(original, low and high calibrated ends); caps 250 and 350 kW; for the original car also 150, 200,
+300 and 450 kW, a dose-response sweep. 40 solves on the fine grid, run on the Kaggle T4. The
+simulator now also returns superclip, the part of harvest taken while accelerating at full
+throttle (tested: never above the cap or the total harvest, zero where the car is not
+accelerating); the DP and every earlier result are unchanged by it (all 116 tests pass).
+Measures per lap: lap time, energy harvested by super-clipping, total and longest continuous
+super-clipping time, and the share of super-clipping time spent at the cap.
+
+Seen before writing the predictions: one smoke test on the synthetic demo circuit with a coarse
+grid that did not converge (not a result): with 350 kW the longest super-clipping stretch was
+shorter (0.63 against 0.94 s) but super-clipping harvested more energy (2.42 against 1.87 MJ).
+
+Predictions. Only solves that pass the convergence rule (CONVERGED_S, 0.05 s) count; a pair with
+a failed solve counts against the prediction.
+F1. Raising the cap from 250 to 350 kW never makes the optimal lap slower by more than 0.02 s,
+    and makes it faster by less than 0.20 s, at all 12 (circuit, car) pairs.
+F2. The longest continuous super-clipping stretch is shorter under 350 kW at at least 10 of the
+    12 pairs (the effect the FIA intended).
+F3. Super-clipping harvests more energy per lap under 350 kW at at least 10 of the 12 pairs: when
+    full-throttle harvesting is allowed faster, the optimum moves harvesting there from braking
+    and part throttle.
+F4. Original car, caps 150 to 450 kW: super-clipping energy does not fall as the cap rises at any
+    of the four circuits (no step down larger than 0.05 MJ).
+No prediction is made about total super-clipping time. How these model results are compared with
+the real laps is pre-registered separately, before that comparison is run.

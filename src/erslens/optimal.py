@@ -78,7 +78,7 @@ def _transition(p, car, ds, mass, V, S, U, target, straight):
     neighbouring charges side by side, which read neighbouring value-table cells (1.4x faster on a
     T4 than command last, identical results; research log 2026-10-31)."""
     carry = (V[:, None, None], S[None, None, :], 0.0)
-    (v_next, s_next, e_in), (_, _, _, _, dt) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight))
+    (v_next, s_next, e_in), (_, _, _, _, dt, _) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight))
     return v_next, s_next, e_in, dt
 
 
@@ -118,7 +118,7 @@ class _Compiled:
             def fwd(state, x):
                 v, s = state
                 target, straight, value_next = x
-                (v_n, s_n, e_in), (_, _, _, _, dt) = _step(p, unlimited, st.ds, mass, (v, s, 0.0),
+                (v_n, s_n, e_in), (_, _, _, _, dt, _) = _step(p, unlimited, st.ds, mass, (v, s, 0.0),
                                                             (U, target, straight))
                 j = jnp.argmin(dt + price * e_in + _interp(value_next, grid, v_n, s_n))
                 return (v_n[j], s_n[j]), U[j]

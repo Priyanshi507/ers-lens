@@ -57,6 +57,13 @@ def test_superclip_cap_limits_only_full_throttle_harvesting():
     assert capped["harvest"][flat].max() <= 250e3 + 1e-6
 
 
+def test_superclip_output_is_the_capped_full_throttle_harvest():
+    out, flat = _replay(CarParams().with_(superclip_max_w=250e3), -350e3)
+    sc = out["superclip"]
+    assert np.all(sc >= 0.0) and np.all(sc <= out["harvest"] + 1e-9) and sc.max() <= 250e3 + 1e-6
+    assert sc[flat].max() > 0.0 and np.all(sc[~flat] == 0.0)
+
+
 def test_deploy_cap_limits_deployment():
     capped, _ = _replay(CarParams().with_(deploy_max_w=250e3), 350e3)
     assert 0 < capped["deploy"].max() <= 250e3 + 1e-6

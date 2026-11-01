@@ -50,7 +50,7 @@ def _setup(track_path: str, car_path: str, dtype: str = "float64", layout: str =
         if layout == "vus":
             return _transition(p, unlimited, ds, mass, V, S, U, target, straight)
         carry = (V[:, None, None], S[None, :, None], 0.0)
-        (v_n, s_n, e_in), (_, _, _, _, dt) = _step(p, unlimited, ds, mass, carry, (U[None, None, :], target, straight))
+        (v_n, s_n, e_in), (_, _, _, _, dt, _) = _step(p, unlimited, ds, mass, carry, (U[None, None, :], target, straight))
         return v_n, s_n, e_in, dt
 
     def interp(value_next, v_n, s_n):

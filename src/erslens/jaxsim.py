@@ -84,13 +84,15 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     soc_next = soc + e_in - deploy / ed * dt
     if hard_soc:
         soc_next = jnp.clip(soc_next, 0.0, car.es_capacity_j)
-    out = (v, soc, deploy, ice_h + brake_h, dt)
+    superclip = jnp.where(accel, ice_h, 0.0)
+    out = (v, soc, deploy, ice_h + brake_h, dt, superclip)
     return (v_next, soc_next, harvested + e_in), out
 
 
 def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_laps: int,
                   soc0_frac: float = 0.5, v0: float | None = None, hard_soc: bool = True):
-    """Returns per-lap outputs stacked as (n_laps, n_points): v, soc, deploy, harvest, dt."""
+    """Returns per-lap outputs stacked as (n_laps, n_points): v, soc, deploy, harvest, dt, and
+    superclip, the part of harvest taken while accelerating at full throttle."""
     v0 = jnp.minimum(st.env[-1], 80.0) if v0 is None else v0
 
     def lap(carry, lap_idx):
@@ -102,8 +104,8 @@ def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_
 
     _, outs = jax.lax.scan(lap, (jnp.asarray(v0, jnp.float64), soc0_frac * car.es_capacity_j),
                            jnp.arange(n_laps, dtype=jnp.float64))
-    v, soc, deploy, harvest, dt = outs
-    return {"v": v, "soc": soc, "deploy": deploy, "harvest": harvest, "dt": dt}
+    v, soc, deploy, harvest, dt, superclip = outs
+    return {"v": v, "soc": soc, "deploy": deploy, "harvest": harvest, "dt": dt, "superclip": superclip}
 
 
 def lap_times(out: dict) -> jnp.ndarray:

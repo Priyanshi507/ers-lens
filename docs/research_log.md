@@ -1371,3 +1371,35 @@ So in the model the fix shortens and delays super-clipping at the end of the lon
 part spectators see, while more energy is taken in short bursts at lower speed, where the extra
 100 kW can be used. docs/fia_fix_dose.png shows energy and time against the cap (original car);
 docs/fia_fix_straight.png shows Canada's longest straight under both caps.
+
+## 2026-11-01: Whole straights: re-cutting laps so no straight crosses the line
+
+Open question from the season test (2026-10-31): clipping tracked the measured length of the
+longest straight (Spearman 0.84), but that straight was found with avoid_boundary, which skips
+any straight touching the start/finish line because lap distance resets there. At circuits whose
+main straight crosses the line, the method measured a shorter straight, which alone could explain
+low clipping (for example Bahrain 700 m, Azerbaijan 680 m, Barcelona 415 m in the season test).
+
+Method (multi_race.py --rebase): each lap is re-cut at the slowest corner of the reference lap
+(boundary_offset), which no straight crosses. New lap k runs from that corner in lap k to the
+same corner in lap k+1, with distance and time carried across the line; it counts as a pit lap if
+either source lap was. The reference track is rolled to start at the same corner, and the longest
+straight is found as before. Detector, quality checks and thresholds are unchanged. Tested on the
+synthetic demo circuit, whose 1,100 m main straight starts at the line: without re-cutting the
+method finds 895 m, with it 1,095 m, and every re-cut lap clips as simulated.
+
+Run: the same 18 races as the season test, same data source (OpenF1), output to
+results/multi_rebased; the season-test results are not edited. Verdicts by
+scripts/rebase_compare.py.
+
+Predictions, before any re-cut real data is seen:
+R1. At every race whose re-cut longest straight is at least 200 m longer than the season test's,
+    with at least 20 clean laps in both runs, the share of clean laps clipping by 3 km/h or more
+    is higher than in the season test.
+R2. Among the 11 races new in the season test, with at least 20 clean laps after re-cutting, at
+    least half have 80% or more of clean laps clipping (E1 held at 2 of 8 before).
+R3. Over all races with at least 20 clean laps, Spearman's correlation between straight length
+    and clip share is 0.7 or more: straight length still explains clipping once straights are
+    measured whole.
+If R1 and R2 hold, finding 3's season verdict was partly a measurement artefact and the README is
+corrected; if not, the low clipping at those circuits is real.

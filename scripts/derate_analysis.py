@@ -46,6 +46,42 @@ def longest_flat_out_run(track: Track, avoid_boundary: bool = False) -> tuple[fl
     return float(track.distance_m[best[0]]), float(track.distance_m[best[1] - 1])
 
 
+def boundary_offset(track: Track) -> float:
+    """A lap boundary that no straight crosses: the slowest corner of the reference lap."""
+    corners = np.where(np.isfinite(track.v_limit_ms), track.v_limit_ms, np.inf)
+    return float(track.distance_m[int(np.argmin(corners))])
+
+
+def roll_track(track: Track, offset_m: float) -> Track:
+    """The reference lap re-started at offset_m, so distance 0 sits at that point."""
+    k = int(np.searchsorted(track.distance_m, offset_m))
+    roll = lambda a: None if a is None else np.roll(a, -k)
+    return Track(track.name, track.distance_m, roll(track.v_limit_ms), roll(track.straight_mode),
+                 roll(track.elevation_m))
+
+
+def rebase_laps(race: pd.DataFrame, offset_m: float) -> pd.DataFrame:
+    """Laps re-cut at offset_m instead of the start/finish line, so a straight crossing the line
+    is measured whole. New lap k runs from offset_m in lap k to offset_m in lap k+1; it is marked
+    as a pit lap if either source lap was."""
+    laps = dict(tuple(race.groupby("lap")))
+    out = []
+    for k, cur in laps.items():
+        nxt = laps.get(k + 1)
+        if nxt is None:
+            continue
+        a = cur[cur["distance_m"] >= offset_m]
+        b = nxt[nxt["distance_m"] < offset_m]
+        if a.empty or b.empty:
+            continue
+        lap_m, lap_s, t0 = cur["distance_m"].max(), cur["time_s"].max(), a["time_s"].iloc[0]
+        a = a.assign(distance_m=a["distance_m"] - offset_m, time_s=a["time_s"] - t0)
+        b = b.assign(distance_m=b["distance_m"] + lap_m - offset_m, time_s=b["time_s"] + lap_s - t0)
+        pit = bool(cur["pit_in"].any() or cur["pit_out"].any() or nxt["pit_in"].any() or nxt["pit_out"].any())
+        out.append(pd.concat([a, b]).assign(lap=k, pit_in=pit, pit_out=pit))
+    return pd.concat(out, ignore_index=True) if out else race.iloc[0:0]
+
+
 def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict | None, str]:
     """Return (metrics, "ok") or (None, reason the lap was rejected)."""
     win = lap[(lap["distance_m"] >= start_m) & (lap["distance_m"] <= end_m + 100)]

@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from derate_analysis import analyse_driver, longest_flat_out_run
+from derate_analysis import analyse_driver, boundary_offset, longest_flat_out_run, rebase_laps, roll_track
 
 CLIP_KMH = 3.0
 MIN_LAPS = 20  # races with fewer clean laps are reported but excluded from the comparison
@@ -62,16 +62,24 @@ def race_summary(laps: pd.DataFrame, candidates: int, straight_m: float) -> dict
     }
 
 
-def analyse_event(year: int, event: str, out: Path, session: str = "R") -> tuple[dict, pd.DataFrame]:
+def analyse_event(year: int, event: str, out: Path, session: str = "R",
+                  rebase: bool = False) -> tuple[dict, pd.DataFrame]:
+    """rebase re-cuts laps at the slowest corner, so a straight crossing the start/finish line is
+    measured whole instead of being skipped."""
     from erslens.ingest import event_info, load_driver_race, race_drivers, reference_track
 
     name, date = event_info(year, event)
     track = reference_track(year, event)
+    offset = boundary_offset(track) if rebase else 0.0
+    if rebase:
+        track = roll_track(track, offset)
     start_m, end_m = longest_flat_out_run(track, avoid_boundary=True)
     frames, candidates = [], 0
     pace_ref = "fastest" if session == "Q" else "median"
     for drv in race_drivers(year, event, kind=session):
         race = load_driver_race(year, event, drv, kind=session)
+        if rebase and not race.empty:
+            race = rebase_laps(race, offset)
         if race.empty:
             continue
         res = analyse_driver(race, start_m, end_m, pace_ref=pace_ref)
@@ -83,7 +91,7 @@ def analyse_event(year: int, event: str, out: Path, session: str = "R") -> tuple
     laps.insert(0, "event", name)
     laps.to_csv(out / f"{year}_{name.lower().replace(' ', '_')}_{session}_per_lap.csv", index=False)
     straight_m = end_m - start_m
-    row = {"event": name, "date": date.date(), "straight_m": round(straight_m),
+    row = {"event": name, "date": date.date(), "straight_m": round(straight_m), "boundary_m": round(offset),
            **(race_summary(laps, candidates, straight_m) if len(laps)
               else {"candidate_laps": candidates, "clean_laps": 0})}
     return row, laps
@@ -96,6 +104,8 @@ def main():
     p.add_argument("--change-event", default="Miami", help="first race under the new rules")
     p.add_argument("--session", choices=["R", "Q"], default="R", help="race or qualifying")
     p.add_argument("--out", default="results/multi")
+    p.add_argument("--rebase", action="store_true",
+                   help="re-cut laps at the slowest corner so a straight crossing the line is measured whole")
     args = p.parse_args()
 
     from erslens.ingest import event_info
@@ -110,7 +120,7 @@ def main():
     for ev in args.events:
         print(f"\n=== {ev} ===")
         try:
-            row, laps = analyse_event(args.year, ev, out, args.session)
+            row, laps = analyse_event(args.year, ev, out, args.session, args.rebase)
         except (DataNotLoadedError, LookupError) as err:
             # A download failure is not a result: record it and keep going, so one race cannot stop the run.
             print(f"SKIPPED {ev}: timing data could not be loaded ({err})")

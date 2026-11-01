@@ -289,3 +289,47 @@ def test_elevation_correction_removes_gravity_bias():
     corrected = electric_power_swing(lap, 0, 1e6, m, elevation=hill)
     assert level["swing_w"] > 30e3
     assert abs(corrected["swing_w"]) < 5e3
+
+
+def _observed_race(track, policy, n_laps=6, seed=1):
+    sim = simulate(track, CAR, policy, n_laps=n_laps, soc0_frac=0.5)
+    obs = sensor_model(sim, CAR, np.random.default_rng(seed))
+    obs["lap"] += 1
+    obs["distance_m"] -= (obs["lap"] - 1) * track.length_m
+    obs["time_s"] -= obs.groupby("lap")["time_s"].transform("min")
+    obs["pit_in"] = obs["pit_out"] = False
+    return obs
+
+
+def test_rebased_laps_measure_a_straight_that_crosses_the_line():
+    import sys
+    sys.path.insert(0, "scripts")
+    from derate_analysis import analyse_driver, boundary_offset, longest_flat_out_run, rebase_laps, roll_track
+    from erslens.policies import ClipEndOfStraight
+
+    # The demo circuit's longest straight (1,100 m) starts at the line, so it is skipped unless laps are re-cut.
+    start, end = longest_flat_out_run(TRACK, avoid_boundary=True)
+    assert end - start < 1000
+    offset = boundary_offset(TRACK)
+    rolled = roll_track(TRACK, offset)
+    r_start, r_end = longest_flat_out_run(rolled, avoid_boundary=True)
+    assert 1050 < r_end - r_start < 1150
+    race = _observed_race(TRACK, ClipEndOfStraight(clip_from=0.5, clip_w=350e3))
+    rebased = rebase_laps(race, offset)
+    assert sorted(rebased["lap"].unique()) == list(range(1, 6))
+    for _, lap in rebased.groupby("lap"):
+        assert np.all(np.diff(lap["distance_m"]) > 0) and np.all(np.diff(lap["time_s"]) >= 0)
+    res = analyse_driver(rebased, r_start, r_end)
+    assert len(res) >= 3 and (res["flat_out_drop_kmh"] >= 3).all()
+
+
+def test_rebased_lap_is_a_pit_lap_if_either_source_lap_was():
+    import sys
+    sys.path.insert(0, "scripts")
+    import pandas as pd
+    from derate_analysis import rebase_laps
+
+    rows = [{"lap": k, "distance_m": d, "time_s": d / 50, "pit_in": k == 2, "pit_out": False}
+            for k in (1, 2, 3) for d in range(0, 1000, 20)]
+    out = rebase_laps(pd.DataFrame(rows), 500.0)
+    assert out.groupby("lap")["pit_in"].first().to_dict() == {1: True, 2: True}

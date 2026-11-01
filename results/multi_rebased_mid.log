@@ -1,0 +1,105 @@
+req         WARNING 	DEFAULT CACHE ENABLED! (36.0 KB) /Users/priyanshisharma/Library/Caches/fastf1
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+events      WARNING 	Correcting user input 'United States Grand Prix' to 'United States Grand Prix'
+
+=== Australia ===
+SKIPPED Australia: timing data could not be loaded (OpenF1 lap table has 45 of the 1003 laps Jolpica times)
+
+=== China ===
+{'event': 'Chinese Grand Prix', 'date': datetime.date(2026, 3, 15), 'straight_m': 1320, 'boundary_m': 4740, 'skipped_straight_m': 0, 'candidate_laps': 774, 'clean_laps': 248, 'drivers': 17, 'clip_share': 0.94, 'clip_s_mean': 5.66, 'clip_s_lo': 5.44, 'clip_s_hi': 5.9, 'clip_frac_mean': 0.38, 'drop_kmh_median': 15.0, 'period': 'before'}
+
+=== Japan ===
+{'event': 'Japanese Grand Prix', 'date': datetime.date(2026, 3, 29), 'straight_m': 2030, 'boundary_m': 2860, 'skipped_straight_m': 0, 'candidate_laps': 873, 'clean_laps': 282, 'drivers': 21, 'clip_share': 0.96, 'clip_s_mean': 7.04, 'clip_s_lo': 6.8, 'clip_s_hi': 7.28, 'clip_frac_mean': 0.29, 'drop_kmh_median': 46.0, 'period': 'before'}
+
+=== Miami ===
+{'event': 'Miami Grand Prix', 'date': datetime.date(2026, 5, 3), 'straight_m': 1265, 'boundary_m': 4810, 'skipped_straight_m': 0, 'candidate_laps': 823, 'clean_laps': 480, 'drivers': 22, 'clip_share': 0.96, 'clip_s_mean': 6.02, 'clip_s_lo': 5.85, 'clip_s_hi': 6.18, 'clip_frac_mean': 0.42, 'drop_kmh_median': 15.0, 'period': 'after'}
+
+=== Canada ===
+{'event': 'Canadian Grand Prix', 'date': datetime.date(2026, 5, 24), 'straight_m': 1020, 'boundary_m': 2620, 'skipped_straight_m': 0, 'candidate_laps': 1006, 'clean_laps': 629, 'drivers': 21, 'clip_share': 0.98, 'clip_s_mean': 4.69, 'clip_s_lo': 4.6, 'clip_s_hi': 4.78, 'clip_frac_mean': 0.39, 'drop_kmh_median': 16.0, 'period': 'after'}
+
+=== Austria ===
+{'event': 'Austrian Grand Prix', 'date': datetime.date(2026, 6, 28), 'straight_m': 725, 'boundary_m': 1340, 'skipped_straight_m': 0, 'candidate_laps': 1121, 'clean_laps': 929, 'drivers': 21, 'clip_share': 0.83, 'clip_s_mean': 1.88, 'clip_s_lo': 1.82, 'clip_s_hi': 1.94, 'clip_frac_mean': 0.22, 'drop_kmh_median': 5.0, 'period': 'after'}
+
+=== Belgium ===
+{'event': 'Belgian Grand Prix', 'date': datetime.date(2026, 7, 19), 'straight_m': 1840, 'boundary_m': 6685, 'skipped_straight_m': 0, 'candidate_laps': 695, 'clean_laps': 280, 'drivers': 20, 'clip_share': 0.96, 'clip_s_mean': 7.04, 'clip_s_lo': 6.71, 'clip_s_hi': 7.41, 'clip_frac_mean': 0.34, 'drop_kmh_median': 12.0, 'period': 'after'}
+
+=== Monaco Grand Prix ===
+{'event': 'Monaco Grand Prix', 'date': datetime.date(2026, 6, 7), 'straight_m': 510, 'boundary_m': 1210, 'skipped_straight_m': 0, 'candidate_laps': 1149, 'clean_laps': 923, 'drivers': 21, 'clip_share': 0.04, 'clip_s_mean': 0.04, 'clip_s_lo': 0.03, 'clip_s_hi': 0.05, 'clip_frac_mean': 0.01, 'drop_kmh_median': 0.0, 'period': 'after'}
+
+=== Barcelona Grand Prix ===
+{'event': 'Barcelona Grand Prix', 'date': datetime.date(2026, 6, 14), 'straight_m': 1005, 'boundary_m': 2055, 'skipped_straight_m': 0, 'candidate_laps': 985, 'clean_laps': 718, 'drivers': 22, 'clip_share': 0.39, 'clip_s_mean': 0.76, 'clip_s_lo': 0.69, 'clip_s_hi': 0.83, 'clip_frac_mean': 0.07, 'drop_kmh_median': 1.0, 'period': 'after'}
+
+=== British Grand Prix ===
+{'event': 'British Grand Prix', 'date': datetime.date(2026, 7, 5), 'straight_m': 1535, 'boundary_m': 935, 'skipped_straight_m': 0, 'candidate_laps': 842, 'clean_laps': 18, 'drivers': 10, 'clip_share': 0.22, 'clip_s_mean': 0.28, 'clip_s_lo': 0.04, 'clip_s_hi': 0.62, 'clip_frac_mean': 0.02, 'drop_kmh_median': 1.0, 'period': 'after'}
+
+=== Hungarian Grand Prix ===
+{'event': 'Hungarian Grand Prix', 'date': datetime.date(2026, 7, 26), 'straight_m': 455, 'boundary_m': 575, 'skipped_straight_m': 0, 'candidate_laps': 1167, 'clean_laps': 71, 'drivers': 22, 'clip_share': 0.01, 'clip_s_mean': 0.02, 'clip_s_lo': 0.0, 'clip_s_hi': 0.07, 'clip_frac_mean': 0.0, 'drop_kmh_median': 0.0, 'period': 'after'}
+
+=== Dutch Grand Prix ===
+{'event': 'Dutch Grand Prix', 'date': datetime.date(2026, 8, 23), 'straight_m': 885, 'boundary_m': 3085, 'skipped_straight_m': 0, 'candidate_laps': 1066, 'clean_laps': 729, 'drivers': 20, 'clip_share': 0.67, 'clip_s_mean': 1.52, 'clip_s_lo': 1.44, 'clip_s_hi': 1.61, 'clip_frac_mean': 0.15, 'drop_kmh_median': 4.0, 'period': 'after'}
+
+=== Italian Grand Prix ===
+{'event': 'Italian Grand Prix', 'date': datetime.date(2026, 9, 6), 'straight_m': 1275, 'boundary_m': 860, 'skipped_straight_m': 0, 'candidate_laps': 872, 'clean_laps': 365, 'drivers': 20, 'clip_share': 0.72, 'clip_s_mean': 3.15, 'clip_s_lo': 2.85, 'clip_s_hi': 3.47, 'clip_frac_mean': 0.21, 'drop_kmh_median': 8.0, 'period': 'after'}
+
+=== Spanish Grand Prix ===
+{'event': 'Spanish Grand Prix', 'date': datetime.date(2026, 9, 13), 'straight_m': 865, 'boundary_m': 4655, 'skipped_straight_m': 0, 'candidate_laps': 966, 'clean_laps': 613, 'drivers': 22, 'clip_share': 0.92, 'clip_s_mean': 1.91, 'clip_s_lo': 1.84, 'clip_s_hi': 1.98, 'clip_frac_mean': 0.19, 'drop_kmh_median': 12.0, 'period': 'after'}
+
+=== Azerbaijan Grand Prix ===
+{'event': 'Azerbaijan Grand Prix', 'date': datetime.date(2026, 9, 26), 'straight_m': 1980, 'boundary_m': 2480, 'skipped_straight_m': 0, 'candidate_laps': 759, 'clean_laps': 247, 'drivers': 22, 'clip_share': 0.97, 'clip_s_mean': 9.21, 'clip_s_lo': 8.93, 'clip_s_hi': 9.48, 'clip_frac_mean': 0.42, 'drop_kmh_median': 13.0, 'period': 'after'}
+
+=== Bahrain Grand Prix ===
+{'event': 'Bahrain Grand Prix', 'date': datetime.date(2026, 10, 4), 'straight_m': 760, 'boundary_m': 630, 'skipped_straight_m': 0, 'candidate_laps': 629, 'clean_laps': 400, 'drivers': 22, 'clip_share': 0.4, 'clip_s_mean': 0.91, 'clip_s_lo': 0.79, 'clip_s_hi': 1.02, 'clip_frac_mean': 0.1, 'drop_kmh_median': 2.0, 'period': 'after'}
+
+=== Singapore Grand Prix ===
+{'event': 'Singapore Grand Prix', 'date': datetime.date(2026, 10, 11), 'straight_m': 590, 'boundary_m': 2975, 'skipped_straight_m': 0, 'candidate_laps': 1073, 'clean_laps': 421, 'drivers': 22, 'clip_share': 0.0, 'clip_s_mean': 0.0, 'clip_s_lo': 0.0, 'clip_s_hi': 0.0, 'clip_frac_mean': 0.0, 'drop_kmh_median': 0.0, 'period': 'after'}
+
+=== United States Grand Prix ===
+{'event': 'United States Grand Prix', 'date': datetime.date(2026, 10, 25), 'straight_m': 975, 'boundary_m': 2505, 'skipped_straight_m': 0, 'candidate_laps': 982, 'clean_laps': 683, 'drivers': 22, 'clip_share': 0.92, 'clip_s_mean': 3.46, 'clip_s_lo': 3.35, 'clip_s_hi': 3.55, 'clip_frac_mean': 0.31, 'drop_kmh_median': 8.0, 'period': 'after'}
+
+NOT LOADED (1): Australia
+
+                   event       date  straight_m  boundary_m  skipped_straight_m  candidate_laps  clean_laps  drivers  clip_share  clip_s_mean  clip_s_lo  clip_s_hi  clip_frac_mean  drop_kmh_median period  used
+      Chinese Grand Prix 2026-03-15        1320        4740                   0             774         248       17        0.94         5.66       5.44       5.90            0.38             15.0 before  True
+     Japanese Grand Prix 2026-03-29        2030        2860                   0             873         282       21        0.96         7.04       6.80       7.28            0.29             46.0 before  True
+        Miami Grand Prix 2026-05-03        1265        4810                   0             823         480       22        0.96         6.02       5.85       6.18            0.42             15.0  after  True
+     Canadian Grand Prix 2026-05-24        1020        2620                   0            1006         629       21        0.98         4.69       4.60       4.78            0.39             16.0  after  True
+       Monaco Grand Prix 2026-06-07         510        1210                   0            1149         923       21        0.04         0.04       0.03       0.05            0.01              0.0  after  True
+    Barcelona Grand Prix 2026-06-14        1005        2055                   0             985         718       22        0.39         0.76       0.69       0.83            0.07              1.0  after  True
+     Austrian Grand Prix 2026-06-28         725        1340                   0            1121         929       21        0.83         1.88       1.82       1.94            0.22              5.0  after  True
+      British Grand Prix 2026-07-05        1535         935                   0             842          18       10        0.22         0.28       0.04       0.62            0.02              1.0  after False
+      Belgian Grand Prix 2026-07-19        1840        6685                   0             695         280       20        0.96         7.04       6.71       7.41            0.34             12.0  after  True
+    Hungarian Grand Prix 2026-07-26         455         575                   0            1167          71       22        0.01         0.02       0.00       0.07            0.00              0.0  after  True
+        Dutch Grand Prix 2026-08-23         885        3085                   0            1066         729       20        0.67         1.52       1.44       1.61            0.15              4.0  after  True
+      Italian Grand Prix 2026-09-06        1275         860                   0             872         365       20        0.72         3.15       2.85       3.47            0.21              8.0  after  True
+      Spanish Grand Prix 2026-09-13         865        4655                   0             966         613       22        0.92         1.91       1.84       1.98            0.19             12.0  after  True
+   Azerbaijan Grand Prix 2026-09-26        1980        2480                   0             759         247       22        0.97         9.21       8.93       9.48            0.42             13.0  after  True
+      Bahrain Grand Prix 2026-10-04         760         630                   0             629         400       22        0.40         0.91       0.79       1.02            0.10              2.0  after  True
+    Singapore Grand Prix 2026-10-11         590        2975                   0            1073         421       22        0.00         0.00       0.00       0.00            0.00              0.0  after  True
+United States Grand Prix 2026-10-25         975        2505                   0             982         683       22        0.92         3.46       3.35       3.55            0.31              8.0  after  True
+
+Share of longest straight spent clipping (race-level means): before 33.2% (2 events) vs after 20.3% (14 events); exact permutation one-sided p = 0.150
+
+Saved results/multi_rebased_mid/R/race_summary.csv, multi_race.png, per-lap CSVs

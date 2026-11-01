@@ -1349,3 +1349,25 @@ larger source of energy, not a smaller one. This is the optimal strategy under a
 not a measurement of real cars; whether real laps moved the same way is the next, separately
 pre-registered, comparison. The two failed solves are re-run on finer grids (fia_fix.py --refine,
 into refined.csv) as a robustness check; the verdicts above stay as written.
+
+### 2026-11-01: Where the extra super-clipping happens (exploratory), and a correction
+
+Correction to the entry above: the low car's super-clipping stops at 310 kW under the 350 kW cap
+because that car's engine makes 310 kW at the wheels (ice_power_w, fitted to pole laps), and a car
+cannot harvest more than its engine supplies; it is not the MGU-K. The original and high cars
+reach 350 kW, the MGU-K limit, which is also why 450 kW gives the same result as 350 kW.
+
+Exploratory, after the verdicts, no prediction (scripts/fia_fix_figures.py,
+results/fia_fix/location_split.csv; the parts add up to each solve's total in runs.csv):
+- Under 350 kW, super-clipping energy taken below 200 km/h rises at all 12 pairs.
+- On each circuit's longest straight it falls at 9 of 12 (Australia original 0.51 -> 0.27 MJ,
+  Canada original 0.46 -> 0.38 MJ). For the original car the late super-clipping on that straight
+  starts later at all four circuits: Australia from 1,000 to 1,095 m into 1,260 m, China 1,250 to
+  1,260 m into 1,325 m, Miami 1,130 to 1,175 m into 1,265 m, Canada 815 to 850 m into 1,025 m.
+- This fits the MGU-K speed taper in the model: the MGU-K may harvest 350 kW only up to 290 km/h,
+  300 kW at 300 km/h and 250 kW from 310 km/h. At straight-end speeds the 250 kW super-clipping cap
+  hardly binds, so raising it frees harvesting mainly at corner exits and lower speeds.
+So in the model the fix shortens and delays super-clipping at the end of the long straights, the
+part spectators see, while more energy is taken in short bursts at lower speed, where the extra
+100 kW can be used. docs/fia_fix_dose.png shows energy and time against the cap (original car);
+docs/fia_fix_straight.png shows Canada's longest straight under both caps.

@@ -1403,3 +1403,28 @@ R3. Over all races with at least 20 clean laps, Spearman's correlation between s
     measured whole.
 If R1 and R2 hold, finding 3's season verdict was partly a measurement artefact and the README is
 corrected; if not, the low clipping at those circuits is real.
+
+### 2026-11-01: Whole-straights results; R1 and R3 held, R2 not held; a defect in the cut point
+
+Run as written (results/multi_rebased, 16 races measured; Australia not loaded, as in the
+season test; Britain has 18 clean laps and is reported but not used):
+- R1 (higher clip share wherever the straight is 200 m or more longer): HELD, 3 of 3. Japan
+  730 -> 2,030 m, 85% -> 96% of clean laps; Barcelona 415 -> 1,005 m, 5% -> 39%; Azerbaijan
+  680 -> 1,980 m, 1% -> 97%. The Netherlands also lengthened (675 -> 885 m, 50% -> 67%) but had
+  4 clean laps before, so it is outside R1.
+- R2 (80% or more of clean laps clip at half or more of the 11 new races): NOT HELD, 3 of 10
+  (Azerbaijan 97%, Spain 92%, United States 92%).
+- R3 (Spearman straight length against clip share 0.7 or more): HELD, 0.80 over 16 races.
+- Before against after Miami, normalised share: 33.2% (2 races) against 20.3% (14), permutation
+  p = 0.150; still confounded by circuit.
+So part of the season test's low clipping was a measurement artefact (Azerbaijan most of all),
+and part is real (Monaco, Singapore, Hungary).
+
+A defect found after these results, prompted by Bahrain's re-cut straight of only 760 m: the cut
+point was the first point of the slowest corner. When that corner ends the main straight, the
+straight still finishes at the lap boundary and is skipped, the very problem the re-cut was meant
+to remove. Shown on the demo circuit: its 900 m straight ends at the 80 km/h corner and touched
+the boundary. Fix: cut at the middle of the slowest corner (boundary_offset), and record for
+every race the length of any straight still touching the boundary (skipped_straight_m, which
+must be 0; tested). The verdicts above stay as written. The corrected run goes to
+results/multi_rebased_mid and is reported as a correction, with no new predictions.

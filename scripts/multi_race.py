@@ -10,7 +10,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from derate_analysis import analyse_driver, boundary_offset, longest_flat_out_run, rebase_laps, roll_track
+from derate_analysis import (analyse_driver, boundary_offset, longest_flat_out_run, rebase_laps, roll_track,
+                             straight_at_boundary_m)
 
 CLIP_KMH = 3.0
 MIN_LAPS = 20  # races with fewer clean laps are reported but excluded from the comparison
@@ -92,6 +93,7 @@ def analyse_event(year: int, event: str, out: Path, session: str = "R",
     laps.to_csv(out / f"{year}_{name.lower().replace(' ', '_')}_{session}_per_lap.csv", index=False)
     straight_m = end_m - start_m
     row = {"event": name, "date": date.date(), "straight_m": round(straight_m), "boundary_m": round(offset),
+           "skipped_straight_m": round(straight_at_boundary_m(track)),
            **(race_summary(laps, candidates, straight_m) if len(laps)
               else {"candidate_laps": candidates, "clean_laps": 0})}
     return row, laps

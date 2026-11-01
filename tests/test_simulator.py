@@ -314,6 +314,9 @@ def test_rebased_laps_measure_a_straight_that_crosses_the_line():
     rolled = roll_track(TRACK, offset)
     r_start, r_end = longest_flat_out_run(rolled, avoid_boundary=True)
     assert 1050 < r_end - r_start < 1150
+    # The slowest corner (80 km/h) ends the 900 m straight; cutting at its first point skipped it.
+    from derate_analysis import straight_at_boundary_m
+    assert straight_at_boundary_m(TRACK) > 1000 and straight_at_boundary_m(rolled) == 0.0
     race = _observed_race(TRACK, ClipEndOfStraight(clip_from=0.5, clip_w=350e3))
     rebased = rebase_laps(race, offset)
     assert sorted(rebased["lap"].unique()) == list(range(1, 6))

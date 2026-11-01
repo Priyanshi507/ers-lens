@@ -47,9 +47,28 @@ def longest_flat_out_run(track: Track, avoid_boundary: bool = False) -> tuple[fl
 
 
 def boundary_offset(track: Track) -> float:
-    """A lap boundary that no straight crosses: the slowest corner of the reference lap."""
-    corners = np.where(np.isfinite(track.v_limit_ms), track.v_limit_ms, np.inf)
-    return float(track.distance_m[int(np.argmin(corners))])
+    """A lap boundary that no straight touches: the middle of the slowest corner. Its first
+    point would leave the straight before that corner ending at the boundary."""
+    corner = np.isfinite(track.v_limit_ms)
+    k = int(np.argmin(np.where(corner, track.v_limit_ms, np.inf)))
+    a = b = k
+    while corner[(a - 1) % track.n] and (a - 1) % track.n != k:
+        a -= 1
+    while corner[(b + 1) % track.n] and (b + 1) % track.n != k:
+        b += 1
+    return float(track.distance_m[((a + b) // 2) % track.n])
+
+
+def straight_at_boundary_m(track: Track) -> float:
+    """Length of a full-throttle stretch touching the lap boundary (0 if none): the check that
+    no straight is skipped."""
+    flat = ~np.isfinite(track.v_limit_ms)
+    run = 0
+    if flat[0]:
+        run += int(np.argmin(flat)) if not flat.all() else track.n
+    if flat[-1]:
+        run += int(np.argmin(flat[::-1])) if not flat.all() else 0
+    return float(run * track.ds)
 
 
 def roll_track(track: Track, offset_m: float) -> Track:

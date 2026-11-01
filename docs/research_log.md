@@ -1303,3 +1303,49 @@ F4. Original car, caps 150 to 450 kW: super-clipping energy does not fall as the
     of the four circuits (no step down larger than 0.05 MJ).
 No prediction is made about total super-clipping time. How these model results are compared with
 the real laps is pre-registered separately, before that comparison is run.
+
+### 2026-11-01: FIA-fix results: more energy by super-clipping, in less time; F1 and F2 not held
+
+Run on the Kaggle T4 (results/fia_fix/runs.csv, profiles in results/fia_fix/profiles);
+verdicts computed by scripts/fia_fix_verdicts.py. 38 of 40 solves pass the convergence rule;
+the two that fail are Australia, low and high cars, at 350 kW (DP against replay 0.056 and
+0.085 s). By the rule written before the run, those two pairs count against every prediction.
+
+Per (circuit, car) pair, 250 kW against 350 kW:
+
+| Pair | Lap gain | Longest stretch | Super-clip energy | Super-clip time |
+|---|---|---|---|---|
+| Australia original | 0.141 s | 2.74 -> 1.93 s | 4.76 -> 5.27 MJ | 20.7 -> 18.3 s |
+| Australia low (failed) | 0.385 s | 4.38 -> 4.21 s | 6.20 -> 7.16 MJ | 26.2 -> 24.3 s |
+| Australia high (failed) | 0.473 s | 2.76 -> 3.06 s | 5.31 -> 6.73 MJ | 22.2 -> 21.4 s |
+| China original | 0.016 s | 0.57 -> 0.49 s | 1.47 -> 1.64 MJ | 7.2 -> 6.6 s |
+| China low | 0.121 s | 1.73 -> 1.30 s | 3.91 -> 4.51 MJ | 17.6 -> 17.0 s |
+| China high | 0.056 s | 0.88 -> 0.69 s | 1.93 -> 2.29 MJ | 8.9 -> 8.6 s |
+| Miami original | 0.037 s | 1.36 -> 1.83 s | 2.59 -> 3.31 MJ | 13.6 -> 13.5 s |
+| Miami low | 0.126 s | 2.41 -> 2.07 s | 4.76 -> 5.09 MJ | 21.2 -> 20.0 s |
+| Miami high | 0.042 s | 1.47 -> 1.83 s | 3.10 -> 3.53 MJ | 14.1 -> 12.7 s |
+| Canada original | 0.060 s | 2.36 -> 1.96 s | 2.89 -> 3.18 MJ | 12.9 -> 11.6 s |
+| Canada low | 0.141 s | 2.87 -> 2.23 s | 4.17 -> 4.49 MJ | 17.8 -> 16.2 s |
+| Canada high | 0.124 s | 2.31 -> 1.60 s | 3.28 -> 3.80 MJ | 13.9 -> 12.5 s |
+
+- F1 (never slower by more than 0.02 s, faster by less than 0.20 s, all 12): NOT HELD, 10 of 12.
+  No pair is slower. The two failures are the two failed solves, whose gains (0.39 and 0.47 s)
+  are also above 0.20 s; on the ten others the gain is 0.016-0.141 s per lap (median 0.09 s).
+- F2 (longest stretch shorter at 10 or more): NOT HELD, 8 of 12. It is longer under 350 kW for
+  Miami's original and high cars (1.36 -> 1.83 and 1.47 -> 1.83 s) and Australia's high car (a
+  failed solve); Australia's low car is shorter but its solve failed.
+- F3 (more super-clipping energy at 10 or more): HELD, 10 of 12; the two failed solves also show
+  more. On the ten, energy rises by 7-28% (median 13%).
+- F4 (original car, energy never steps down by more than 0.05 MJ from 150 to 450 kW): HELD at all
+  four circuits. The largest step down is China 300 -> 350 kW, 0.03 MJ. 450 kW gives the same
+  result as 350 kW everywhere: the original car's MGU-K cannot harvest more than 350 kW, so a cap
+  above that does nothing. For the low car (310 kW MGU-K) the real change is 250 -> 310 kW.
+
+Exploratory, no prediction was made: total super-clipping time falls under 350 kW at all 12
+pairs (by 0.5-11.5%, median 8.7% on the ten that converged), while its energy rises, so the mean
+super-clipping power rises from 191-236 kW to 246-304 kW. In the model, the fix does what the FIA
+wanted with time (less of it, in total and in most longest stretches) but makes super-clipping a
+larger source of energy, not a smaller one. This is the optimal strategy under a simplified car,
+not a measurement of real cars; whether real laps moved the same way is the next, separately
+pre-registered, comparison. The two failed solves are re-run on finer grids (fia_fix.py --refine,
+into refined.csv) as a robustness check; the verdicts above stay as written.

@@ -11,6 +11,7 @@ so an interrupted run continues. Tracks come from results/tracks (scripts/export
 
     python scripts/fia_fix.py                    # all cars, events and caps
     python scripts/fia_fix.py --demo --quick     # smoke test on the synthetic circuit
+    python scripts/fia_fix.py --refine           # re-solve failed solves on finer grids
 """
 import argparse
 import csv
@@ -58,12 +59,15 @@ def main():
     ap.add_argument("--demo", action="store_true", help="synthetic demo circuit with the original car")
     ap.add_argument("--quick", action="store_true", help="coarse grid and the two rules only: smoke test")
     ap.add_argument("--out", default="results/fia_fix")
+    ap.add_argument("--refine", action="store_true",
+                    help="re-solve every solve that failed the convergence rule on the finer grids of "
+                         "REFINE_LADDER, into refined.csv; runs.csv and the verdicts are not changed")
     args = ap.parse_args()
 
     from erslens.ingest import load_track
     from erslens.optimal import solve_refined
     from erslens.params import load_car_params
-    from erslens.strategy import CONVERGED_S, clip_metrics, race_rules
+    from erslens.strategy import CONVERGED_S, REFINE_LADDER, clip_metrics, race_rules
     from erslens.track import demo_circuit
 
     events = ["demo"] if args.demo else args.events
@@ -72,6 +76,39 @@ def main():
     out_dir = Path(args.out)
     (out_dir / "profiles").mkdir(parents=True, exist_ok=True)
     path = out_dir / "runs.csv"
+
+    def solve_row(e, name, cap, grid_kw):
+        base = load_car_params(CARS[name] if e != "demo" else CARS["original"])
+        track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
+        car = (base if e == "demo" else race_rules(base, e)).with_(superclip_max_w=cap)
+        t = time.perf_counter()
+        sol = solve_refined(track, car, **grid_kw)
+        seconds = time.perf_counter() - t
+        o = {k: np.asarray(v) for k, v in sol.out.items()}
+        r = {"event": e, "car": name, "cap_kw": cap / 1e3, "lap_s": sol.lap_time_sim_s,
+             "dp_pred_s": sol.lap_time_dp_s,
+             "converged": abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S,
+             "harvest_mj": sol.harvested_j / 1e6, **superclip_metrics(o, sol.track.ds, cap),
+             "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "seconds": round(seconds, 1)}
+        return r, sol, o
+
+    if args.refine:
+        failed = [r for r in csv.DictReader(open(path)) if r["converged"] != "True"]
+        with open(out_dir / "refined.csv", "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=FIELDS + ["dv", "n_soc"])
+            writer.writeheader()
+            for row in failed:
+                for dv, n_soc in REFINE_LADDER[1:]:
+                    r, _, _ = solve_row(row["event"], row["car"], float(row["cap_kw"]) * 1e3, {"dv": dv, "n_soc": n_soc})
+                    writer.writerow({**r, "dv": dv, "n_soc": n_soc})
+                    f.flush()
+                    print(f"{row['event']} {row['car']} {row['cap_kw']} kW on dv {dv}, {n_soc} levels: lap "
+                          f"{r['lap_s']:.3f} s, DP {r['dp_pred_s']:.3f} s, converged {r['converged']}", flush=True)
+                    if r["converged"]:
+                        break
+        print(f"All results in {out_dir / 'refined.csv'}")
+        return
+
     done = set()
     if path.exists():
         with open(path) as f:
@@ -84,19 +121,8 @@ def main():
         for e, name, cap in plan(cars, events, args.quick):
             if (e, name, cap / 1e3) in done:
                 continue
-            base = load_car_params(cars[name])
-            track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
-            rules = base if e == "demo" else race_rules(base, e)
-            car = rules.with_(superclip_max_w=cap)
-            t = time.perf_counter()
-            sol = solve_refined(track, car, **grid)
-            seconds = time.perf_counter() - t
-            o = {k: np.asarray(v) for k, v in sol.out.items()}
-            r = {"event": e, "car": name, "cap_kw": cap / 1e3, "lap_s": sol.lap_time_sim_s,
-                 "dp_pred_s": sol.lap_time_dp_s,
-                 "converged": abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S,
-                 "harvest_mj": sol.harvested_j / 1e6, **superclip_metrics(o, sol.track.ds, cap),
-                 "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "seconds": round(seconds, 1)}
+            r, sol, o = solve_row(e, name, cap, grid)
+            seconds = r["seconds"]
             writer.writerow(r)
             f.flush()
             np.savez_compressed(out_dir / "profiles" / f"{e}_{name}_{int(cap / 1e3)}.npz",

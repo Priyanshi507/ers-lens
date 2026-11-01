@@ -1428,3 +1428,14 @@ the boundary. Fix: cut at the middle of the slowest corner (boundary_offset), an
 every race the length of any straight still touching the boundary (skipped_straight_m, which
 must be 0; tested). The verdicts above stay as written. The corrected run goes to
 results/multi_rebased_mid and is reported as a correction, with no new predictions.
+
+### 2026-11-01: Corrected whole-straights run: no race changes
+
+results/multi_rebased_mid, cut at the middle of the slowest corner: skipped_straight_m is 0 at
+all 17 measured races, and every race's measured straight is the same length as in the first
+whole-straights run (Bahrain stays at 760 m, so Bahrain's short straight was not this defect;
+760 m is what its reference lap gives, and why was not checked). Clip shares differ by at most
+0.5 percentage points (Bahrain 40.0% -> 39.5%, Canada 97.9% -> 98.1%), from laps cut at a
+slightly different point. R1, R2 and R3 come out the same: 3 of 3 held, 3 of 10 not held, 0.80
+held. The defect was real (shown on the demo circuit) but affected no 2026 race. README finding 3
+updated with the whole-straights result.

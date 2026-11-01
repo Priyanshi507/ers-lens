@@ -89,10 +89,25 @@ held at 2 of 8 measurable races.
 Britain (18), the Netherlands (4) and Hungary (0 clean laps) had too few laps to measure.
 The before/after comparison with all races (E2) is still not significant (p = 0.12), but it
 is no longer informative: every race with almost no clipping comes after Miami, so circuit
-and rule period cannot be separated. Exploratory, not tested: clipping rises with the length
-of the measured straight (Spearman 0.84 over 14 races). At Baku, Bahrain and Barcelona the
-main straight crosses the start/finish line, which the method has to skip, so the straight
-it measures there is a short one.
+and rule period cannot be separated. Clipping rises with the length
+of the measured straight (Spearman 0.84 over 14 races).
+
+**Whole straights: part of that failure was the measurement.** The method skipped any straight
+crossing the start/finish line, because lap distance resets there. Re-cutting every lap at the
+middle of the slowest corner measures those straights whole (`multi_race.py --rebase`), with
+predictions logged first (research log, 2026-11-01):
+
+| Race (2026) | Straight measured before / now | Laps clipping ≥3 km/h before / now |
+| --- | --- | --- |
+| Azerbaijan | 680 / 1,980 m | 1% / 97% |
+| Japan | 730 / 2,030 m | 85% / 96% |
+| Barcelona | 415 / 1,005 m | 5% / 39% |
+
+Every straight that grew by 200 m or more shows more clipping (R1 held, 3 of 3), and straight
+length still explains clipping (Spearman 0.80 over 16 races, R3 held). But most of the other
+new races still clip on fewer than 80% of laps (R2 failed, 3 of 10): Monaco, Singapore and
+Hungary show almost none on straights measured whole. Clipping is real wherever a straight is
+long, and genuinely rare where none is.
 
 ### 4. Most 2026 public telemetry needs cleaning first
 

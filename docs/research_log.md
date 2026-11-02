@@ -1552,3 +1552,46 @@ Against the first T4 run (kaggle_gpu.json, command-last order, 2026-10-31), the 
 2026-10-31), the CUDA pass is 7.4-7.9x faster at Australia and Canada; those runs were in
 different sessions on different machines. One step now takes about 3.6 ms; why it is not faster
 (float64 throughput, occupancy, or memory) has not been profiled, so no reason is claimed.
+
+## 2026-11-02: Whole-race energy plans: which charge to carry from lap to lap; predictions W1-W3
+
+Question: over a full race under the 2026 rules, where should the battery's charge be spent? The
+Strategy Lab so far solves one lap that starts and ends at the same charge. A race can carry charge
+between laps: bank energy early and spend it late, or the reverse.
+
+Prior work: Duhr, Buccheri, Balerna, Cerofolini and Onder, "Minimum-Race-Time Energy Allocation
+Strategies for the Hybrid-Electric Formula 1 Power Unit", IEEE Transactions on Vehicular
+Technology 72(6), 2023, study race-level allocation for the 2014-2025 power unit with a team's
+model. What is new here is the 2026 rules (350 kW MGU-K with its speed taper, the per-lap recharge
+limit), the real 2026 circuits from public data, and open code on a free GPU.
+
+Design (src/erslens/race.py, scripts/race_plan.py):
+- Lap level. Nine charge levels, 0 to 4 MJ in 0.5 MJ steps. For every start level and end level,
+  the fastest lap that starts at one, ends at or above the other (within 5 kJ), and harvests no
+  more than the event's per-lap recharge limit. One backward pass of the DP aimed at an end level
+  serves all nine start levels; a ladder of twelve harvest prices finds the fastest lap within the
+  limit. Every lap kept is a simulator replay, so its time, harvest and end charge are measured.
+  A candidate is dropped when the DP's predicted cost and its replay differ by more than 0.05 s,
+  the Strategy Lab's convergence rule; the number dropped is saved.
+- Race level. A DP over laps picks the level to carry from each lap to the next, starting at 2 MJ,
+  with no rule on the finishing charge.
+- Baselines. "Neutral": every lap starts and ends at 2 MJ. "Simple": neutral until the last lap,
+  which spends down to whatever end level is fastest.
+
+Assumptions: the low car; fuel and mass held at their mid-race values on every lap; no safety car,
+traffic, pit-lap or Overtake mode; the race distance is the winner's laps from Jolpica. Circuits:
+Australia, China, Miami, Canada (the four with recorded recharge limits and converged solves).
+
+Seen before these predictions were written: a coarse trial on the demo circuit (0.25 km/h, 81
+charge points, five levels, four prices). Its neutral lap was 74.399 s against the single-lap
+solve's 74.361 s; the plan gained 0.63 s by spending 1 MJ early and the rest on the last lap; the
+lap time depends on the charge carried by only about 0.005 s, so when to spend is close to a tie.
+W2's range is informed by that trial.
+
+Check first: the neutral lap must be within 0.05 s of the single-lap solve that starts at 2 MJ.
+If it is not, the tables are not trusted and W1-W3 are not judged.
+
+Predictions (Kaggle T4, ERSLENS_DP_BACKEND=cuda):
+W1. At every circuit the best plan is within 0.1 s of the simple plan over the race.
+W2. At every circuit the best plan is 0.1 to 1.0 s faster than the neutral plan over the race.
+W3. At every circuit the best plan finishes the race at 0 MJ.

@@ -1457,3 +1457,35 @@ C2. Super-clipping energy below 200 km/h is higher under 350 kW at 80% or more o
 C3. No circuit's optimal lap is slower by more than 0.02 s under 350 kW.
 No prediction for the longest straight; it is reported. Circuits with no long straight (Monaco,
 Singapore) are kept: the rule applies there too.
+
+### 2026-11-02: Calendar results: C1 held, C2 and C3 not held; the low-speed shift is not general
+
+Run on the Kaggle T4 (results/fia_fix_calendar). Correction to the entry above: the run covers 18
+circuits, not 17; Australia's track was already saved, so it is included here although its
+OpenF1 race laps do not load. Check passed: the four original circuits reproduce results/fia_fix
+exactly (Australia 75.156 / 75.015 s, China 89.260 / 89.244 s, Miami 85.871 / 85.834 s, Canada
+70.408 / 70.348 s at 250 / 350 kW). 35 of 36 solves pass the convergence rule; the United States
+at 350 kW fails and counts against every prediction. 14 circuits use the assumed 8.5 MJ limit.
+
+- C1 (more super-clipping energy under 350 kW at 80% or more): HELD, 16 of 18. Monaco has no
+  super-clipping under either cap (0.000 MJ both); the United States failed to converge, though
+  it also shows more (2.72 -> 2.96 MJ).
+- C2 (more super-clipping energy below 200 km/h at 80% or more): NOT HELD, 12 of 18. It falls at
+  Hungary (0.70 -> 0.61 MJ), Spain (0.37 -> 0.33 MJ) and Bahrain (0.25 -> 0.24 MJ), is unchanged at
+  Singapore (0.26 MJ) and Monaco (0), and the United States failed.
+- C3 (no circuit slower by more than 0.02 s): NOT HELD, 17 of 18, only through the United States'
+  failed solve; its lap is also faster (by 0.011 s). Every converged circuit is faster or equal
+  under 350 kW, by 0.000 (Monaco) to 0.357 s (Italy).
+- Exploratory: super-clipping energy on the longest straight falls at 15 of 18.
+
+So across the calendar, in the model: the 350 kW cap raises super-clipping energy almost
+everywhere and takes it off the end of the longest straight almost everywhere, but where the
+extra energy is taken is not always below 200 km/h. The four-circuit statement "the extra
+100 kW is used mainly at corner exits and lower speeds" does not generalise and is not used.
+
+Refined re-runs of the two failed four-circuit solves (results/fia_fix/refined.csv): Australia
+low car at 350 kW converges on the finer charge grid (641 levels): lap 77.612 s against the DP's
+77.606 s; its gain over 250 kW becomes 0.278 s (from 0.385 s), still above F1's 0.20 s, with more
+super-clipping energy (6.36 against 6.20 MJ) and a shorter longest stretch (3.68 against 4.38 s).
+Australia high car at 350 kW fails on both finer grids (DP against replay 0.083 and 0.094 s). The
+F1-F4 verdicts stay as written.

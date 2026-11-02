@@ -1595,3 +1595,46 @@ Predictions (Kaggle T4, ERSLENS_DP_BACKEND=cuda):
 W1. At every circuit the best plan is within 0.1 s of the simple plan over the race.
 W2. At every circuit the best plan is 0.1 to 1.0 s faster than the neutral plan over the race.
 W3. At every circuit the best plan finishes the race at 0 MJ.
+
+### 2026-11-02: Whole-race results: the check did not hold (3 of 4), so W1-W3 are not judged
+
+Kaggle T4, CUDA backward pass, commit bc8ceef (results/race/). The tables were made twice in one
+session by the same commit, and the four neutral laps agree to the printed digit.
+
+| Circuit | Laps | Neutral lap / single-lap solve | Check (0.05 s) | Gain over neutral | Best minus simple |
+|---|---|---|---|---|---|
+| Australia | 58 | 77.890 / 77.890 s | ok | 0.425 s | 0.000 s |
+| China | 56 | 91.999 / 91.997 s | ok | 0.695 s | 0.000 s |
+| Miami | 57 | 88.321 / 88.244 s | FAILED (0.077 s) | 3.305 s | -2.742 s |
+| Canada | 68 | 72.593 / 72.577 s | ok (0.016 s) | 3.059 s | -2.560 s |
+
+By the rule written before the run, the tables are not trusted and W1-W3 are not judged.
+
+Looked at after the run, not predicted. The lap that starts and ends at the same charge, by level
+(s): 
+
+| Level (MJ) | 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 |
+|---|---|---|---|---|---|---|---|---|---|
+| Australia | 79.014 | 78.516 | 78.159 | 77.960 | 77.890 | 77.909 | 77.909 | 77.910 | 78.005 |
+| China | 92.742 | 92.347 | 92.098 | 92.009 | 91.999 | 92.012 | 92.108 | 92.263 | 92.448 |
+| Miami | 89.309 | 88.753 | 88.376 | 88.273 | 88.321 | 88.334 | 88.434 | 88.505 | 88.791 |
+| Canada | 74.022 | 73.397 | 72.938 | 72.713 | 72.593 | 72.554 | 72.554 | 72.554 | 72.669 |
+
+- Laps are slowest near an empty battery (about 1.0-1.1 s slower at 0 MJ than at 2 MJ) and slower
+  again near a full one; probably because the battery's limits bind during the lap, not checked.
+- At Australia and China the 2 MJ lap is the fastest, the plan holds 2 MJ and spends it on the
+  last lap, and that last-lap spend is the whole gain (0.4-0.7 s).
+- At Miami and Canada another level is faster than 2 MJ (Miami 1.5 MJ by 0.048 s; Canada 2.5-3.5
+  MJ by 0.039 s), and the plan moves there on lap 1 and stays for every lap but the first and
+  last: 0.048 s x 55 laps = 2.6 s and 0.039 s x 66 laps = 2.6 s, close to the "best minus simple"
+  differences (2.74 and 2.56 s). The large gains are the
+  choice of a steady level repeated every lap, not a way of spending energy.
+- At Miami the single-lap solve on the refined grid starts at 2 MJ and runs 88.244 s, faster than
+  every level in the table, so there the 1.5 MJ advantage is at least partly the base grid's
+  error at 2 MJ. At Canada the refined 2 MJ lap (72.577 s) is still 0.023 s slower than the
+  table's 2.5 MJ lap, so whether that advantage is real is not settled by these runs.
+- Dropped candidates are counted per start level; China's are the most (8-42 per level).
+
+What this changes: a whole-race plan built on a lap table magnifies per-lap errors by the number
+of laps, so the table needs every level checked, not only 2 MJ. Not yet done: a lap table on the
+refined grid, with the check applied at every level.

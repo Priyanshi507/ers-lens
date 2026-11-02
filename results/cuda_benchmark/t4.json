@@ -1,0 +1,116 @@
+{
+ "device": "Tesla T4",
+ "jax": "0.11.2",
+ "cupy": "14.2.0",
+ "car": "configs/car_2026_q_low.yaml",
+ "events": {
+  "Australia": {
+   "backward_xla_s": 7.0521,
+   "backward_cuda_s": 3.7876,
+   "runs_xla_s": [
+    7.013,
+    7.0521,
+    7.0847
+   ],
+   "runs_cuda_s": [
+    3.7878,
+    3.7876,
+    3.7828
+   ],
+   "max_value_diff_s": 1.3642420526593924e-12,
+   "checksum_xla": 19143640.110976093,
+   "checksum_cuda": 19143640.110976093,
+   "solve_xla": {
+    "seconds": 57.65,
+    "lap_s": 77.58125997731432,
+    "dp_pred_s": 77.57323388828353
+   },
+   "solve_cuda": {
+    "seconds": 30.55,
+    "lap_s": 77.58125997731432,
+    "dp_pred_s": 77.5732338882835
+   }
+  },
+  "China": {
+   "backward_xla_s": 7.6897,
+   "backward_cuda_s": 3.9307,
+   "runs_xla_s": [
+    7.6734,
+    7.6897,
+    7.698
+   ],
+   "runs_cuda_s": [
+    3.9305,
+    3.9307,
+    3.9311
+   ],
+   "max_value_diff_s": 1.1368683772161603e-12,
+   "checksum_xla": 22559647.603688236,
+   "checksum_cuda": 22559647.603688233,
+   "solve_xla": {
+    "seconds": 59.85,
+    "lap_s": 91.87575457398394,
+    "dp_pred_s": 91.85991422095871
+   },
+   "solve_cuda": {
+    "seconds": 31.75,
+    "lap_s": 91.87575457398394,
+    "dp_pred_s": 91.85991422095874
+   }
+  },
+  "Miami": {
+   "backward_xla_s": 7.6077,
+   "backward_cuda_s": 3.8872,
+   "runs_xla_s": [
+    7.5986,
+    7.6077,
+    7.6105
+   ],
+   "runs_cuda_s": [
+    3.8871,
+    3.8872,
+    3.8882
+   ],
+   "max_value_diff_s": 1.5916157281026244e-12,
+   "checksum_xla": 21736795.109541483,
+   "checksum_cuda": 21736795.109541483,
+   "solve_xla": {
+    "seconds": 59.27,
+    "lap_s": 88.24415107257497,
+    "dp_pred_s": 88.2376953725747
+   },
+   "solve_cuda": {
+    "seconds": 31.44,
+    "lap_s": 88.24415107257497,
+    "dp_pred_s": 88.23769537257463
+   }
+  },
+  "Canada": {
+   "backward_xla_s": 6.1469,
+   "backward_cuda_s": 3.1393,
+   "runs_xla_s": [
+    6.1469,
+    6.1485,
+    6.144
+   ],
+   "runs_cuda_s": [
+    3.1393,
+    3.1391,
+    3.1396
+   ],
+   "max_value_diff_s": 1.7053025658242404e-12,
+   "checksum_xla": 17901112.413794987,
+   "checksum_cuda": 17901112.413794987,
+   "solve_xla": {
+    "seconds": 48.68,
+    "lap_s": 72.52830963445396,
+    "dp_pred_s": 72.521298117819
+   },
+   "solve_cuda": {
+    "seconds": 25.57,
+    "lap_s": 72.52830963445396,
+    "dp_pred_s": 72.52129811781903
+   }
+  }
+ }
+}

@@ -271,6 +271,24 @@ Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original 
 `python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar/runs.csv]`.
 Runs on a free Kaggle T4 GPU (`scripts/kaggle_fia_fix_calendar.md`).
 
+### Performance: the solver on a free GPU
+
+Every speed-up below gives the same lap times as before (bit-for-bit for the last two rows),
+measured on Kaggle's free Tesla T4 with predictions written before each run.
+
+| Step (Australia, fine grid) | One backward pass | Full solve |
+| --- | --- | --- |
+| XLA, first layout | 12.57 s | 96.8 s |
+| XLA, charge-last array layout | 7.05-7.50 s | 58 s |
+| Hand-written CUDA kernel (`src/erslens/cuda_dp.py`) | 3.79 s | 30.6 s |
+
+The kernel gives each (speed, charge) state one GPU thread that loops over the power commands,
+so the physics step, the value-table lookup and the minimum run fused in registers. Its source
+is also compiled as C++ and checked against a NumPy twin in the tests, so it is verified without
+a GPU. It met its accuracy and full-solve predictions but not the 2x backward-pass prediction
+(1.86-1.96x). Use it with `ERSLENS_DP_BACKEND=cuda` on any CUDA GPU; reproduce the comparison
+with `scripts/kaggle_cuda_benchmark.md`.
+
 ## Repository
 
 ```
@@ -289,6 +307,7 @@ src/erslens/
     gaussnet.py             neural network with calibrated Gaussian uncertainty (JAX, Optax)
     ingest.py               FastF1 loading, track and elevation profiles
     optimal.py              Strategy Lab method M1: dynamic programming over state of charge
+    cuda_dp.py              the DP backward pass as one hand-written CUDA kernel (CuPy)
     gradopt.py              Strategy Lab method M2: gradient descent through the JAX simulator
     simple.py               simple deployment rules, tuned by exhaustive search
     strategy.py             S1-S7 measurements, legal-car sweep, per-race rules, convergence rule
@@ -310,7 +329,7 @@ scripts/
     fia_fix_verdicts.py     finding 9: verdicts F1-F4 and C1-C3
     gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
     export_fia.py           data for the FIA-fix page
-tests/                      126 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      134 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

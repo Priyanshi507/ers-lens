@@ -1527,3 +1527,28 @@ K1. The two backends' value tables differ by at most 1e-9 s anywhere, at all fou
 K2. The CUDA backward pass is at least 2x faster than XLA's at all four circuits.
 K3. A full solve with the CUDA backward pass gives the same lap time to 0.001 s and is at least
     1.5x faster, at all four circuits.
+
+### 2026-11-02: CUDA kernel results: K1 and K3 held, K2 not held (1.86-1.96x)
+
+Kaggle T4, both backends in one session (results/cuda_benchmark/t4.json, commit befaf5a):
+
+| Circuit | Backward XLA / CUDA | Speed-up | Full solve XLA / CUDA | Speed-up | Largest value difference |
+|---|---|---|---|---|---|
+| Australia | 7.05 / 3.79 s | 1.86x | 58 / 31 s | 1.89x | 1.4e-12 s |
+| China | 7.69 / 3.93 s | 1.96x | 60 / 32 s | 1.89x | 1.1e-12 s |
+| Miami | 7.61 / 3.89 s | 1.96x | 59 / 31 s | 1.89x | 1.6e-12 s |
+| Canada | 6.15 / 3.14 s | 1.96x | 49 / 26 s | 1.90x | 1.7e-12 s |
+
+- K1 (value tables within 1e-9 s): HELD, 4 of 4; the largest difference anywhere is 1.7e-12 s, and
+  the first-point checksums agree to the last digit at Australia, Miami and Canada (China differs
+  in the 17th significant digit).
+- K2 (backward pass at least 2x faster): NOT HELD, 0 of 4; 1.86-1.96x.
+- K3 (same lap to 0.001 s and full solve at least 1.5x faster): HELD, 4 of 4. The lap times are
+  bit-for-bit equal to XLA's at all four circuits (for example Australia 77.58125997731432 s).
+
+Against the first T4 run (kaggle_gpu.json, command-last order, 2026-10-31), the solver is now
+3.3-3.4x faster per backward pass (Australia 12.57 -> 3.79 s) and 3.2x per full solve (96.8 ->
+30.6 s), with the same results. Compared with the M4 in the A/B runs (same order as XLA now,
+2026-10-31), the CUDA pass is 7.4-7.9x faster at Australia and Canada; those runs were in
+different sessions on different machines. One step now takes about 3.6 ms; why it is not faster
+(float64 throughput, occupancy, or memory) has not been profiled, so no reason is claimed.

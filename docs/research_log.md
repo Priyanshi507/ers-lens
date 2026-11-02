@@ -1500,3 +1500,30 @@ counting only converged pairs as in C1-C3 (the United States' solve failed). Ene
 +0.21 MJ, Spain +0.09 MJ, Bahrain +0.06 MJ. Consistent with the MGU-K taper in the model, which
 allows more than 250 kW only below 310 km/h. Correction to 2026-11-01: 14 circuits, not 13, use
 the assumed recharge limit (assumptions.csv lists 14). README finding 9 added.
+
+## 2026-11-02: A hand-written CUDA kernel for the backward pass; predictions K1-K3
+
+Why not Pallas, as planned: JAX's Pallas GPU kernels need compute capability 8.0 (Ampere) or
+newer through the Triton backend, which JAX 0.11 also deprecates, or Hopper through Mosaic GPU.
+The free Kaggle T4 is 7.5 (jax-ml/jax issue #26799; Pallas quickstart). A CUDA kernel compiled
+at run time by CuPy (NVRTC) runs on the T4.
+
+Design (src/erslens/cuda_dp.py): one thread per (speed, charge) state loops over the 19 power
+commands, so the step's 4.7 million transitions stay in registers: the physics of jaxsim._step,
+the bilinear lookup of the next point's value table (map_coordinates order 1, mode nearest), and
+the minimum, in one kernel launch per track point. Divisions by values fixed per state are done
+once as reciprocals, leaving one division and one square root per transition (the profiling
+entries of 2026-10-31 show float64 arithmetic limits the transition on the T4). Selected with
+ERSLENS_DP_BACKEND=cuda; the forward pass and replay stay in JAX, and the value tables pass
+between CuPy and JAX through DLPack without copying.
+
+Checked without a GPU: a NumPy twin of the kernel matches the XLA step to 1.4e-14 s on Canada's
+fine grid for two cars at six track points, and the kernel's own source, compiled as C++ with
+the thread indices stubbed, gives exactly the NumPy twin's values (tests/test_cuda_dp.py).
+
+Predictions for the Kaggle T4, both backends in one session (scripts/cuda_benchmark.py; low car,
+Australia, China, Miami and Canada):
+K1. The two backends' value tables differ by at most 1e-9 s anywhere, at all four circuits.
+K2. The CUDA backward pass is at least 2x faster than XLA's at all four circuits.
+K3. A full solve with the CUDA backward pass gives the same lap time to 0.001 s and is at least
+    1.5x faster, at all four circuits.

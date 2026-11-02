@@ -10,6 +10,7 @@ steady-state in speed. Energy neutrality is a hard terminal constraint: the batt
 the lap at least as charged as it started. The per-lap harvest limit is enforced with a
 Lagrange multiplier found by bisection.
 """
+import os
 from dataclasses import dataclass
 
 import jax
@@ -23,6 +24,14 @@ from .track import Track
 from .physics import braking_envelope
 
 MISS_PENALTY_S_PER_J = 1e-3   # ending the lap 1 kJ short costs 1 s: never worth it
+
+
+def dp_backend() -> str:
+    """ERSLENS_DP_BACKEND: "xla" (default) or "cuda" (the hand-written kernel in cuda_dp, GPU only)."""
+    backend = os.environ.get("ERSLENS_DP_BACKEND", "xla")
+    if backend not in ("xla", "cuda"):
+        raise ValueError(f"ERSLENS_DP_BACKEND must be xla or cuda, not {backend!r}")
+    return backend
 
 
 @dataclass(frozen=True)
@@ -132,6 +141,17 @@ class _Compiled:
             return {k: a[0] for k, a in out.items()}
 
         self.backward, self.forward, self.replay = jax.jit(backward), jax.jit(forward), jax.jit(replay)
+        if dp_backend() == "cuda":
+            from .cuda_dp import CudaBackward, constants
+
+            cuda = CudaBackward(grid.v_ms, grid.soc_j, grid.cmd_w, np.asarray(st.env), np.asarray(st.straight),
+                                constants(p, unlimited, st.ds, mass), terminal, MISS_PENALTY_S_PER_J)
+
+            def backward_cuda(soc0, price):
+                values, v_end = cuda(float(soc0), float(price))
+                return jax.dlpack.from_dlpack(values), jax.dlpack.from_dlpack(v_end)
+
+            self.backward = backward_cuda
 
 
 def _attempt(c: _Compiled, car: CarParams, track: Track, soc0: float, price: float):

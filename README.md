@@ -237,6 +237,38 @@ Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-1
 Reproduce: `python scripts/strategy_run.py --car configs/car_2026_q_low.yaml --out results/strategy_q_low`,
 then `--rules` and `--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low/runs.csv`
 
+### 9. The FIA's Miami fix, solved on the same circuits
+
+From Miami the FIA raised the power a car may harvest while flat out (super-clipping) from
+250 to 350 kW. Real races cannot show the effect: each circuit raced under one rule, and every
+circuit with almost no clipping came after Miami. So the Strategy Lab solves each circuit under
+both caps with everything else equal. Predictions were recorded before each run (research log,
+2026-11-01).
+
+| Result under 350 kW, original car, 18 circuits | Circuits |
+| --- | --- |
+| Super-clipping harvests more energy (C1) | **16 of 18, held** (Monaco: none under either cap; United States: solve failed the accuracy rule) |
+| Less of it on the longest straight (not predicted) | 15 of 18 |
+| More of it below 250 km/h (not predicted) | 16 of 18 (all but Monaco and the failed United States solve) |
+| More of it below 200 km/h (C2) | 12 of 18, **not held** |
+| Lap never slower (C3) | Every converged circuit; **not held** as written, through the United States' failed solve |
+
+In the model, the fix does what it aimed at on the straights, less super-clipping at the end of
+the longest one, while super-clipping as a whole takes more energy, at lower speeds where the
+MGU-K can use the extra 100 kW (its cap tapers from 350 kW at 290 km/h to 250 kW at 310 km/h).
+On four circuits with three cars, total super-clipping time fell at all 12 pairs while its
+energy rose by 7-28% on the ten that converged (predictions F1-F4: F3 and F4 held, F1 and F2
+not held). This is the lap-time optimum of a simplified car, not a measurement of real cars;
+14 of the 18 circuits use an assumed 8.5 MJ recharge limit
+([`results/fia_fix_calendar/assumptions.csv`](results/fia_fix_calendar/assumptions.csv)).
+
+![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
+
+Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original --caps 250 350
+--assume-recharge-mj 8.5 --out results/fia_fix_calendar --events ...` (every circuit), then
+`python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar/runs.csv]`.
+Runs on a free Kaggle T4 GPU (`scripts/kaggle_fia_fix_calendar.md`).
+
 ## Repository
 
 ```

@@ -1489,3 +1489,14 @@ low car at 350 kW converges on the finer charge grid (641 levels): lap 77.612 s 
 super-clipping energy (6.36 against 6.20 MJ) and a shorter longest stretch (3.68 against 4.38 s).
 Australia high car at 350 kW fails on both finer grids (DP against replay 0.083 and 0.094 s). The
 F1-F4 verdicts stay as written.
+
+### 2026-11-02: Where the extra calendar super-clipping is taken (exploratory)
+
+From results/fia_fix_calendar/location_split.csv (speed bands fixed on 2026-11-01, before this
+run; combining the two lower bands was chosen after seeing it): under 350 kW, super-clipping
+energy below 250 km/h rises at 17 of 18 circuits (all but Monaco, which has none), 16 of 18
+counting only converged pairs as in C1-C3 (the United States' solve failed). Energy above
+250 km/h falls at 10 of 18. Where C2 failed, the gain sits at 200-250 km/h instead: Hungary
++0.21 MJ, Spain +0.09 MJ, Bahrain +0.06 MJ. Consistent with the MGU-K taper in the model, which
+allows more than 250 kW only below 310 km/h. Correction to 2026-11-01: 14 circuits, not 13, use
+the assumed recharge limit (assumptions.csv lists 14). README finding 9 added.

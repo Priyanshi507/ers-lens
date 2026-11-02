@@ -264,6 +264,8 @@ not held). This is the lap-time optimum of a simplified car, not a measurement o
 
 ![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
 
+Explore every circuit under both caps on the [FIA-fix page](https://priyanshi507.github.io/ers-lens/fia.html).
+
 Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original --caps 250 350
 --assume-recharge-mj 8.5 --out results/fia_fix_calendar --events ...` (every circuit), then
 `python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar/runs.csv]`.
@@ -304,7 +306,12 @@ scripts/
     calibrate_car.py        finding 8: fit drag and engine power to pole laps
     strategy_run.py         finding 8: all Strategy Lab stages
     strategy_evaluate.py    finding 8: verdicts S1-S7
-tests/                      90 automated tests (physics invariants, estimators, optimizers, verdict logic)
+    fia_fix.py              finding 9: every circuit under the 250 and 350 kW caps
+    fia_fix_verdicts.py     finding 9: verdicts F1-F4 and C1-C3
+    gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
+    export_fia.py           data for the FIA-fix page
+tests/                      126 automated tests (physics invariants, estimators, optimizers, verdict logic)
+site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
 ```

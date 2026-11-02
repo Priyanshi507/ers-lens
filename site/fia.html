@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERS-Lens: did the FIA's Miami fix change super-clipping?</title>
+<meta name="description" content="Every 2026 Formula 1 circuit solved for the lap-time-optimal energy strategy under the 250 kW and 350 kW super-clipping caps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body class="lab">
+<header class="masthead">
+  <p class="wordmark"><a href="https://github.com/Priyanshi507/ers-lens">ERS-Lens</a></p>
+  <nav class="pages" aria-label="Pages"><a href="index.html">Clipping explorer</a><a href="strategy.html">Strategy Lab</a><a href="fia.html" aria-current="page">The FIA's fix</a></nav>
+  <h1>Did the FIA's Miami fix change super-clipping?</h1>
+  <p class="lede">From the Miami Grand Prix, a car may harvest up to 350 kW while flat out, not 250 kW. Real races cannot show what that changed, because each circuit raced under one rule. So every circuit is solved twice for the lap-time-optimal energy strategy, once under each cap, with everything else equal.</p>
+</header>
+
+<main>
+  <section class="answer" aria-live="polite">
+    <p id="answer-main" class="answer-main">Loading…</p>
+    <p id="answer-detail" class="answer-detail"></p>
+  </section>
+
+  <section class="panel panel-main" id="calendar">
+    <h2>Every circuit, both caps</h2>
+    <p class="note">Energy harvested by super-clipping in one optimal lap. Circuits marked * use an assumed 8.5 MJ race recharge limit; the other four use sourced limits.</p>
+    <div class="chart chart-calendar"><canvas id="energy-chart" role="img" aria-label="Super-clipping energy per circuit under the 250 and 350 kW caps"></canvas></div>
+  </section>
+
+  <section class="panel" id="where">
+    <h2>Where the extra energy comes from</h2>
+    <p class="note" id="where-note"></p>
+    <div class="chart chart-calendar"><canvas id="where-chart" role="img" aria-label="Change in super-clipping energy below and above 250 km/h, per circuit"></canvas></div>
+  </section>
+
+  <section class="panel" id="lap">
+    <h2>One circuit, both caps</h2>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Circuit" id="pick-circuit"></div>
+    </div>
+    <p id="lap-summary" class="lap-summary" aria-live="polite"></p>
+    <dl class="stats" id="lap-stats"></dl>
+    <div class="chart chart-speed"><canvas id="speed-chart" role="img" aria-label="Optimal speed along the lap under both caps"></canvas></div>
+    <div class="chart chart-power"><canvas id="sc-chart" role="img" aria-label="Super-clipping power along the lap under both caps"></canvas></div>
+    <p class="legend"><span class="key key-flat"></span>Longest straight</p>
+  </section>
+
+  <section class="panel" id="verdicts">
+    <h2>Predictions, written before each run</h2>
+    <p class="note">A solve counts only if the optimizer's own lap time matches its replay in the simulator within 0.05 s; a pair with a failed solve counts against the prediction.</p>
+    <div class="table-wrap"><table class="verdict-table" id="verdict-table"></table></div>
+  </section>
+
+  <section class="panel limits">
+    <h2>What this can't tell you</h2>
+    <p>These are lap-time optima for a simplified model car on one lap with mid-race fuel: no traffic, tyres, slipstream or Overtake mode. They show what the rule makes worth doing, not what real teams did. Fourteen of the eighteen circuits use an assumed recharge limit. Whether real laps moved the same way has not been tested yet.</p>
+    <p><a href="https://github.com/Priyanshi507/ers-lens/blob/main/docs/research_log.md">Every prediction, check and failure is in the research log</a></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Built by <a href="https://github.com/Priyanshi507">Priyanshi Sharma</a> from the ERS-Lens Strategy Lab. Not affiliated with Formula 1, the FIA or any team. Data generated <span id="generated">—</span>.</p>
+</footer>
+
+<script src="vendor/chart-4.4.1.umd.min.js"></script>
+<script type="module" src="fia.js"></script>
+</body>
+</html>

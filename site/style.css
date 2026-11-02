@@ -214,3 +214,6 @@ select { min-width: 11rem; }
   .verdict-table tbody th { min-width: 12rem; }
 }
 .lab .answer-main strong { white-space: normal; }
+
+.chart-calendar { height: 30rem; }
+@media (max-width: 40rem) { .chart-calendar { height: 34rem; } }

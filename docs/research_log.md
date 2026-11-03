@@ -1663,3 +1663,43 @@ Consequences: Italy's FIA-fix calendar result used the wrong recharge limit and 
 at 7.0 MJ. The config's statement that the 350 kW zones are not published was wrong and is
 corrected. Planned: read all 18 documents as PDFs, take every recharge limit from them, and
 then decide whether the sector power curves can be modelled.
+
+### 2026-11-03: The FIA documents as PDFs, and the rulebook: three assumed limits were wrong
+
+Read as PDFs (pdftotext -layout): Section C, Issue 17 (28 April 2026), and the Power Unit
+Information documents for Canada, Austria, Britain, Belgium, Italy, Spain (V2), Azerbaijan,
+Bahrain at Sepang and Mexico City. The table's column order is printed in the PDFs: Race with
+Overtake not active, Race with Overtake active, Qualifying, Free Practice, Out laps.
+
+| Circuit | Race limit (MJ) | Qualifying (MJ) | Power-limited distance | Reduction rate |
+|---|---|---|---|---|
+| Canada | 8.0 | 6.0 | 2682 m | 100 kW/s |
+| Austria | 8.0 | 6.0 | 2923 m | 100 kW/s |
+| Britain | 8.0 | 6.5 | 3833 m | 50 kW/s |
+| Belgium | 8.5 | 7.0 | 4594 m | 50 kW/s |
+| Italy | 7.0 | 5.0 | 4218 m | 50 kW/s |
+| Spain (Madrid) | 8.5 | 7.5 | 3206 m | 100 kW/s |
+| Azerbaijan | 8.5 | 8.5 | 3796 m | 50 kW/s |
+| Bahrain (Sepang) | 8.5 | 7.5 | 3365 m | 100 kW/s |
+| Mexico City | 8.5 | 8.5 | 2101 m | 100 kW/s |
+
+- Against the 8.5 MJ assumed in the calendar run: right at 11 of 14 circuits, wrong at Austria
+  (8.0), Britain (8.0) and Italy (7.0). The earlier entry's "7 of 8 checked" is superseded.
+  Canada agrees with the press-sourced 8.0/6.0 MJ already in the config.
+- Section C confirms the model's taper (C5.2.8 i: 1800 - 5v kW below 340 km/h, 6900 - 20v kW
+  from 340 to 345 km/h, 0 above) and the 4 MJ window (C5.2.9). C5.2.8 iii, in named race
+  sectors: 250 kW below 310 km/h, then the same taper. Which document column lists those
+  sectors needs care: the PDFs have a column "sectors where the alternative power curve
+  applies in Sprint & Race" and, in the curve legend, "Main overtaking zones" against "Other
+  parts of the lap"; not resolved, so the config keeps 250 kW everywhere as the extreme bound.
+- C5.12.6 limits the reduction of the driver's maximum power demand, while the MGU-K gives more
+  than 100 kW, to 50 kW in any 1 s where the power-limited distance exceeds 3500 m, else 100 kW.
+  All 13 documents read state the rate that this rule gives for their distance. The model's
+  single 50 kW/s ramp (secondary source) is therefore right only at the 50 kW/s races; the
+  ramp test of 2026-10 (1 of 7 circuits) mixed both kinds and is not re-judged here.
+
+Changes: configs/rules_2026_races.yaml now holds race and qualifying limits for all 18 circuits
+from the FIA documents, so no run needs --assume-recharge-mj. Re-run planned for the three
+corrected circuits, original car, both caps (scripts/kaggle_fia_fix_corrected.md). What will be
+reported: C1-C3 re-counted with the corrected rows replacing the assumed ones; the verdicts
+recorded on 2026-11-01 stay as recorded, and any change is reported as a correction.

@@ -262,8 +262,9 @@ not held). This is the lap-time optimum of a simplified car, not a measurement o
 14 of the 18 circuits use an assumed 8.5 MJ recharge limit
 ([`results/fia_fix_calendar/assumptions.csv`](results/fia_fix_calendar/assumptions.csv)).
 Checked afterwards against the FIA's per-race Power Unit Information documents, the assumption
-is right at 7 of the 8 circuits checked so far and wrong at Monza (7.0 MJ), so Italy's result
-used the wrong limit and is to be re-run (research log, 2026-11-03).
+is right at 11 of the 14 and wrong at Austria and Britain (8.0 MJ) and Monza (7.0 MJ); those
+three are being re-run with the FIA values, which every circuit now uses
+([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml); research log, 2026-11-03).
 
 ![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
 
@@ -390,21 +391,21 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 
 ## Limitations
 
-- The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 km/h) is
-  confirmed in the [FIA 2026 Power Unit Technical Regulations, Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf)
-  (29 March 2024); later issues have not been checked. A 50 kW/s ramp limit comes from a
-  secondary source only, and the data reject it as a description of clipping. The power-drop
-  estimator depends on neither.
+- The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 to 345 km/h)
+  is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 17 (28 April 2026), as in
+  the [2024 Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf).
+  The model's 50 kW/s ramp is the rule only at some races: C5.12.6 limits the reduction to 50 kW
+  per second where the FIA's power-limited distance exceeds 3500 m and 100 kW elsewhere (each
+  race's document states which). The data reject a ramp as a description of clipping either
+  way, and the power-drop estimator depends on neither.
 - Results cover full-throttle straights only; one straight per circuit. A straight that
   crosses the start/finish line is measured whole only with `--rebase` (finding 3); one that
   ends in a fast corner cannot be measured.
 - Car mass is assumed (768 kg plus a nominal fuel load); a 5% error shifts power drops by ~5%.
 - Slipstream and Override Mode are not yet separated from clipping.
-- The FIA publishes, for every race, a Power Unit Information document with the recharge limits,
-  the MGU-K power curves by speed (standard, Overtake, and an alternative curve in named
-  sectors) and the sectors where they apply. The model uses one regulation taper everywhere
-  and takes the recharge limits from press reports (one checked against the FIA document so
-  far is wrong: Monza); using these documents is planned.
+- From Miami, C5.2.8 iii adds an alternative curve in race sectors named in each race's FIA
+  document: 250 kW below 310 km/h, then the usual taper. The model uses one taper everywhere,
+  with 250 kW everywhere as an extreme-case bound.
 - Time lost assumes pre-clip deployment is a fixed fraction of the regulation limit; when it
   is not, the estimate is biased high by up to about 0.06 s per lap. It needs about 4 s of
   full-throttle running before the speed peak, so short straights cannot be measured.

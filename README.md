@@ -247,33 +247,35 @@ both caps with everything else equal. Predictions were recorded before each run 
 
 | Result under 350 kW, original car, 18 circuits | Circuits |
 | --- | --- |
-| Super-clipping harvests more energy (C1) | **16 of 18, held** (Monaco: none under either cap; United States: solve failed the accuracy rule) |
-| Less of it on the longest straight (not predicted) | 15 of 18 |
-| More of it below 250 km/h (not predicted) | 16 of 18 (all but Monaco and the failed United States solve) |
-| More of it below 200 km/h (C2) | 12 of 18, **not held** |
-| Lap never slower (C3) | Every converged circuit; **not held** as written, through the United States' failed solve |
+| Super-clipping harvests more energy (C1) | **17 of 18, held** (Monaco: none under either cap) |
+| Less of it on the longest straight (not predicted) | 16 of 18 (not Monaco or Singapore, where it is zero) |
+| More of it below 250 km/h (not predicted) | 17 of 18 (all but Monaco) |
+| More of it below 200 km/h (C2) | 14 of 18, **not held** (not Hungary, Monaco, Spain, United States) |
+| Lap never slower by more than 0.02 s (C3) | **18 of 18, held** |
 
 In the model, the fix does what it aimed at on the straights, less super-clipping at the end of
 the longest one, while super-clipping as a whole takes more energy, at lower speeds where the
 MGU-K can use the extra 100 kW (its cap tapers from 350 kW at 290 km/h to 250 kW at 310 km/h).
 On four circuits with three cars, total super-clipping time fell at all 12 pairs while its
-energy rose by 7-28% on the ten that converged (predictions F1-F4: F3 and F4 held, F1 and F2
-not held). This is the lap-time optimum of a simplified car, not a measurement of real cars;
-Every circuit now uses its recharge limit from the FIA's per-race Power Unit Information
-document ([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml)). The first run
-assumed 8.5 MJ at 14 circuits, which was wrong at Austria and Britain (8.0 MJ) and Monza
-(7.0 MJ); re-run with the FIA values, every count above is unchanged
-([`results/fia_fix_calendar_fia`](results/fia_fix_calendar_fia); the first run stays in
-[`results/fia_fix_calendar`](results/fia_fix_calendar); research log, 2026-11-03).
+energy rose by 3-20% (predictions F1-F4: F2, F3 and F4 held; F1 not held, because the lap gain
+exceeded the predicted 0.20 s for two cars at Australia). This is the lap-time optimum of a
+simplified car, not a measurement of real cars. Every circuit uses its recharge limit from the
+FIA's per-race Power Unit Information document
+([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml)).
+
+These are the results of the corrected solver (results/fia_fix_calendar_fixed and
+results/fia_fix_fixed, 2026-11-03). The first runs, kept unchanged, recorded C1 held (16), C2 not
+held (12), C3 not held (17), F2 not held (8 of 12) and F3 held (10 of 12); the failures there
+came from solves that the solver bug broke (research log, 2026-11-03).
 
 ![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
 
 Explore every circuit under both caps on the [FIA-fix page](https://priyanshi507.github.io/ers-lens/fia.html).
 
-Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original --caps 250 350
---out results/fia_fix_calendar_fia --events ...` (every circuit), then
-`python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar_fia/runs.csv]`.
-Runs on a free Kaggle T4 GPU (`scripts/kaggle_fia_fix_calendar.md`).
+Reproduce: `scripts/kaggle_rerun_fixed.md` (free Kaggle T4), or `python scripts/fia_fix.py --out
+results/fia_fix_fixed` (four circuits) and `--cars original --caps 250 350 --out
+results/fia_fix_calendar_fixed --events ...` (every circuit), then `python scripts/fia_fix_verdicts.py
+[--calendar] --runs <out>/runs.csv`.
 
 ### 10. Whole-race energy plans: not yet trustworthy
 
@@ -288,6 +290,28 @@ Canada it moves to another charge level whose lap is 0.04-0.05 s faster and repe
 about 55-66 laps, which is most of the apparent 3 s gain, and at Miami that advantage is at
 least partly grid error. A race plan multiplies any per-lap error by the number of laps, so
 every charge level has to be checked; that is the next step. Research log, 2026-11-02.
+
+### 11. The FIA's real 250 kW sectors
+
+From Miami, in race sectors that each event's FIA document names, MGU-K deployment is limited to
+250 kW below 310 km/h (Section C, Issue 21, C5.2.8 iii; Section B, Issue 09, B7.2.1 b xii). The
+Strategy Lab now applies each race's own sectors (14 circuits, read from the FIA PDFs;
+[`configs/deploy_sectors_2026.yaml`](configs/deploy_sectors_2026.yaml)) and compares them with no
+sector limit and with 250 kW on the whole lap, the bound used before.
+
+| Original car, 14 circuits | Result |
+| --- | --- |
+| P1: no limit <= FIA sectors <= 250 kW everywhere | **14 of 14, held** |
+| P2: the sectors cost at most half of 250 kW everywhere | **14 of 14, held** |
+| P3: the optimum deploys less inside the sectors and more outside | **13 of 14, held** (Singapore: 0.005 MJ less outside) |
+
+The real sectors cost 0.007-0.216 s per lap (Britain least, Spain most, where they cover 66% of
+the lap), against 0.26-0.56 s for 250 kW everywhere: the old bound overstated the rule's cost by
+about six times. The rule applies "during any power limited period", defined in an FIA document
+that is not public, so these numbers are the most the sectors can cost; the true cost lies
+between zero and them. Predictions were written before the run (research log, 2026-11-03). The
+first run, with the solver bug, recorded P1-P3 not held; its two impossible laps (an extra
+limit giving a faster lap) are what exposed the bug.
 
 ### Performance: the solver on a free GPU
 
@@ -352,7 +376,7 @@ scripts/
     fia_fix_figures.py      finding 9 figures
     rebase_compare.py       finding 3: straights measured whole across the start/finish line
     race_plan.py            finding 10: lap tables (GPU) and race plans
-    sectors_run.py          the 250 kW sectors against none and everywhere (P1-P3)
+    sectors_run.py          finding 11: the 250 kW sectors against none and everywhere (P1-P3)
     gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
     step_cost.py            operation and memory counts of one DP step (XLA cost analysis)
     cuda_benchmark.py       the CUDA kernel against XLA, results checked for equality
@@ -397,8 +421,9 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   limit, the DP could return a lap that ended below its starting charge (the price on harvest
   could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price
   search tests the planned harvest, and the convergence rule also requires the lap to keep its
-  charge. Re-checked on the saved results, no verdict changed; the experiments are being re-run
-  with the fixed solver (research log, 2026-11-03).
+  charge. Findings 9 and 11 are re-run with the fixed solver (C3 and F2 changed to held); the
+  Strategy Lab (finding 8) is re-checked on its saved results, no verdict changed, and its re-run
+  is next (research log, 2026-11-03).
 - The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 to 345 km/h)
   is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 21 (19 October 2026), as in
   the [2024 Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf).

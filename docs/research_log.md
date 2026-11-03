@@ -1849,3 +1849,35 @@ results/strategy, strategy_q_low, strategy_q_high): no verdict changes. Counts t
 original car S2 China 27 -> 26 of 27; high car S2 Australia 18 -> 17 of 27; high car, Miami,
 8 MJ limit now excluded (it had been 0.383 s faster than with 8.5 MJ, which a lower limit cannot
 give: the lap ended 2.0 MJ short). The Strategy Lab page drops the same two sweep cars.
+
+### 2026-11-03: Re-run with the fixed solver, part 1: sectors and FIA-fix
+
+Kaggle T4, CUDA backward pass, commit 0ca0e75 (results/sectors_fixed, fia_fix_calendar_fixed,
+fia_fix_fixed). Every one of the 118 solves passes the convergence rule, now including the end
+charge; every lap ends 0.1-258 kJ above its start. The six laps that had ended short are 0.09-0.31
+s slower than before; every other lap moved by at most 0.03 s, in either direction.
+
+sectors_fixed/runs.csv came back without its header row: the script wrote the header only when
+the file did not exist, so an empty file left by an interrupted first attempt skipped it. The
+rows are complete (42) and were read with the script's column list; the script now also writes
+the header into an empty file.
+
+Sectors (predictions of 2026-11-03), corrected solver:
+- P1 HELD, 14 of 14. P2 HELD, 14 of 14. P3 HELD, 13 of 14 (Singapore: 0.005 MJ less outside).
+- The FIA sectors cost 0.007-0.216 s per lap (Britain 0.007, Italy 0.008, Spain 0.216), against
+  0.261-0.564 s for 250 kW everywhere. Recorded on the first run: P1-P3 not held.
+
+FIA-fix calendar (C1-C3 of 2026-11-01), corrected solver, FIA recharge limits:
+- C1 HELD, 17 of 18 (Monaco: no super-clipping either way). C2 NOT HELD, 14 of 18 (Hungary,
+  Monaco, Spain, United States). C3 HELD, 18 of 18. Exploratory: less on the longest straight 16
+  of 18, more below 250 km/h 17 of 18. Recorded on 2026-11-01: C1 held 16, C2 not held 12, C3
+  not held 17; the United States solves that failed then fail no longer.
+FIA-fix, four circuits, three cars (F1-F4 of 2026-11-01), corrected solver:
+- F1 NOT HELD, 10 of 12 (Australia low and high cars gain 0.274 and 0.256 s, above the predicted
+  0.20 s). F2 HELD, 12 of 12. F3 HELD, 12 of 12. F4 HELD, 4 of 4. Super-clipping time falls at
+  all 12 pairs, its energy rises 3-20%. Recorded on 2026-11-01: F1 not held 10, F2 not held 8,
+  F3 held 10, F4 held.
+
+Changed verdicts: C3 and F2, not held to held; both of their failures had come from solves the bug
+broke. The README, the FIA-fix page and docs/fia_fix_dose.png now use these runs; the first runs
+stay in results/ unchanged. Next: the Strategy Lab re-run (finding 8).

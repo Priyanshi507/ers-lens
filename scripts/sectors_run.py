@@ -36,7 +36,7 @@ def solve_all(events, out_dir: Path):
     (out_dir / "profiles").mkdir(parents=True, exist_ok=True)
     path = out_dir / "runs.csv"
     done = {(r["event"], r["variant"]) for r in csv.DictReader(open(path))} if path.exists() else set()
-    new = not path.exists()
+    new = not path.exists() or path.stat().st_size == 0
     with open(path, "a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         if new:

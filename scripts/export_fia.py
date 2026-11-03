@@ -1,8 +1,8 @@
 """Export the FIA-fix experiment to site/data/fia.json for the site's FIA-fix page.
 
-Reads only committed results: results/fia_fix_calendar_fia (18 circuits, original car, 250 and 350 kW,
+Reads only committed results: results/fia_fix_calendar_fixed (18 circuits, original car, 250 and 350 kW,
 recharge limits from the FIA's per-race documents)
-and results/fia_fix (four circuits, three cars) for the F1-F4 verdicts. Every energy on the page
+and results/fia_fix_fixed (four circuits, three cars, corrected solver) for the F1-F4 verdicts. Every energy on the page
 is recomputed from the saved profiles and checked against runs.csv, so the page cannot drift from
 the research log.
 
@@ -86,8 +86,8 @@ def build(calendar: Path, four: Path) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--calendar", default="results/fia_fix_calendar_fia")
-    ap.add_argument("--four", default="results/fia_fix")
+    ap.add_argument("--calendar", default="results/fia_fix_calendar_fixed")
+    ap.add_argument("--four", default="results/fia_fix_fixed")
     ap.add_argument("--out", default="site/data/fia.json")
     args = ap.parse_args()
     data = build(Path(args.calendar), Path(args.four))

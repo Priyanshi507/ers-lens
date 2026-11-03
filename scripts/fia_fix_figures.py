@@ -117,7 +117,7 @@ def location_split(profiles: Path, runs: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dir", default="results/fia_fix")
+    ap.add_argument("--dir", default="results/fia_fix_fixed")
     ap.add_argument("--out", default="docs")
     ap.add_argument("--event", default="Canada")
     ap.add_argument("--car", default="original")

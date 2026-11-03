@@ -131,7 +131,7 @@ def main():
     if path.exists():
         with open(path) as f:
             done = {(r["event"], r["car"], float(r["cap_kw"])) for r in csv.DictReader(f)}
-    new = not path.exists()
+    new = not path.exists() or path.stat().st_size == 0
     with open(path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDS)
         if new:

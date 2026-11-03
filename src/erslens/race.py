@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .optimal import _Compiled, grid_with, race_car, start_at_slowest_point
+from .optimal import _Compiled, dp_car, grid_with, start_at_slowest_point
 from .strategy import CONVERGED_S
 
 END_TOL_J = 5e3
@@ -33,7 +33,7 @@ class LapTable:
 
 
 def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int = 321) -> LapTable:
-    rc = race_car(car)
+    rc = dp_car(car)
     tr = start_at_slowest_point(track, rc)
     c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
     n = len(levels_j)

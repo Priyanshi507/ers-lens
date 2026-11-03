@@ -1,8 +1,8 @@
 | Check | Result | Detail |
 |---|---|---|
-| Convergence rule (<= 0.05 s) | NOT held | 128 of 130 M1 results converged, 2 after grid refinement; 2 excluded (China sweep i1d0m0, China rules_no_taper nominal) |
+| Convergence rule (<= 0.05 s) | NOT held | 126 of 130 M1 results converged, 2 after grid refinement; 4 excluded (Australia sweep i1d2m1, China sweep i1d0m0, China rules_no_taper nominal, Miami rules_h8 nominal) |
 | S1 | held | Australia 0.29, China 0.38, Miami 0.00, Canada 0.00 |
-| S2 | NOT held | Australia 18 of 27 (67%), China 21 of 27 (78%), Miami 25 of 27 (93%), Canada 26 of 27 (96%); excluded cars counted as not clipping |
+| S2 | NOT held | Australia 17 of 27 (63%), China 21 of 27 (78%), Miami 25 of 27 (93%), Canada 26 of 27 (96%); excluded cars counted as not clipping |
 | S3 | held | 3 of 4 circuits clip without the taper: Australia 0.06, China 0.00, Miami 0.72, Canada 0.00 |
 | S4 | NOT held | Australia 16 km/h lower, China 24 km/h lower, Miami 20 km/h lower, Canada 23 km/h lower |
 | S5 | NOT held | Australia optimum faster by 2.671 s, China optimum faster by 2.170 s, Miami optimum faster by 2.334 s, Canada optimum faster by 2.241 s |
@@ -16,7 +16,7 @@
 | S3 (corrected rules) | NOT held | 1 of 4 clip without the taper: Australia 0.71, China excluded, Miami 0.72, Canada 0.00 |
 | S4 (corrected rules) | NOT held | Australia 16 km/h, China 24 km/h, Miami 20 km/h, Canada 25 km/h |
 
-**Corrected 2026 race rules** (configs/rules_2026_races.yaml; logged 2026-10-07, before these runs). Same thresholds as above.
+**Per-race 2026 rules** (configs/rules_2026_races.yaml as it stood when these rows were run; see the research log). Same thresholds as above.
 
 | Variant | Circuit | Clip ratio | Clips? | Deploy speed gap | Lap vs original | Convergence |
 |---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@
 | rules_no_taper | Canada | 0.00 | yes | 24 km/h | +0.058 s | 0.001 s |
 | rules_h8 | Australia | 0.43 | yes | 16 km/h | +0.340 s | 0.018 s |
 | rules_h8 | China | 0.65 | no | 24 km/h | +0.271 s | 0.007 s |
-| rules_h8 | Miami | 0.27 | yes | 17 km/h | -0.383 s | 0.026 s |
+| rules_h8 | Miami | excluded | - | - | - | not converged |
 | rules_h8 | Canada | 0.00 | yes | 25 km/h | +0.068 s | 0.001 s |
 | rules_deploy250 | Miami | 0.00 | yes | 15 km/h | +0.334 s | 0.003 s |
 | rules_deploy250 | Canada | 0.50 | yes | 18 km/h | +0.466 s | 0.002 s |

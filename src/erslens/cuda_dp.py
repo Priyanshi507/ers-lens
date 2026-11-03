@@ -31,6 +31,7 @@ extern "C" __global__ void dp_step(
     const double ice = k[6], eh = k[7], ed = k[8], deploy_max = fmin(k[9], deploy_cap), traction = k[10];
     const double superclip = k[11], cap_j = k[12], budget = k[13], vmin = k[14], g = k[15];
     const double mguk = k[16], a1 = k[17], b1 = k[18], knee = k[19], a2 = k[20], b2 = k[21];
+    const bool regen_by_command = k[22] != 0.0;
 
     const double v = v_grid[iv], soc = s_grid[is];
     const double v_eff = fmax(v, vmin);
@@ -63,7 +64,8 @@ extern "C" __global__ void dp_step(
         const double v_next = accel ? v_acc : target;
         if (!accel) deploy = 0.0;
         ice_h = accel ? fmin(ice_h, superclip) : (partial ? fmin(ice_h, fmax(0.0, ice - p_need)) : 0.0);
-        const double brake_h = braking ? fmin(fmin(-p_need, cap_k), room) : 0.0;
+        double brake_h = braking ? fmin(fmin(-p_need, cap_k), room) : 0.0;
+        if (regen_by_command) brake_h = fmin(brake_h, fmax(-c, 0.0));
         const double dt = 2.0 * ds / (v + v_next);
         const double e_in = eh * (ice_h + brake_h) * dt;
         const double s_next = fmin(fmax(soc + e_in - deploy * inv_ed * dt, 0.0), cap_j);
@@ -90,7 +92,7 @@ def constants(p: dict, car, ds: float, mass: float) -> np.ndarray:
                      f(p["eta_harvest"]), f(p["eta_deploy"]), car.deploy_max_w, car.traction_max_n,
                      car.superclip_max_w, car.es_capacity_j, max(0.0, car.harvest_per_lap_j), V_MIN, G,
                      car.mguk_power_w, car.taper_a1_w, car.taper_b1_w_per_kmh, car.taper_knee_kmh,
-                     car.taper_a2_w, car.taper_b2_w_per_kmh], dtype=np.float64)
+                     car.taper_a2_w, car.taper_b2_w_per_kmh, float(car.regen_by_command)], dtype=np.float64)
 
 
 def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, deploy_cap=np.inf):
@@ -100,6 +102,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     ice, eh, ed, deploy_max, traction, superclip, cap_j, budget, vmin, g = k[6:16]
     deploy_max = min(deploy_max, deploy_cap)
     mguk, a1, b1, knee, a2, b2 = k[16:22]
+    regen_by_command = k[22] != 0.0
     nv, ns = value_next.shape
     v0, dv, ds_soc = v_grid[0], v_grid[1] - v_grid[0], s_grid[1] - s_grid[0]
     v = np.asarray(v_grid, dtype=np.float64)[:, None]
@@ -130,6 +133,8 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
         ice_h = np.where(accel, np.minimum(ice_h, superclip),
                          np.where(partial, np.minimum(ice_h, np.maximum(0.0, ice - p_need)), 0.0))
         brake_h = np.where(braking, np.minimum(np.minimum(-p_need, cap_k), room), 0.0)
+        if regen_by_command:
+            brake_h = np.minimum(brake_h, max(-c, 0.0))
         dt = 2.0 * ds / (v + v_next)
         e_in = eh * (ice_h + brake_h) * dt
         s_next = np.minimum(np.maximum(soc + e_in - deploy * inv_ed * dt, 0.0), cap_j)

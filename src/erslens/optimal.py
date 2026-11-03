@@ -75,6 +75,11 @@ def race_car(car: CarParams) -> CarParams:
     return car.with_(fuel_kg=car.fuel_kg / 2.0, fuel_per_lap_kg=0.0)
 
 
+def dp_car(car: CarParams) -> CarParams:
+    """race_car with braking harvest chosen by the command, as the DP's recharge pricing needs."""
+    return race_car(car).with_(regen_by_command=True)
+
+
 def start_at_slowest_point(track: Track, car: CarParams) -> Track:
     k = int(np.argmin(braking_envelope(track, car)))
     roll = lambda a: None if a is None else np.roll(a, -k)
@@ -140,7 +145,14 @@ class _Compiled:
             out = simulate_laps(p, cmd, st, car, 1, soc0 / car.es_capacity_j, self.v0)
             return {k: a[0] for k, a in out.items()}
 
+        def planned_harvest(cmd, soc0):
+            # With the recharge limit lifted: the replay under the limit stops harvesting once it is
+            # reached, so it can never show that a plan wanted more (research log, 2026-11-03).
+            out = simulate_laps(p, cmd, st, unlimited, 1, soc0 / car.es_capacity_j, self.v0)
+            return (out["harvest"][0] * out["dt"][0]).sum() * car.eta_harvest
+
         self.backward, self.forward, self.replay = jax.jit(backward), jax.jit(forward), jax.jit(replay)
+        self.planned_harvest = jax.jit(planned_harvest)
         if dp_backend() == "cuda":
             from .cuda_dp import CudaBackward, constants
 
@@ -160,8 +172,9 @@ def _attempt(c: _Compiled, car: CarParams, track: Track, soc0: float, price: flo
     cmd, start_cost = c.forward(values, v_end, soc0, price)
     out = {k: np.asarray(a) for k, a in c.replay(cmd, soc0).items()}
     harvested = float((out["harvest"] * out["dt"]).sum() * car.eta_harvest)
+    planned = float(c.planned_harvest(cmd, soc0))
     return Solution(track, car, np.asarray(cmd), soc0, price,
-                    float(start_cost) - price * harvested, float(out["dt"].sum()), out), harvested
+                    float(start_cost) - price * harvested, float(out["dt"].sum()), out), planned
 
 
 def _priced(attempt, budget: float, lo: float, hi: float, n_bisect: int):
@@ -180,7 +193,7 @@ def solve(track: Track, car: CarParams, grid: Grid | None = None, soc0_fracs=(0.
     price term), to be compared with lap_time_sim_s from replaying the strategy in the simulator;
     the two agree once the grid is fine enough, which is the convergence check.
     """
-    car = race_car(car)
+    car = dp_car(car)
     track = start_at_slowest_point(track, car)
     grid = grid or default_grid(car)
     c = _Compiled(track, car, grid, terminal)
@@ -214,7 +227,7 @@ def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 
     0.016 s from dv 0.25, and the DP prediction matches the replay to within 0.02 s.
     """
     coarse = solve(track, car, soc0_fracs=(soc0_frac,), max_bisect=10)
-    rc = race_car(car)
+    rc = dp_car(car)
     tr = start_at_slowest_point(track, rc)
     c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
     budget = rc.harvest_per_lap_j

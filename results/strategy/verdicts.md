@@ -1,8 +1,8 @@
 | Check | Result | Detail |
 |---|---|---|
-| Convergence rule (<= 0.05 s) | held | 138 of 138 M1 results converged, 6 after grid refinement; 0 excluded |
+| Convergence rule (<= 0.05 s) | NOT held | 137 of 138 M1 results converged, 6 after grid refinement; 1 excluded (China sweep i0d0m2) |
 | S1 | held | Australia 0.00, China 0.13, Miami 0.00, Canada 0.00 |
-| S2 | held | Australia 25 of 27 (93%), China 27 of 27 (100%), Miami 27 of 27 (100%), Canada 27 of 27 (100%); excluded cars counted as not clipping |
+| S2 | held | Australia 25 of 27 (93%), China 26 of 27 (96%), Miami 27 of 27 (100%), Canada 27 of 27 (100%); excluded cars counted as not clipping |
 | S3 | held | 3 of 4 circuits clip without the taper: Australia 0.51, China 0.29, Miami 0.00, Canada 0.00 |
 | S4 | held | Australia 26 km/h lower, China 36 km/h lower, Miami 29 km/h lower, Canada 30 km/h lower |
 | S5 | NOT held | Australia optimum faster by 2.026 s, China optimum faster by 1.724 s, Miami optimum faster by 1.824 s, Canada optimum faster by 1.670 s |
@@ -17,7 +17,7 @@
 | S4 (corrected rules) | held | Australia 25 km/h, China 34 km/h, Miami 28 km/h, Canada 29 km/h |
 | Starting charge | sensitivity | Australia 0.103 s between 30% and 70%, Canada 0.169 s between 30% and 70%, China 0.049 s between 30% and 70%, Miami 0.034 s between 30% and 70% |
 
-**Corrected 2026 race rules** (configs/rules_2026_races.yaml; logged 2026-10-07, before these runs). Same thresholds as above.
+**Per-race 2026 rules** (configs/rules_2026_races.yaml as it stood when these rows were run; see the research log). Same thresholds as above.
 
 | Variant | Circuit | Clip ratio | Clips? | Deploy speed gap | Lap vs original | Convergence |
 |---|---|---|---|---|---|---|

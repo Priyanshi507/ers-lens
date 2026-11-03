@@ -31,7 +31,7 @@ def solve_all(events, out_dir: Path):
     from erslens.optimal import race_car, solve_refined, start_at_slowest_point
     from erslens.params import load_car_params
     from erslens.sectors import SECTOR_CAP_W, with_fia_sectors
-    from erslens.strategy import CONVERGED_S, clip_metrics, race_rules
+    from erslens.strategy import clip_metrics, race_rules, solution_ok
 
     (out_dir / "profiles").mkdir(parents=True, exist_ok=True)
     path = out_dir / "runs.csv"
@@ -56,7 +56,7 @@ def solve_all(events, out_dir: Path):
                 o = {k: np.asarray(v) for k, v in sol.out.items()}
                 d = o["deploy"] * o["dt"] / 1e6
                 r = {"event": e, "variant": variant, "lap_s": sol.lap_time_sim_s, "dp_pred_s": sol.lap_time_dp_s,
-                     "converged": abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S,
+                     "converged": solution_ok(sol),
                      "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"],
                      "superclip_mj": float((o["superclip"] * o["dt"]).sum() / 1e6), "deploy_mj": float(d.sum()),
                      "deploy_in_sectors_mj": float(d[mask].sum()), "deploy_outside_mj": float(d[~mask].sum()),

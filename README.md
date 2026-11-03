@@ -359,7 +359,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      148 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      152 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
@@ -393,6 +393,12 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 
 ## Limitations
 
+- Solver correction, 2026-11-03: where braking alone could recover more than the per-lap recharge
+  limit, the DP could return a lap that ended below its starting charge (the price on harvest
+  could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price
+  search tests the planned harvest, and the convergence rule also requires the lap to keep its
+  charge. Re-checked on the saved results, no verdict changed; the experiments are being re-run
+  with the fixed solver (research log, 2026-11-03).
 - The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 to 345 km/h)
   is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 21 (19 October 2026), as in
   the [2024 Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf).

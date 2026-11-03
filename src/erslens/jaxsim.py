@@ -81,6 +81,8 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
                         jnp.minimum(jnp.minimum(-p_need, cap_k),
                                     jnp.minimum(budget, space) / (eh * dt_guess)),
                         0.0)
+    if car.regen_by_command:
+        brake_h = jnp.minimum(brake_h, jnp.maximum(-cmd, 0.0))
 
     dt = 2.0 * ds / (v + v_next)
     e_in = eh * (ice_h + brake_h) * dt

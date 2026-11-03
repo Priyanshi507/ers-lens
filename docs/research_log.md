@@ -1795,3 +1795,57 @@ P2. At 80% or more of circuits the FIA sectors cost at most half of what 250 kW 
     costs, relative to no sector limit.
 P3. At 80% or more of circuits the optimal lap deploys less energy inside the sectors and more
     outside them than with no sector limit.
+
+### 2026-11-03: 250 kW sectors: P1-P3 not held, and a solver bug found through them
+
+Kaggle T4, CUDA backward pass, commit e9fcf5e (results/sectors, kept as run).
+
+- P1 (none <= fia <= everywhere): NOT HELD, 10 of 14. P2 (sectors cost at most half of
+  everywhere, 80%): NOT HELD, 11 of 14 (Spain 0.242 against 0.476 s; Azerbaijan and United States
+  unconverged). P3 (energy moves out of the sectors, 80%): NOT HELD, 9 of 14.
+- At the 10 circuits with three converged solves and no anomaly, the FIA sectors cost 0.032-0.242
+  s per lap (median about 0.08 s) against 0.27-0.56 s for 250 kW everywhere (median about 0.49 s).
+
+Looked at after the run. At Britain and Singapore the "fia" lap was faster than "none" (by 0.087
+and 0.207 s), which an extra limit cannot do. Both laps harvest exactly the recharge limit and
+end the lap 0.57 and 1.89 MJ below their starting charge, so they are not charge-neutral laps.
+
+Cause. Braking harvest in jaxsim._step happens whatever the command, and the replay (correctly)
+stops harvesting once the lap's recharge limit is reached. The DP prices harvest to respect the
+limit, but no price can reduce braking harvest, so where braking alone could recover more than
+the limit the DP plans with energy the replay will not get, and the lap ends short. The price
+search could not see it, because it read harvest from the replay, which never exceeds the limit.
+The 0.05 s rule did not catch every case, because the lost harvest at the end of the lap changes
+the charge more than the lap time.
+
+How far it reaches (laps ending more than 10 kJ below their start, from the saved results):
+results/sectors 6 of 42 (2 of them passed the 0.05 s rule: Britain fia, Singapore fia);
+results/fia_fix 2 of 40 (Australia, low and high car, 350 kW; both already unconverged);
+results/fia_fix_calendar and _fia 2 of 36 (United States, both caps; already unconverged);
+Strategy Lab runs 54 of 945 rows across seven result sets, 47 already excluded by the 0.05 s
+rule and 7 not (legal-car sweep, no-taper and 8 MJ variants at Australia, China and Miami).
+The whole-race lap tables of 2026-11-02 already dropped any lap ending below its target.
+
+Fix (tests/test_optimal.py, tests/test_cuda_dp.py):
+- For the DP only (optimal.dp_car), braking harvest is at most what the command asks
+  (CarParams.regen_by_command), as brake-by-wire allows; the most negative command gives the
+  old full harvest, so every old choice is still available. The simulator's other users (M2,
+  simple rules) are unchanged.
+- The price search tests the harvest the plan would take with the limit lifted.
+- The convergence rule now also requires the lap to end no more than 5 kJ below its start
+  (strategy.solution_ok, and in strategy.resolve_runs for saved rows).
+- On the demo circuit with limits of 1.0, 3.0 and 8.5 MJ every lap now keeps its charge; on a
+  short test track the non-binding case is unchanged to the microsecond, and a binding case the
+  old solver solved validly is unchanged (3.0 MJ) or 0.13 s faster (2.0 MJ, where the old lap
+  ended 324 kJ above its start).
+
+Consequence: every DP result was computed with the old solver. They are re-run with the fixed
+one, starting with the sectors and FIA-fix experiments, then the Strategy Lab. No new
+predictions: P1-P3, C1-C3, F1-F4 and S1-S7 are re-judged on the re-runs, the verdicts recorded
+before stay as recorded, and any change is reported as a correction.
+
+Re-check of the saved Strategy Lab rows under the new rule (no re-run yet; strategy_evaluate.py on
+results/strategy, strategy_q_low, strategy_q_high): no verdict changes. Counts that moved:
+original car S2 China 27 -> 26 of 27; high car S2 Australia 18 -> 17 of 27; high car, Miami,
+8 MJ limit now excluded (it had been 0.383 s faster than with 8.5 MJ, which a lower limit cannot
+give: the lap ended 2.0 MJ short). The Strategy Lab page drops the same two sweep cars.

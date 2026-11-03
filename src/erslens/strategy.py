@@ -86,6 +86,12 @@ def rules_sensitivity(path: str = "configs/rules_2026_races.yaml") -> dict:
 # Pre-registered rule (research log, 2026-10-07): an M1 result whose own DP prediction differs
 # from its simulator replay by more than this is not used in any verdict.
 CONVERGED_S = 0.05
+END_SHORT_J = 5e3   # a lap may end at most this far below its start charge (research log, 2026-11-03)
+
+
+def solution_ok(sol) -> bool:
+    """The convergence rule: the DP's prediction matches the replay, and the lap keeps its charge."""
+    return abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S and sol.soc_end_j >= sol.soc0_j - END_SHORT_J
 REFINED_TAG = "|refined"
 NOT_M1 = ("m2", "simple_")
 # Finer grids tried, in order, for a result that fails the rule; each stays within ~4 GB.
@@ -132,6 +138,8 @@ def resolve_runs(runs):
     other = runs.variant.str.startswith(NOT_M1)
     m1 = runs[~other].copy()
     m1["converged"] = (m1.dp_pred_s - m1.lap_s).abs() <= CONVERGED_S
+    if {"soc_start_mj", "soc_end_mj"} <= set(m1.columns):
+        m1["converged"] &= m1.soc_end_mj >= m1.soc_start_mj - END_SHORT_J / 1e6
     m1["refined"] = m1.car_id.str.contains(REFINED_TAG, regex=False)
     used, excluded = [], []
     for _, case in m1.groupby(["event", "variant", "base_id"], sort=False):

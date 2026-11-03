@@ -35,6 +35,9 @@ class CarParams:
     brake_g_low: float = 1.8
     brake_g_high: float = 5.0
     brake_v_ref_ms: float = 83.0
+    # Braking harvest at most what the command asks (brake-by-wire), so a harvest price can steer
+    # it too; set only for the DP, whose recharge limit relies on that (research log, 2026-11-03).
+    regen_by_command: bool = False
 
     def with_(self, **changes) -> "CarParams":
         return replace(self, **changes)

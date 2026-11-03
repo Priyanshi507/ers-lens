@@ -19,6 +19,13 @@ def test_converged_rows_are_used_and_unconverged_are_excluded():
     assert list(excluded.car_id) == ["c2"]
 
 
+def test_a_lap_ending_short_of_its_start_charge_is_excluded():
+    runs = pd.DataFrame([{**run("A", "sweep", "c1", 70.0, 70.01), "soc_start_mj": 2.0, "soc_end_mj": 2.0},
+                         {**run("A", "sweep", "c2", 69.5, 69.5), "soc_start_mj": 2.0, "soc_end_mj": 1.0}])
+    used, excluded = resolve_runs(runs)
+    assert list(used.car_id) == ["c1"] and list(excluded.car_id) == ["c2"]
+
+
 def test_threshold_is_inclusive():
     used, excluded = resolve_runs(pd.DataFrame([run("A", "nominal", "nominal", 70.0, 70.0 + CONVERGED_S)]))
     assert len(used) == 1 and excluded.empty

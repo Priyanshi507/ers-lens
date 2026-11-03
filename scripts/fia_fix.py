@@ -72,7 +72,7 @@ def main():
     from erslens.ingest import load_track
     from erslens.optimal import solve_refined
     from erslens.params import load_car_params
-    from erslens.strategy import CONVERGED_S, REFINE_LADDER, clip_metrics, race_rules
+    from erslens.strategy import REFINE_LADDER, clip_metrics, race_rules, solution_ok
     from erslens.track import demo_circuit
 
     events = ["demo"] if args.demo else args.events
@@ -105,7 +105,7 @@ def main():
         o = {k: np.asarray(v) for k, v in sol.out.items()}
         r = {"event": e, "car": name, "cap_kw": cap / 1e3, "lap_s": sol.lap_time_sim_s,
              "dp_pred_s": sol.lap_time_dp_s,
-             "converged": abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S,
+             "converged": solution_ok(sol),
              "harvest_mj": sol.harvested_j / 1e6, **superclip_metrics(o, sol.track.ds, cap),
              "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "seconds": round(seconds, 1)}
         return r, sol, o

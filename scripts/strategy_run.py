@@ -20,7 +20,7 @@ from erslens.gradopt import solve_gradient
 from erslens.optimal import race_car, solve_refined, start_at_slowest_point
 from erslens.params import load_car_params
 from erslens.simple import tune
-from erslens.strategy import (CONVERGED_S, REFINE_LADDER, REFINED_TAG, clip_metrics, legal_sweep, no_taper,
+from erslens.strategy import (CONVERGED_S, END_SHORT_J, REFINE_LADDER, REFINED_TAG, clip_metrics, legal_sweep, no_taper,
                               original_grid, race_rules, resolve_runs, rules_sensitivity, variant_setup)
 from erslens.track import demo_circuit
 
@@ -141,7 +141,8 @@ def main():
                 record(r.event, r.variant, tag, refined)
                 if not result:
                     result = pd.read_csv(path).set_index(["event", "variant", "car_id"]).loc[(r.event, r.variant, tag)].to_dict()
-                if abs(float(result["dp_pred_s"]) - float(result["lap_s"])) <= CONVERGED_S:
+                if abs(float(result["dp_pred_s"]) - float(result["lap_s"])) <= CONVERGED_S and \
+                        float(result["soc_end_mj"]) >= float(result["soc_start_mj"]) - END_SHORT_J / 1e6:
                     break
         f.close()
         print(f"All results in {path}")

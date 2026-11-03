@@ -48,3 +48,14 @@ def test_no_energy_means_engine_only_lap_time():
     empty = CAR.with_(es_capacity_j=1.0, harvest_per_lap_j=0.0)
     sol = solve(TRACK, empty, soc0_fracs=(0.5,))
     assert sol.lap_time_sim_s == pytest.approx(replay_constant(empty, 0.0, 0.5), abs=0.02)
+
+
+@pytest.mark.parametrize("limit_j", [0.3e6, 1.0e6, 3.0e6])
+def test_a_binding_recharge_limit_never_drains_the_battery(limit_j):
+    """The price search once read harvest from a replay that already stops at the limit, so a plan
+    wanting more looked feasible and the lap ended up to 2 MJ short (research log, 2026-11-03)."""
+    from erslens.track import demo_circuit
+
+    sol = solve(demo_circuit(), CAR.with_(harvest_per_lap_j=limit_j, superclip_max_w=350e3), soc0_fracs=(0.5,))
+    assert sol.soc_end_j >= sol.soc0_j - 5e3
+    assert sol.harvested_j <= limit_j * (1 + 1e-9)

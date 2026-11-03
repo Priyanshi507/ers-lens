@@ -4,14 +4,14 @@ import pytest
 
 from erslens.cuda_dp import constants, reference_step
 from erslens.jaxsim import params_of, static_track
-from erslens.optimal import _interp, _transition, grid_with, race_car, start_at_slowest_point
+from erslens.optimal import _interp, _transition, dp_car, grid_with, start_at_slowest_point
 from erslens.params import load_car_params
 from erslens.track import demo_circuit
 
 
 @pytest.fixture(scope="module")
 def setup():
-    rc = race_car(load_car_params("configs/car_2026_q_low.yaml")).with_(superclip_max_w=250e3)
+    rc = dp_car(load_car_params("configs/car_2026_q_low.yaml")).with_(superclip_max_w=250e3)
     tr = start_at_slowest_point(demo_circuit(), rc)
     g = grid_with(rc, 0.5, 41)
     st = static_track(tr, rc)

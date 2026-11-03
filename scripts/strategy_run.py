@@ -29,9 +29,13 @@ FIELDS = ["event", "variant", "car_id", "lap_s", "dp_pred_s", "harvest_mj", "soc
           "full_throttle_mean_kmh", "corr_with_nominal", "seconds"]
 
 
-def load_track(event: str, year: int):
+def load_track(event: str, year: int, saved: str | None = None):
     if event == "demo":
         return demo_circuit()
+    if saved:
+        from erslens.ingest import load_track as load_saved
+
+        return load_saved(Path(saved) / f"{event}.npz")
     from erslens.ingest import reference_track
 
     return reference_track(year, event)
@@ -51,6 +55,8 @@ def main():
     ap.add_argument("--demo", action="store_true", help="use the synthetic demo circuit")
     ap.add_argument("--quick", action="store_true", help="coarse grids and 3 sweep cars: smoke test only")
     ap.add_argument("--year", type=int, default=2026)
+    ap.add_argument("--tracks", help="read the tracks saved by scripts/export_tracks.py from this folder "
+                                     "(machines without the FastF1 cache)")
     ap.add_argument("--out", default="results/strategy")
     ap.add_argument("--car", default="configs/car_2026.yaml", help="car parameter file")
     ap.add_argument("--skip-soc0", action="store_true", help="leave out the starting-charge sensitivity stage")
@@ -70,14 +76,14 @@ def main():
     if path.exists():
         with path.open() as f:
             done = {(r["event"], r["variant"], r["car_id"]) for r in csv.DictReader(f)}
-    write_header = not path.exists()
+    write_header = not path.exists() or path.stat().st_size == 0
     f = path.open("a", newline="")
     writer = csv.DictWriter(f, fieldnames=FIELDS)
     if write_header:
         writer.writeheader()
 
     car = load_car_params(args.car)
-    tracks = {e: load_track(e, args.year) for e in events}
+    tracks = {e: load_track(e, args.year, args.tracks) for e in events}
     sweep = legal_sweep(car)[:3] if args.quick else legal_sweep(car)
     nominal_cmd = {}
 

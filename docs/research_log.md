@@ -1881,3 +1881,15 @@ FIA-fix, four circuits, three cars (F1-F4 of 2026-11-01), corrected solver:
 Changed verdicts: C3 and F2, not held to held; both of their failures had come from solves the bug
 broke. The README, the FIA-fix page and docs/fia_fix_dose.png now use these runs; the first runs
 stay in results/ unchanged. Next: the Strategy Lab re-run (finding 8).
+
+### 2026-11-03: Strategy Lab re-run with the fixed solver: plan
+
+All three cars of finding 8 (original, both ends of the calibration ridge) are re-run in full with
+the fixed solver, every stage then --rules then --refine, into results/strategy_rules_q_fixed,
+strategy_q_low_fixed and strategy_q_high_fixed (scripts/kaggle_rerun_strategy.md; the tracks
+are the saved results/tracks files, which scripts/export_tracks.py wrote from the tracks every
+Strategy Lab result used). Of the 420 saved DP rows, 290 harvest within 0.05 MJ of their limit,
+where the fix can change the result. Check before anything is reported: rows whose limit did not
+bind must reproduce the saved rows to 0.001 s; any larger difference is a code or track error,
+and nothing is reported until it is found. Then S1-S7 are re-judged; verdicts recorded before
+stay as recorded.

@@ -259,20 +259,20 @@ MGU-K can use the extra 100 kW (its cap tapers from 350 kW at 290 km/h to 250 kW
 On four circuits with three cars, total super-clipping time fell at all 12 pairs while its
 energy rose by 7-28% on the ten that converged (predictions F1-F4: F3 and F4 held, F1 and F2
 not held). This is the lap-time optimum of a simplified car, not a measurement of real cars;
-14 of the 18 circuits use an assumed 8.5 MJ recharge limit
-([`results/fia_fix_calendar/assumptions.csv`](results/fia_fix_calendar/assumptions.csv)).
-Checked afterwards against the FIA's per-race Power Unit Information documents, the assumption
-is right at 11 of the 14 and wrong at Austria and Britain (8.0 MJ) and Monza (7.0 MJ); those
-three are being re-run with the FIA values, which every circuit now uses
-([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml); research log, 2026-11-03).
+Every circuit now uses its recharge limit from the FIA's per-race Power Unit Information
+document ([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml)). The first run
+assumed 8.5 MJ at 14 circuits, which was wrong at Austria and Britain (8.0 MJ) and Monza
+(7.0 MJ); re-run with the FIA values, every count above is unchanged
+([`results/fia_fix_calendar_fia`](results/fia_fix_calendar_fia); the first run stays in
+[`results/fia_fix_calendar`](results/fia_fix_calendar); research log, 2026-11-03).
 
 ![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
 
 Explore every circuit under both caps on the [FIA-fix page](https://priyanshi507.github.io/ers-lens/fia.html).
 
 Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original --caps 250 350
---assume-recharge-mj 8.5 --out results/fia_fix_calendar --events ...` (every circuit), then
-`python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar/runs.csv]`.
+--out results/fia_fix_calendar_fia --events ...` (every circuit), then
+`python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar_fia/runs.csv]`.
 Runs on a free Kaggle T4 GPU (`scripts/kaggle_fia_fix_calendar.md`).
 
 ### 10. Whole-race energy plans: not yet trustworthy

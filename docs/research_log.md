@@ -1703,3 +1703,20 @@ from the FIA documents, so no run needs --assume-recharge-mj. Re-run planned for
 corrected circuits, original car, both caps (scripts/kaggle_fia_fix_corrected.md). What will be
 reported: C1-C3 re-counted with the corrected rows replacing the assumed ones; the verdicts
 recorded on 2026-11-01 stay as recorded, and any change is reported as a correction.
+
+### 2026-11-03: Re-run with the FIA limits: no verdict changes
+
+Kaggle T4, commit 2551d47, XLA backend, original car, both caps (results/fia_fix_corrected). The
+six rows replace the assumed-limit rows in results/fia_fix_calendar_fia; the first run stays
+unchanged in results/fia_fix_calendar.
+
+| Circuit (FIA limit) | Lap gain under 350 kW, assumed / FIA | Super-clip energy 250 -> 350 kW, FIA (MJ) | Converged |
+|---|---|---|---|
+| Austria (8.0 MJ) | 0.145 / 0.146 s | 4.19 -> 5.10 | both |
+| Britain (8.0 MJ) | 0.126 / 0.079 s | 3.82 -> 4.24 | both |
+| Italy (7.0 MJ) | 0.357 / 0.201 s | 4.79 -> 4.91 | both |
+
+- Austria barely changes: its optimal laps harvest 7.6-8.0 MJ, so the limit hardly binds.
+- C1 held 16 of 18, C2 not held 12 of 18, C3 not held 17 of 18, less energy on the longest
+  straight 15 of 18, more below 250 km/h 16 of 18: all as recorded on 2026-11-01.
+- The FIA-fix page now shows results/fia_fix_calendar_fia, with no circuit marked as assumed.

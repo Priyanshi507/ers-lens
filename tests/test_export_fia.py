@@ -10,7 +10,7 @@ from export_fia import build  # noqa: E402
 
 @pytest.fixture(scope="module")
 def data():
-    return build(Path("results/fia_fix_calendar"), Path("results/fia_fix"))
+    return build(Path("results/fia_fix_calendar_fia"), Path("results/fia_fix"))
 
 
 def test_every_circuit_has_both_caps(data):
@@ -36,6 +36,5 @@ def test_published_data_is_current(data):
     assert published == json.loads(json.dumps(data))
 
 
-def test_assumed_limits_are_marked(data):
-    assumed = [c["label"] for c in data["circuits"] if c["assumed_recharge_mj"]]
-    assert len(assumed) == 14 and "Canada" not in assumed
+def test_no_circuit_uses_an_assumed_limit(data):
+    assert not [c["label"] for c in data["circuits"] if c["assumed_recharge_mj"]]

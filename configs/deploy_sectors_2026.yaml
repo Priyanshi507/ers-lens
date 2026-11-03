@@ -1,0 +1,23 @@
+# Race sectors where the MGU-K is limited to 250 kW below 310 km/h, then the usual taper
+# (Section C Iss 21, C5.2.8 iii; listed per race under Section B Iss 09, B7.2.1 b xii).
+# Source: each race's FIA "Power Unit Information" document, column "Sectors where the
+# alternative power curve defined above applies in Sprint & Race". Windows are FIA lap distance
+# (m) along the FIA centreline; they are scaled to each track file's length. The rule applies
+# from Miami; the three races before it have no such sectors.
+# pdf: read from the PDF (pdftotext -layout); text: the document's text from web search only.
+events:
+  Canada:               {centreline_m: 4361, read: pdf, sectors: [[220, 1200]]}
+  Austria:              {centreline_m: 4236, read: pdf, sectors: [[2170, 2960], [3720, 3920]]}
+  British Grand Prix:   {centreline_m: 5891, read: pdf, sectors: [[350, 1000], [4950, 5450]]}
+  Belgium:              {centreline_m: 7004, read: pdf, sectors: [[2400, 4900]]}
+  Italian Grand Prix:   {centreline_m: 5793, read: pdf, sectors: [[2100, 2800]]}
+  Spanish Grand Prix:   {centreline_m: 5416, read: pdf, sectors: [[1500, 5100]]}
+  Azerbaijan Grand Prix: {centreline_m: 6003, read: pdf, sectors: [[300, 600], [1500, 2870], [3700, 4050]]}
+  Bahrain Grand Prix:   {centreline_m: 5543, read: pdf, sectors: [[1550, 2500], [3100, 4100]]}
+  Miami:                {centreline_m: 5412, read: pdf, sectors: [[370, 1550], [3100, 3520]]}
+  Monaco Grand Prix:    {centreline_m: 3337, read: pdf, sectors: []}   # "-": no such sectors
+  Barcelona Grand Prix: {centreline_m: 4657, read: pdf, sectors: [[820, 2100], [2520, 2850], [3480, 3750]]}  # V2
+  Hungarian Grand Prix: {centreline_m: 4381, read: pdf, sectors: [[1780, 2700], [3500, 4000]]}
+  Dutch Grand Prix:     {centreline_m: 4259, read: pdf, sectors: [[350, 800], [2000, 2450], [3100, 3400]]}
+  Singapore Grand Prix: {centreline_m: 4927, read: pdf, sectors: [[400, 900], [1750, 2150], [2600, 3000]]}
+  United States Grand Prix: {centreline_m: 5513, read: pdf, sectors: [[1300, 1850], [3700, 5250]]}

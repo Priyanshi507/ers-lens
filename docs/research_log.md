@@ -1747,3 +1747,51 @@ Section B Issue 09 (1 October 2026) are. Read as PDFs:
 Nothing in the results changes. Planned: model the 250 kW curve on each race's named sectors
 (lap distance mapped from the FIA centreline to the track files) in place of the 250 kW-everywhere
 bound, as a new experiment with its predictions written first.
+
+## 2026-11-03: The FIA's real 250 kW sectors in the Strategy Lab; predictions P1-P3
+
+Question: from Miami the MGU-K is limited to 250 kW below 310 km/h in race sectors that the FIA
+names for each circuit (Section C Iss 21, C5.2.8 iii; Section B Iss 09, B7.2.1 b xii). So far
+the model bounded this only by 250 kW on the whole lap. What does the real rule cost, and where
+does the optimal car put its energy instead?
+
+Design:
+- A per-point deployment cap (Track.deploy_cap_w) passes through jaxsim._step, the DP (XLA and
+  the CUDA kernel) and the replay. With no sectors the results are unchanged bit for bit, and a
+  sector covering the whole lap equals the old 250 kW-everywhere bound bit for bit
+  (tests/test_sectors.py); the kernel's source compiled as C++ matches its NumPy twin with the
+  cap on (tests/test_cuda_dp.py).
+- Sectors (configs/deploy_sectors_2026.yaml) are the documents' column "sectors where the
+  alternative power curve defined above applies in Sprint & Race", bracketed (qualifying-only)
+  windows excluded. FIA lap distance is scaled to each track file's length (they differ from
+  the FIA centreline by 0.6-2.0%); both are assumed to start at the control line.
+- Each circuit is solved three ways, original car, the event's FIA race limits, 350 kW
+  super-clip: "none", "fia", "everywhere" (scripts/sectors_run.py). Circuits: every post-Miami
+  circuit whose sectors are recorded before the run.
+
+Assumptions and limits: Issue 21 applies the curve "during any power limited period"; what the
+ECU counts as one is in FIA-F1-DOC-058, which is not public, so the model applies the limit
+whenever the car is in a sector, an upper bound on its effect; "none" is the lower bound, so the
+real rule's effect lies between the two. Public descriptions agree only in outline: the ECU
+enters "power limited pending" then "power limited", during which the driver's maximum power
+demand is reduced and cannot rise again except with Boost (C5.12.4-C5.12.5); what starts a
+period is in DOC-058 (searched 2026-11-03: not public). Overtake mode is not modelled.
+Alignment error of the windows is probably tens of metres; not measured.
+
+Circuits (all sectors read from the PDFs): Miami, Canada, Barcelona, Austria, Britain, Belgium,
+Hungary, Netherlands, Italy, Spain, Azerbaijan, Bahrain (Sepang), Singapore, United States: 14.
+Monaco is left out: its document lists no such sectors. Australia, China and Japan raced before
+the rule. A check of the alignment, made before any solve: inside the sectors a larger share of
+points is corner-limited than over the whole lap at all 14 (for example Hungary 0.72 against
+0.48, Miami 0.66 against 0.33; weakest Bahrain 0.37 against 0.34), as expected of the FIA's
+"twisty" parts of the lap. Sector share of the lap: 0.12 (Italy) to 0.66 (Spain).
+
+Nothing has been seen: the code was smoke-tested on one circuit with its output discarded.
+
+Predictions (Kaggle T4, ERSLENS_DP_BACKEND=cuda; a circuit counts only if all three solves pass
+the 0.05 s convergence rule):
+P1. At every circuit, lap time none <= fia <= everywhere, each within 0.02 s.
+P2. At 80% or more of circuits the FIA sectors cost at most half of what 250 kW everywhere
+    costs, relative to no sector limit.
+P3. At 80% or more of circuits the optimal lap deploys less energy inside the sectors and more
+    outside them than with no sector limit.

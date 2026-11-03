@@ -23,13 +23,14 @@ def setup():
     return g, st, p, unlimited, mass, V, S, U, k, table
 
 
-@pytest.mark.parametrize("point", [0, 50, 200, 400, 700])
-def test_reference_step_matches_the_xla_step(setup, point):
+@pytest.mark.parametrize("point,cap", [(0, np.inf), (50, np.inf), (200, np.inf), (400, np.inf), (700, np.inf),
+                                       (200, 250e3), (700, 250e3)])
+def test_reference_step_matches_the_xla_step(setup, point, cap):
     g, st, p, unlimited, mass, V, S, U, k, table = setup
     target, straight = st.env[point], st.straight[point]
-    v_n, s_n, e_in, dt = _transition(p, unlimited, st.ds, mass, V, S, U, target, straight)
+    v_n, s_n, e_in, dt = _transition(p, unlimited, st.ds, mass, V, S, U, target, straight, cap)
     xla = np.asarray((dt + 2e-7 * e_in + _interp(jnp.asarray(table), g, v_n, s_n)).min(axis=1))
-    ref = reference_step(table, g.v_ms, g.soc_j, g.cmd_w, float(target), bool(straight), 2e-7, k)
+    ref = reference_step(table, g.v_ms, g.soc_j, g.cmd_w, float(target), bool(straight), 2e-7, k, cap)
     assert np.abs(ref - xla).max() < 1e-9
 
 
@@ -48,11 +49,11 @@ def test_kernel_source_run_on_the_cpu_matches_the_reference(setup, tmp_path):
             "struct D { int x, y; }; static D blockIdx, blockDim, threadIdx;\n")
     harness = """
 extern "C" void run_all(const double* vn, double* out, const double* cmd, const double* vg, const double* sg,
-    int nv, int ns, int nu, double v0, double dv, double dsoc, double target, int straight, double price, const double* k) {
+    int nv, int ns, int nu, double v0, double dv, double dsoc, double target, int straight, double price, const double* k, double cap) {
   blockDim.x = 1; threadIdx.x = 0;
   for (int iv = 0; iv < nv; ++iv) for (int is = 0; is < ns; ++is) {
     blockIdx.y = iv; blockIdx.x = is;
-    dp_step(vn, out, cmd, vg, sg, nv, ns, nu, v0, dv, dsoc, target, straight, price, k);
+    dp_step(vn, out, cmd, vg, sg, nv, ns, nu, v0, dv, dsoc, target, straight, price, k, cap);
   }
 }
 """
@@ -64,13 +65,13 @@ extern "C" void run_all(const double* vn, double* out, const double* cmd, const 
     g, st, p, unlimited, mass, V, S, U, k, table = setup
     vg, sg, cm = (np.ascontiguousarray(a, dtype=np.float64) for a in (g.v_ms, g.soc_j, g.cmd_w))
     table = np.ascontiguousarray(table)
-    for point in (0, 200, 700):
+    for point, cap in ((0, np.inf), (200, np.inf), (700, np.inf), (200, 250e3)):
         target, straight = float(st.env[point]), bool(st.straight[point])
         out = np.empty_like(table)
         lib.run_all(ptr(table), ptr(out), ptr(cm), ptr(vg), ptr(sg), len(vg), len(sg), len(cm), ctypes.c_double(vg[0]),
                     ctypes.c_double(vg[1] - vg[0]), ctypes.c_double(sg[1] - sg[0]), ctypes.c_double(target),
-                    int(straight), ctypes.c_double(2e-7), ptr(k))
-        assert np.array_equal(out, reference_step(table, g.v_ms, g.soc_j, g.cmd_w, target, straight, 2e-7, k))
+                    int(straight), ctypes.c_double(2e-7), ptr(k), ctypes.c_double(cap))
+        assert np.array_equal(out, reference_step(table, g.v_ms, g.soc_j, g.cmd_w, target, straight, 2e-7, k, cap))
 
 
 def test_unknown_backend_is_rejected(monkeypatch):

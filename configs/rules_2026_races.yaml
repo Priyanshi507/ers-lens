@@ -23,10 +23,9 @@
 #      here only as an extreme-case bound (250 kW everywhere).
 #  [7] FIA, "Power Unit Information" document for each event (Race Director, fia.com decision
 #      documents), table "Maximum Recharge per lap": Race (Overtake not active), Race (Overtake
-#      active), Qualifying, Free Practice, Out laps. PDFs read 2026-11-03 for Canada, Austria,
-#      Britain, Belgium, Italy, Spain, Azerbaijan and Bahrain (Sepang); for Japan, Monaco,
-#      Barcelona, Hungary, Netherlands, Singapore and United States the documents' text as
-#      returned by web search, PDFs not read. Every press value above agrees with [7].
+#      active), Qualifying, Free Practice, Out laps. PDFs read 2026-11-03 for every circuit from
+#      Miami on (Barcelona V2, Spain V2); Japan from the document's text via web search only.
+#      Every press value above agrees with [7].
 # Overtake mode (+0.5 MJ while active) is not modelled; the race values are without it.
 # Super-clip cap: 250 kW for the three events before Miami, 350 kW from Miami [5].
 
@@ -53,19 +52,19 @@ events:
     harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   Monaco Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   Barcelona Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   British Grand Prix:
     harvest_per_lap_j: 8.0e6     # [7]
     superclip_max_w: 350000.0
   Hungarian Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   Dutch Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   Italian Grand Prix:
     harvest_per_lap_j: 7.0e6     # [7]
@@ -80,10 +79,10 @@ events:
     harvest_per_lap_j: 8.5e6     # [7] (held at Sepang)
     superclip_max_w: 350000.0
   Singapore Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
   United States Grand Prix:
-    harvest_per_lap_j: 8.5e6     # [7] text
+    harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
 
 # Qualifying recharge limit per lap; every other rule as in the race entry above.

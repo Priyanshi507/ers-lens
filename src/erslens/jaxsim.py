@@ -24,11 +24,13 @@ class StaticTrack:
     ds: float
     env: jnp.ndarray          # braking envelope at the next point, m/s
     straight: jnp.ndarray     # bool per point
+    deploy_cap: jnp.ndarray   # W per point (FIA sector limit), inf where none
 
 
 def static_track(track: Track, car: CarParams) -> StaticTrack:
     env = braking_envelope(track, car)
-    return StaticTrack(track.ds, jnp.asarray(np.roll(env, -1)), jnp.asarray(track.straight_mode))
+    cap = np.full(track.n, np.inf) if track.deploy_cap_w is None else np.asarray(track.deploy_cap_w, float)
+    return StaticTrack(track.ds, jnp.asarray(np.roll(env, -1)), jnp.asarray(track.straight_mode), jnp.asarray(cap))
 
 
 def params_of(car: CarParams) -> dict:
@@ -43,7 +45,8 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     """hard_soc=False removes the battery-window limits so gradients survive an empty or full
     battery; only optimizers use it, and they must penalize leaving the window themselves."""
     v, soc, harvested = carry
-    cmd, target, straight = x
+    cmd, target, straight = x[:3]
+    deploy_cap = x[3] if len(x) > 3 else jnp.inf
     cda = jnp.where(straight, p["cda_straight"], p["cda_corner"])
     v_eff = jnp.maximum(v, V_MIN)
     resist = 0.5 * car.rho * cda * v_eff ** 2 + car.crr * mass * G
@@ -53,7 +56,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     dt_guess = ds / v_eff
     eh, ed = p["eta_harvest"], p["eta_deploy"]
 
-    deploy = jnp.minimum(jnp.minimum(jnp.maximum(cmd, 0.0), cap_k), car.deploy_max_w)
+    deploy = jnp.minimum(jnp.minimum(jnp.maximum(cmd, 0.0), cap_k), jnp.minimum(car.deploy_max_w, deploy_cap))
     if hard_soc:
         deploy = jnp.minimum(deploy, soc * ed / dt_guess)
     ice_h = jnp.where(cmd < 0.0,
@@ -99,7 +102,7 @@ def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_
         v, soc = carry
         mass = car.mass_kg + jnp.maximum(0.0, car.fuel_kg - car.fuel_per_lap_kg * lap_idx)
         step = lambda c, x: _step(p, car, st.ds, mass, c, x, hard_soc)
-        (v, soc, _), out = jax.lax.scan(step, (v, soc, 0.0), (cmd, st.env, st.straight))
+        (v, soc, _), out = jax.lax.scan(step, (v, soc, 0.0), (cmd, st.env, st.straight, st.deploy_cap))
         return (v, soc), out
 
     _, outs = jax.lax.scan(lap, (jnp.asarray(v0, jnp.float64), soc0_frac * car.es_capacity_j),

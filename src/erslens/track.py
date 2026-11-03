@@ -10,6 +10,7 @@ class Track:
     v_limit_ms: np.ndarray      # inf where the car is power-limited
     straight_mode: np.ndarray   # active-aero low-drag zones
     elevation_m: np.ndarray | None = None
+    deploy_cap_w: np.ndarray | None = None   # per point; None means no sector limit
 
     @property
     def straight_progress(self) -> np.ndarray:

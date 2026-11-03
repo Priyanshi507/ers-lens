@@ -22,13 +22,13 @@ extern "C" __global__ void dp_step(
     const double* __restrict__ value_next, double* __restrict__ value_out,
     const double* __restrict__ cmd, const double* __restrict__ v_grid, const double* __restrict__ s_grid,
     int nv, int ns, int nu, double v0, double dv, double ds_soc, double target, int straight, double price,
-    const double* __restrict__ k)
+    const double* __restrict__ k, double deploy_cap)
 {
     int is = blockIdx.x * blockDim.x + threadIdx.x;
     int iv = blockIdx.y;
     if (is >= ns || iv >= nv) return;
     const double ds = k[0], mass = k[1], rho = k[2], crr = k[3], cda = straight ? k[4] : k[5];
-    const double ice = k[6], eh = k[7], ed = k[8], deploy_max = k[9], traction = k[10];
+    const double ice = k[6], eh = k[7], ed = k[8], deploy_max = fmin(k[9], deploy_cap), traction = k[10];
     const double superclip = k[11], cap_j = k[12], budget = k[13], vmin = k[14], g = k[15];
     const double mguk = k[16], a1 = k[17], b1 = k[18], knee = k[19], a2 = k[20], b2 = k[21];
 
@@ -93,11 +93,12 @@ def constants(p: dict, car, ds: float, mass: float) -> np.ndarray:
                      car.taper_a2_w, car.taper_b2_w_per_kmh], dtype=np.float64)
 
 
-def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k):
+def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, deploy_cap=np.inf):
     """The kernel's loop in NumPy over the whole (speed, charge) grid."""
     ds, mass, rho, crr = k[0], k[1], k[2], k[3]
     cda = k[4] if straight else k[5]
     ice, eh, ed, deploy_max, traction, superclip, cap_j, budget, vmin, g = k[6:16]
+    deploy_max = min(deploy_max, deploy_cap)
     mguk, a1, b1, knee, a2, b2 = k[16:22]
     nv, ns = value_next.shape
     v0, dv, ds_soc = v_grid[0], v_grid[1] - v_grid[0], s_grid[1] - s_grid[0]
@@ -156,6 +157,7 @@ class CudaBackward:
     k: np.ndarray
     terminal: bool
     miss_penalty: float
+    deploy_cap: np.ndarray | None = None
     block: int = 128
 
     def __post_init__(self):
@@ -173,10 +175,11 @@ class CudaBackward:
         v_end = self.miss_penalty * short if self.terminal else cp.zeros((nv, ns))
         values = cp.empty((len(self.env), nv, ns))
         grid, nxt = ((ns + self.block - 1) // self.block, nv), v_end
+        cap = np.full(len(self.env), np.inf) if self.deploy_cap is None else self.deploy_cap
         v0, dv, ds_soc = float(self.v_grid[0]), float(self.v_grid[1] - self.v_grid[0]), float(self.s_grid[1] - self.s_grid[0])
         for i in range(len(self.env) - 1, -1, -1):
             self.kernel(grid, (self.block,), (nxt, values[i], self.d_cmd, self.d_v, self.d_s, np.int32(nv), np.int32(ns), np.int32(nu),
                                               v0, dv, ds_soc, float(self.env[i]), np.int32(bool(self.straight[i])),
-                                              float(price), self.d_k))
+                                              float(price), self.d_k, float(cap[i])))
             nxt = values[i]
         return values, v_end

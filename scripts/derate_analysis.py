@@ -76,7 +76,7 @@ def roll_track(track: Track, offset_m: float) -> Track:
     k = int(np.searchsorted(track.distance_m, offset_m))
     roll = lambda a: None if a is None else np.roll(a, -k)
     return Track(track.name, track.distance_m, roll(track.v_limit_ms), roll(track.straight_mode),
-                 roll(track.elevation_m))
+                 roll(track.elevation_m), roll(track.deploy_cap_w))
 
 
 def rebase_laps(race: pd.DataFrame, offset_m: float) -> pd.DataFrame:

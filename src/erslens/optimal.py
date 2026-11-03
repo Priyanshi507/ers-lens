@@ -79,15 +79,15 @@ def start_at_slowest_point(track: Track, car: CarParams) -> Track:
     k = int(np.argmin(braking_envelope(track, car)))
     roll = lambda a: None if a is None else np.roll(a, -k)
     return Track(track.name, track.distance_m, roll(track.v_limit_ms), roll(track.straight_mode),
-                 roll(track.elevation_m))
+                 roll(track.elevation_m), roll(track.deploy_cap_w))
 
 
-def _transition(p, car, ds, mass, V, S, U, target, straight):
+def _transition(p, car, ds, mass, V, S, U, target, straight, deploy_cap=jnp.inf):
     """Every (speed, command, charge) at one track point, in that order: charge last puts
     neighbouring charges side by side, which read neighbouring value-table cells (1.4x faster on a
     T4 than command last, identical results; research log 2026-10-31)."""
     carry = (V[:, None, None], S[None, None, :], 0.0)
-    (v_next, s_next, e_in), (_, _, _, _, dt, _) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight))
+    (v_next, s_next, e_in), (_, _, _, _, dt, _) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight, deploy_cap))
     return v_next, s_next, e_in, dt
 
 
@@ -113,12 +113,12 @@ class _Compiled:
             v_end = MISS_PENALTY_S_PER_J * short if terminal else jnp.zeros((len(V), len(S)))
 
             def back(value_next, x):
-                target, straight = x
-                v_n, s_n, e_in, dt = _transition(p, unlimited, st.ds, mass, V, S, U, target, straight)
+                target, straight, cap = x
+                v_n, s_n, e_in, dt = _transition(p, unlimited, st.ds, mass, V, S, U, target, straight, cap)
                 value = (dt + price * e_in + _interp(value_next, grid, v_n, s_n)).min(axis=1)
                 return value, value
 
-            _, values = jax.lax.scan(back, v_end, (st.env, st.straight), reverse=True)
+            _, values = jax.lax.scan(back, v_end, (st.env, st.straight, st.deploy_cap), reverse=True)
             return values, v_end
 
         def forward(values, v_end, soc0, price):
@@ -126,13 +126,13 @@ class _Compiled:
 
             def fwd(state, x):
                 v, s = state
-                target, straight, value_next = x
+                target, straight, cap, value_next = x
                 (v_n, s_n, e_in), (_, _, _, _, dt, _) = _step(p, unlimited, st.ds, mass, (v, s, 0.0),
-                                                            (U, target, straight))
+                                                            (U, target, straight, cap))
                 j = jnp.argmin(dt + price * e_in + _interp(value_next, grid, v_n, s_n))
                 return (v_n[j], s_n[j]), U[j]
 
-            _, cmd = jax.lax.scan(fwd, (jnp.asarray(self.v0), soc0), (st.env, st.straight, nxt))
+            _, cmd = jax.lax.scan(fwd, (jnp.asarray(self.v0), soc0), (st.env, st.straight, st.deploy_cap, nxt))
             start = _interp(values[0], grid, jnp.asarray([self.v0]), jnp.asarray([soc0]))[0]
             return cmd, start
 
@@ -145,7 +145,8 @@ class _Compiled:
             from .cuda_dp import CudaBackward, constants
 
             cuda = CudaBackward(grid.v_ms, grid.soc_j, grid.cmd_w, np.asarray(st.env), np.asarray(st.straight),
-                                constants(p, unlimited, st.ds, mass), terminal, MISS_PENALTY_S_PER_J)
+                                constants(p, unlimited, st.ds, mass), terminal, MISS_PENALTY_S_PER_J,
+                                np.asarray(st.deploy_cap))
 
             def backward_cuda(soc0, price):
                 values, v_end = cuda(float(soc0), float(price))

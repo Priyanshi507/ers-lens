@@ -1720,3 +1720,30 @@ unchanged in results/fia_fix_calendar.
 - C1 held 16 of 18, C2 not held 12 of 18, C3 not held 17 of 18, less energy on the longest
   straight 15 of 18, more below 250 km/h 16 of 18: all as recorded on 2026-11-01.
 - The FIA-fix page now shows results/fia_fix_calendar_fia, with no circuit marked as assumed.
+
+### 2026-11-03: The current rulebooks: Section C Issue 21 and Section B Issue 09
+
+Issue 17 of Section C, read earlier today, is not the current one: Issue 21 (19 October 2026) and
+Section B Issue 09 (1 October 2026) are. Read as PDFs:
+
+- C5.2.7-C5.2.9 as in Issue 17: 350 kW absolute, the taper 1800 - 5v kW below 340 km/h and
+  6900 - 20v kW from 340 to 345 km/h, the 4 MJ window. The README now cites Issue 21.
+- C5.2.10: 8.5 MJ per lap, reducible to 7 MJ where the FIA finds braking and partial-load
+  harvesting cannot exceed 7 MJ (Monza's 7.0 MJ is this case); +0.5 MJ with Overtake.
+- C5.12.6 in Issue 17 ended "the resulting electrical DC power of the ERS-K must remain above
+  -250 kW", which reads as a 250 kW super-clip limit, against the FIA's statement of 20 April
+  2026 that peak super-clip power rose to 350 kW from Miami. In Issue 21 that sentence is gone
+  and the total power reduction is limited to 700 kW. So the current rule no longer sets a
+  250 kW floor, consistent with the FIA statement that finding 9 is built on. (Issue 17's text
+  came out as "6700kW" and "-250kW"; tracked deletions do not survive pdftotext, so what Issue
+  17 itself intended is not settled here.)
+- C5.2.8 iii now applies "during any power limited period": 250 kW below 310 km/h, then the
+  taper, on specified race sectors. B7.2.1 b xii makes the FIA list, per circuit, "the sectors
+  where this limit curve applies", which settles this morning's open question: the 250 kW
+  sectors are the documents' column "sectors where the alternative power curve applies in
+  Sprint & Race" (for example Monza T4-T7, 2100-2800 m).
+- B7.2.1 b vi: the maximum reduction rate (50 or 100 kW/s, C5.12.6) is set per race, as found.
+
+Nothing in the results changes. Planned: model the 250 kW curve on each race's named sectors
+(lap distance mapped from the FIA centreline to the track files) in place of the 250 kW-everywhere
+bound, as a new experiment with its predictions written first.

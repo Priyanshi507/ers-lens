@@ -392,7 +392,7 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 ## Limitations
 
 - The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 to 345 km/h)
-  is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 17 (28 April 2026), as in
+  is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 21 (19 October 2026), as in
   the [2024 Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf).
   The model's 50 kW/s ramp is the rule only at some races: C5.12.6 limits the reduction to 50 kW
   per second where the FIA's power-limited distance exceeds 3500 m and 100 kW elsewhere (each
@@ -403,9 +403,10 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   ends in a fast corner cannot be measured.
 - Car mass is assumed (768 kg plus a nominal fuel load); a 5% error shifts power drops by ~5%.
 - Slipstream and Override Mode are not yet separated from clipping.
-- From Miami, C5.2.8 iii adds an alternative curve in race sectors named in each race's FIA
-  document: 250 kW below 310 km/h, then the usual taper. The model uses one taper everywhere,
-  with 250 kW everywhere as an extreme-case bound.
+- From Miami, C5.2.8 iii limits deployment during power-limited periods to 250 kW below 310 km/h
+  (then the usual taper) in race sectors that each race's FIA document names (Section B, Issue 09,
+  B7.2.1 b xii). The model uses one taper everywhere, with 250 kW everywhere as an extreme-case
+  bound; modelling the named sectors is the next step.
 - Time lost assumes pre-clip deployment is a fixed fraction of the regulation limit; when it
   is not, the estimate is biased high by up to about 0.06 s per lap. It needs about 4 s of
   full-throttle running before the speed peak, so short straights cannot be measured.

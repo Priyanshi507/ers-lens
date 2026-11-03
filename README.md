@@ -261,6 +261,9 @@ energy rose by 7-28% on the ten that converged (predictions F1-F4: F3 and F4 hel
 not held). This is the lap-time optimum of a simplified car, not a measurement of real cars;
 14 of the 18 circuits use an assumed 8.5 MJ recharge limit
 ([`results/fia_fix_calendar/assumptions.csv`](results/fia_fix_calendar/assumptions.csv)).
+Checked afterwards against the FIA's per-race Power Unit Information documents, the assumption
+is right at 7 of the 8 circuits checked so far and wrong at Monza (7.0 MJ), so Italy's result
+used the wrong limit and is to be re-run (research log, 2026-11-03).
 
 ![Super-clipping energy and time against the cap](docs/fia_fix_dose.png)
 
@@ -270,6 +273,20 @@ Reproduce: `python scripts/fia_fix.py` (four circuits) or with `--cars original 
 --assume-recharge-mj 8.5 --out results/fia_fix_calendar --events ...` (every circuit), then
 `python scripts/fia_fix_verdicts.py [--calendar --runs results/fia_fix_calendar/runs.csv]`.
 Runs on a free Kaggle T4 GPU (`scripts/kaggle_fia_fix_calendar.md`).
+
+### 10. Whole-race energy plans: not yet trustworthy
+
+Which charge should a car carry from lap to lap over a race? A lap table (fastest lap from every
+start charge to every end charge, 0-4 MJ, within the recharge limit, every lap a simulator
+replay) feeds a race-level plan. Prior work on race allocation for the 2014-2025 power unit:
+Duhr et al., *IEEE Transactions on Vehicular Technology* 72(6), 2023. On four circuits the
+check written before the run failed at Miami (the table's 2 MJ lap 0.077 s off the single-lap
+solve, limit 0.05 s), so the three predictions were not judged. Looking afterwards: at
+Australia and China the plan holds 2 MJ and spends it on the last lap (0.4-0.7 s); at Miami and
+Canada it moves to another charge level whose lap is 0.04-0.05 s faster and repeats it for
+about 55-66 laps, which is most of the apparent 3 s gain, and at Miami that advantage is at
+least partly grid error. A race plan multiplies any per-lap error by the number of laps, so
+every charge level has to be checked; that is the next step. Research log, 2026-11-02.
 
 ### Performance: the solver on a free GPU
 
@@ -311,6 +328,9 @@ src/erslens/
     gradopt.py              Strategy Lab method M2: gradient descent through the JAX simulator
     simple.py               simple deployment rules, tuned by exhaustive search
     strategy.py             S1-S7 measurements, legal-car sweep, per-race rules, convergence rule
+    race.py                 finding 10: lap tables over charge levels and the race-level plan
+    params.py, track.py, policies.py, synth.py   car parameters, track geometry, deployment rules, synthetic data
+    openf1.py               OpenF1 and Jolpica clients (cached), the free source since F1's archive closed
 scripts/
     derate_analysis.py      quality checks and full-throttle speed-loss detection
     multi_race.py           clipping across races, before/after comparison
@@ -327,9 +347,16 @@ scripts/
     strategy_evaluate.py    finding 8: verdicts S1-S7
     fia_fix.py              finding 9: every circuit under the 250 and 350 kW caps
     fia_fix_verdicts.py     finding 9: verdicts F1-F4 and C1-C3
+    fia_fix_figures.py      finding 9 figures
+    rebase_compare.py       finding 3: straights measured whole across the start/finish line
+    race_plan.py            finding 10: lap tables (GPU) and race plans
     gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
-    export_fia.py           data for the FIA-fix page
-tests/                      134 automated tests (physics invariants, estimators, optimizers, verdict logic)
+    step_cost.py            operation and memory counts of one DP step (XLA cost analysis)
+    cuda_benchmark.py       the CUDA kernel against XLA, results checked for equality
+    export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
+    kaggle_*.md             step-by-step runs on Kaggle's free T4
+    (others)                diagnostics and checks referenced from the research log
+tests/                      139 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
@@ -368,10 +395,16 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   (29 March 2024); later issues have not been checked. A 50 kW/s ramp limit comes from a
   secondary source only, and the data reject it as a description of clipping. The power-drop
   estimator depends on neither.
-- Results cover full-throttle straights only; one straight per circuit. Circuits whose
-  longest straight crosses the start/finish line or ends in a fast corner cannot be measured.
+- Results cover full-throttle straights only; one straight per circuit. A straight that
+  crosses the start/finish line is measured whole only with `--rebase` (finding 3); one that
+  ends in a fast corner cannot be measured.
 - Car mass is assumed (768 kg plus a nominal fuel load); a 5% error shifts power drops by ~5%.
 - Slipstream and Override Mode are not yet separated from clipping.
+- The FIA publishes, for every race, a Power Unit Information document with the recharge limits,
+  the MGU-K power curves by speed (standard, Overtake, and an alternative curve in named
+  sectors) and the sectors where they apply. The model uses one regulation taper everywhere
+  and takes the recharge limits from press reports (one checked against the FIA document so
+  far is wrong: Monza); using these documents is planned.
 - Time lost assumes pre-clip deployment is a fixed fraction of the regulation limit; when it
   is not, the estimate is biased high by up to about 0.06 s per lap. It needs about 4 s of
   full-throttle running before the speed peak, so short straights cannot be measured.
@@ -383,7 +416,9 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 The closest work is [Kleisarchaki (2026)](https://arxiv.org/abs/2603.01290), an HMM–POMDP
 framework for inferring rival ERS state from telemetry, evaluated on synthetic races.
 Optimal ERS control for known cars goes back to Limebeer, Perantoni and Rao (2014,
-*International Journal of Control*). ERS-Lens is the empirical, observation-side complement:
+*International Journal of Control*); minimum-lap-time and race-level energy allocation for the
+2014-2025 power unit were developed at ETH Zurich (Duhr, Buccheri, Balerna, Cerofolini and
+Onder, *IEEE Transactions on Vehicular Technology* 72(6), 2023, and earlier papers). ERS-Lens is the empirical, observation-side complement:
 what an outsider can verify from public data.
 
 ## Licence

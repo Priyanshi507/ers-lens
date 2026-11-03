@@ -16,8 +16,10 @@
 #  [5] PlanetF1, "FIA confirms changes to F1 2026 rules for Miami Grand Prix" (FIA statement):
 #      peak superclip power 350 kW from Miami, previously 250 kW.
 #  [6] Yahoo Sports / Motorsport, "FIA confirms 2026 F1 rule changes ahead of Miami Grand Prix":
-#      from Miami, MGU-K deployment 350 kW in key acceleration zones, 250 kW elsewhere. The zones
-#      are not published, so this is modelled only as an extreme-case bound (250 kW everywhere).
+#      from Miami, MGU-K deployment 350 kW in key acceleration zones, 250 kW elsewhere. Modelled
+#      only as an extreme-case bound (250 kW everywhere). Each race's FIA Power Unit Information
+#      document lists sectors and MGU-K power curves (article C5.2.8); which of its sectors are
+#      these zones is not yet checked against the documents themselves (research log, 2026-11-03).
 # Overtake mode (+0.5 MJ while active) is not modelled; the race values are without it.
 
 events:

@@ -1611,7 +1611,7 @@ session by the same commit, and the four neutral laps agree to the printed digit
 By the rule written before the run, the tables are not trusted and W1-W3 are not judged.
 
 Looked at after the run, not predicted. The lap that starts and ends at the same charge, by level
-(s): 
+(s):
 
 | Level (MJ) | 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -1638,3 +1638,28 @@ Looked at after the run, not predicted. The lap that starts and ends at the same
 What this changes: a whole-race plan built on a lap table magnifies per-lap errors by the number
 of laps, so the table needs every level checked, not only 2 MJ. Not yet done: a lap table on the
 refined grid, with the check applied at every level.
+
+## 2026-11-03: A primary source for the per-race rules: the FIA's Power Unit Information documents
+
+For every 2026 race the FIA Race Director issues a "Power Unit Information" document (fia.com,
+decision documents). It gives the maximum recharge per lap for each session, a maximum PU power
+reduction rate, the MGU-K DC power curves against car speed (standard, Overtake, an alternative
+curve) and the lap-distance sectors where each applies (articles C5.2.8, C5.2.10, C5.12). The
+project so far took the recharge limits from press reports and assumed 8.5 MJ at 14 circuits.
+
+Read from the text of the documents (the PDFs themselves not yet read; layout partly lost):
+- The first two recharge values are the race without and with Overtake, the third qualifying.
+  This order matches the press-sourced values (RaceFans, Autosport, PlanetF1) at every event
+  read that they cover: Australia 8.0/8.5/7.0, China 8.5/9.0/9.0, Japan 8.5/9.0/8.0 and Miami
+  8.5/9.0/8.0 MJ. Canada's document is not yet read.
+- Race limit without Overtake at the assumed circuits: Japan, Monaco, Barcelona, Hungary,
+  Netherlands, Singapore and United States 8.5 MJ, as assumed; Italy (Monza) 7.0 MJ, not 8.5.
+  Not yet read: Austria, Belgium, Britain, Spain (Madrid), Azerbaijan, Bahrain (at Sepang).
+- The maximum PU power reduction rate is 50 kW/s at Australia and Monza and 100 kW/s at the
+  other circuits read. Whether it is the same quantity as the 50 kW/s ramp in configs/car_2026.yaml
+  (secondary source) is not checked.
+
+Consequences: Italy's FIA-fix calendar result used the wrong recharge limit and is to be re-run
+at 7.0 MJ. The config's statement that the 350 kW zones are not published was wrong and is
+corrected. Planned: read all 18 documents as PDFs, take every recharge limit from them, and
+then decide whether the sector power curves can be modelled.

@@ -34,7 +34,7 @@ def tables(events, out: Path):
     from erslens.optimal import solve_refined
     from erslens.params import load_car_params
     from erslens.race import lap_table
-    from erslens.strategy import race_rules
+    from erslens.strategy import race_rules, solution_ok
 
     (out / "tables").mkdir(parents=True, exist_ok=True)
     for e in events:
@@ -44,13 +44,18 @@ def tables(events, out: Path):
             continue
         car = race_rules(load_car_params(CAR), e)
         track = load_track(f"results/tracks/{e}.npz")
-        single = solve_refined(track, car, soc0_frac=LEVELS_J[START] / car.es_capacity_j)
+        # One single-lap solve per level: the check covers every level (research log, 2026-11-04).
+        singles = [solve_refined(track, car, soc0_frac=lv / car.es_capacity_j) for lv in LEVELS_J]
         t = lap_table(track, car, LEVELS_J)
         np.savez(path, levels_j=t.levels_j, lap_s=t.lap_s, harvest_j=t.harvest_j, end_j=t.end_j, price=t.price,
-                 budget_j=t.budget_j, unconverged=t.unconverged, single_lap_s=single.lap_time_sim_s)
-        print(f"{e}: neutral lap {t.lap_s[START, START]:.3f} s against single-lap solve {single.lap_time_sim_s:.3f} s; "
-              f"{int(np.isfinite(t.lap_s).sum())} of {t.lap_s.size} pairs found, {int(t.unconverged.sum())} candidates dropped",
-              flush=True)
+                 budget_j=t.budget_j, unconverged=t.unconverged,
+                 single_lap_s=np.array([s.lap_time_sim_s for s in singles]),
+                 single_ok=np.array([solution_ok(s) for s in singles]))
+        gap = np.abs(np.diag(t.lap_s) - [s.lap_time_sim_s for s in singles])
+        print(f"{e}: same-charge laps against single-lap solves, largest gap {gap.max():.3f} s (level "
+              f"{t.levels_j[int(np.argmax(gap))] / 1e6:g} MJ); single solves converged {sum(map(solution_ok, singles))} "
+              f"of {len(singles)}; {int(np.isfinite(t.lap_s).sum())} of {t.lap_s.size} pairs found, "
+              f"{int(t.unconverged.sum())} candidates dropped", flush=True)
 
 
 def plans(events, out: Path, year: int = 2026):
@@ -63,8 +68,14 @@ def plans(events, out: Path, year: int = 2026):
         n = race_laps(year, date)
         p = race_plan(t, n, START)
         simple = (n - 1) * t.lap_s[START, START] + np.min(t.lap_s[START])
-        rows.append({"event": e, "laps": n, "neutral_lap_s": float(t.lap_s[START, START]), "single_lap_s": float(z["single_lap_s"]),
-                     "check_ok": bool(abs(t.lap_s[START, START] - float(z["single_lap_s"])) <= CHECK_S),
+        single = np.atleast_1d(z["single_lap_s"])
+        if single.size == 1:   # tables of 2026-11-02: one single-lap solve, at the start level
+            gap, ok = abs(t.lap_s[START, START] - single[0]), True
+        else:
+            gap, ok = float(np.max(np.abs(np.diag(t.lap_s) - single))), bool(np.all(z["single_ok"]))
+        rows.append({"event": e, "laps": n, "neutral_lap_s": float(t.lap_s[START, START]),
+                     "single_lap_s": float(single[START] if single.size > 1 else single[0]),
+                     "largest_level_gap_s": float(gap), "check_ok": bool(ok and gap <= CHECK_S),
                      "race_s": float(p.race_s), "neutral_race_s": float(p.neutral_s), "gain_s": float(p.gain_s),
                      "simple_s": float(simple), "best_minus_simple_s": float(p.race_s - simple),
                      "finish_level_mj": float(t.levels_j[p.levels[-1]] / 1e6),

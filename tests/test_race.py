@@ -61,3 +61,17 @@ def test_plans_step_writes_csv_and_json(tmp_path, monkeypatch):
     script.plans({"Australia": "2026-03-08"}, tmp_path)
     assert json.loads((tmp_path / "verdicts.json").read_text())["W3"] == [1, 1, True]
     assert (tmp_path / "plans.csv").read_text().startswith("event,laps")
+
+
+def test_the_check_covers_every_level(tmp_path, monkeypatch):
+    n = len(script.LEVELS_J)
+    lap = np.array([[80 + 0.25 * (j - i) / 2 if j <= i + 2 else np.inf for j in range(n)] for i in range(n)])
+    single = np.diag(lap).copy()
+    single[1] -= 0.06            # one level's single-lap solve is faster than the table's lap there
+    (tmp_path / "tables").mkdir()
+    z = np.zeros((n, n))
+    np.savez(tmp_path / "tables" / "Australia.npz", levels_j=script.LEVELS_J, lap_s=lap, harvest_j=z, end_j=z,
+             price=z, budget_j=7e6, unconverged=z.astype(int), single_lap_s=single, single_ok=np.ones(n, bool))
+    monkeypatch.setattr(script, "race_laps", lambda year, date: 58)
+    script.plans({"Australia": "2026-03-08"}, tmp_path)
+    assert json.loads((tmp_path / "verdicts.json").read_text()) == {"check": [0, 1, False]}

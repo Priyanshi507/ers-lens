@@ -1938,3 +1938,17 @@ Re-judged on these runs (verdicts recorded 2026-10-22 and 2026-10-28 stay as rec
   to three). Not recomputed: plausibility and correlation (results/strategy).
 
 The Strategy Lab page and the README now use these runs; the first runs stay in results/.
+
+## 2026-11-04: Whole-race plans re-run with the fixed solver; the check now covers every level
+
+The lap tables of 2026-11-02 were built with the old solver (their own filter already dropped laps
+ending below their target, but the price search could still be pushed by braking harvest it could
+not control). They are rebuilt for the same four circuits, same car, levels, price ladder and grid
+(0.125 km/h, 321 charge points), into results/race_fixed.
+
+The check is made stricter before the run, because of what the first run showed (a whole-race
+plan repeats a per-lap error at every lap): the same-charge lap at every one of the nine levels,
+not only at 2 MJ, must be within 0.05 s of a single-lap solve that starts and ends at that level,
+and all nine single-lap solves must pass the convergence rule. If it fails, W1-W3 are not judged.
+W1-W3 are unchanged from 2026-11-02. This run is not blind: the first run's tables and plans have
+been seen (2026-11-02 entries).

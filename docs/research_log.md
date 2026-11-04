@@ -1952,3 +1952,35 @@ not only at 2 MJ, must be within 0.05 s of a single-lap solve that starts and en
 and all nine single-lap solves must pass the convergence rule. If it fails, W1-W3 are not judged.
 W1-W3 are unchanged from 2026-11-02. This run is not blind: the first run's tables and plans have
 been seen (2026-11-02 entries).
+
+## 2026-11-04: A modelling error: the speed taper was applied to harvesting too
+
+Found while reading the 2027 Technical Regulations (Section C Iss 04), and checked in the current
+2026 text (Section C Iss 21): article C5.2.8's speed formula limits "the electrical DC power of the
+ERS-K used to propel the car". Harvesting is limited by the absolute ERS-K power, C5.2.7 (350 kW),
+by the super-clip limit, and by the per-lap recharge (C5.2.10); no article limits harvesting by
+car speed (searched for harvest, recharge, recover, regenerate, negative). The model has applied
+the propulsion taper to super-clipping and braking harvest as well (simulate.py, jaxsim._step,
+the CUDA kernel), so above 290 km/h it let the car harvest less than the rules allow. The
+explanation of finding 9 relied on this explicitly (2026-11-01: "the MGU-K may harvest 350 kW
+only up to 290 km/h").
+
+Fix: harvesting is limited by CarParams.mguk_power_w (C5.2.7); CarParams.harvest_taper=True
+restores the old behaviour, so earlier results stay reproducible (tests/test_harvest_limit.py; the
+CUDA kernel's source still matches its NumPy twin, now also at a high-speed point). The
+estimator studies (findings 1, 2, 5, 6) do not need this to be judged: their ground truth comes
+from the same simulator they are tested in, and the straight-fit and synthetic-straight models
+already left harvesting untapered; their re-check is listed as pending, not done.
+
+Re-run of every DP experiment with the corrected limit, into *_h folders
+(scripts/kaggle_rerun_harvest.md): FIA-fix calendar and four circuits, the 250 kW sectors, the
+Strategy Lab (three cars) and the whole-race lap tables (with the every-level check of earlier
+today). All earlier predictions (S1-S7, F1-F4, C1-C3, P1-P3, W1-W3) are re-judged on it as a
+correction. Predictions written before the run, about the correction itself (original car unless
+said; a solve counts only if it passes the convergence rule):
+H1. No solve in the FIA-fix calendar, four-circuit and sectors re-runs is slower than the same
+    solve with the tapered harvest (the _fixed runs) by more than 0.02 s: the car gains freedom.
+H2. Under the 350 kW cap, super-clipping energy on the longest straight is higher than with the
+    tapered harvest at 80% or more of the circuits that super-clip there in either run.
+H3. The exploratory count "less super-clipping energy on the longest straight under 350 kW than
+    under 250 kW" (16 of 18 with the tapered harvest) falls below 15 of 18.

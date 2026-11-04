@@ -29,6 +29,7 @@ def simulate(track: Track, car: CarParams, policy: EnergyPolicy, n_laps: int = 1
             v_eff = max(v, V_MIN)
             resist = resistive_force(v_eff, mass, cda, car)
             cap_k = mguk_power_cap(v_eff, car)
+            cap_h = cap_k if car.harvest_taper else car.mguk_power_w
             budget = max(0.0, car.harvest_per_lap_j - harvested)
             space = car.es_capacity_j - soc
 
@@ -40,7 +41,7 @@ def simulate(track: Track, car: CarParams, policy: EnergyPolicy, n_laps: int = 1
             deploy = min(max(cmd, 0.0), cap_k, soc * car.eta_deploy / dt_guess)
             ice_harvest = 0.0
             if deploy == 0.0 and cmd < 0.0:
-                ice_harvest = min(-cmd, cap_k, car.ice_power_w,
+                ice_harvest = min(-cmd, cap_h, car.ice_power_w,
                                   budget / (car.eta_harvest * dt_guess),
                                   space / (car.eta_harvest * dt_guess))
 
@@ -65,7 +66,7 @@ def simulate(track: Track, car: CarParams, policy: EnergyPolicy, n_laps: int = 1
                 else:
                     p_brake = -f_needed * v_eff
                     deploy = ice_harvest = 0.0
-                    brake_harvest = min(p_brake, cap_k,
+                    brake_harvest = min(p_brake, cap_h,
                                         budget / (car.eta_harvest * dt_guess),
                                         space / (car.eta_harvest * dt_guess))
                     throttle, brake, phase = 0.0, True, "brake"

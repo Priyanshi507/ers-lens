@@ -65,7 +65,7 @@ extern "C" void run_all(const double* vn, double* out, const double* cmd, const 
     g, st, p, unlimited, mass, V, S, U, k, table = setup
     vg, sg, cm = (np.ascontiguousarray(a, dtype=np.float64) for a in (g.v_ms, g.soc_j, g.cmd_w))
     table = np.ascontiguousarray(table)
-    for point, cap in ((0, np.inf), (200, np.inf), (700, np.inf), (200, 250e3)):
+    for point, cap in ((0, np.inf), (200, np.inf), (700, np.inf), (200, 250e3), (350, np.inf)):
         target, straight = float(st.env[point]), bool(st.straight[point])
         out = np.empty_like(table)
         lib.run_all(ptr(table), ptr(out), ptr(cm), ptr(vg), ptr(sg), len(vg), len(sg), len(cm), ctypes.c_double(vg[0]),

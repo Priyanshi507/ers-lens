@@ -32,6 +32,7 @@ extern "C" __global__ void dp_step(
     const double superclip = k[11], cap_j = k[12], budget = k[13], vmin = k[14], g = k[15];
     const double mguk = k[16], a1 = k[17], b1 = k[18], knee = k[19], a2 = k[20], b2 = k[21];
     const bool regen_by_command = k[22] != 0.0;
+    const double cap_h_abs = k[23];   // harvest limit: the absolute MGU-K power, or < 0 for the old taper
 
     const double v = v_grid[iv], soc = s_grid[is];
     const double v_eff = fmax(v, vmin);
@@ -41,6 +42,7 @@ extern "C" __global__ void dp_step(
     const double cap_k = fmax(kmh >= knee ? a2 - b2 * kmh : low, 0.0);
     const double space = cap_j - soc;
     const double dt_guess = ds / v_eff;
+    const double cap_h = cap_h_abs < 0.0 ? cap_k : cap_h_abs;
     const double room = fmin(budget, space) / (eh * dt_guess);
     const double f_needed = mass * (target * target - v * v) / (2.0 * ds) + resist;
     const double p_need = f_needed * v_eff;
@@ -53,7 +55,7 @@ extern "C" __global__ void dp_step(
         const double c = cmd[u];
         double deploy = fmin(fmin(fmax(c, 0.0), cap_k), deploy_max);
         deploy = fmin(deploy, soc_limit);
-        double ice_h = c < 0.0 ? fmin(fmin(fmin(-c, cap_k), ice), room) : 0.0;
+        double ice_h = c < 0.0 ? fmin(fmin(fmin(-c, cap_h), ice), room) : 0.0;
         const double p_wheel = ice + deploy - ice_h;
         const double f_drive = fmin(p_wheel * inv_veff, traction);
         const double a = (f_drive - resist) * inv_mass;
@@ -64,7 +66,7 @@ extern "C" __global__ void dp_step(
         const double v_next = accel ? v_acc : target;
         if (!accel) deploy = 0.0;
         ice_h = accel ? fmin(ice_h, superclip) : (partial ? fmin(ice_h, fmax(0.0, ice - p_need)) : 0.0);
-        double brake_h = braking ? fmin(fmin(-p_need, cap_k), room) : 0.0;
+        double brake_h = braking ? fmin(fmin(-p_need, cap_h), room) : 0.0;
         if (regen_by_command) brake_h = fmin(brake_h, fmax(-c, 0.0));
         const double dt = 2.0 * ds / (v + v_next);
         const double e_in = eh * (ice_h + brake_h) * dt;
@@ -92,7 +94,8 @@ def constants(p: dict, car, ds: float, mass: float) -> np.ndarray:
                      f(p["eta_harvest"]), f(p["eta_deploy"]), car.deploy_max_w, car.traction_max_n,
                      car.superclip_max_w, car.es_capacity_j, max(0.0, car.harvest_per_lap_j), V_MIN, G,
                      car.mguk_power_w, car.taper_a1_w, car.taper_b1_w_per_kmh, car.taper_knee_kmh,
-                     car.taper_a2_w, car.taper_b2_w_per_kmh, float(car.regen_by_command)], dtype=np.float64)
+                     car.taper_a2_w, car.taper_b2_w_per_kmh, float(car.regen_by_command),
+                     -1.0 if car.harvest_taper else car.mguk_power_w], dtype=np.float64)
 
 
 def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, deploy_cap=np.inf):
@@ -103,6 +106,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     deploy_max = min(deploy_max, deploy_cap)
     mguk, a1, b1, knee, a2, b2 = k[16:22]
     regen_by_command = k[22] != 0.0
+    cap_h_abs = k[23]
     nv, ns = value_next.shape
     v0, dv, ds_soc = v_grid[0], v_grid[1] - v_grid[0], s_grid[1] - s_grid[0]
     v = np.asarray(v_grid, dtype=np.float64)[:, None]
@@ -111,6 +115,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     resist = 0.5 * rho * cda * (v_eff * v_eff) + crr * mass * g
     kmh = v_eff * 3.6
     cap_k = np.maximum(np.where(kmh >= knee, a2 - b2 * kmh, np.minimum(mguk, a1 - b1 * kmh)), 0.0)
+    cap_h = cap_k if cap_h_abs < 0.0 else cap_h_abs
     dt_guess = ds / v_eff
     room = np.minimum(budget, cap_j - soc) / (eh * dt_guess)
     f_needed = mass * (target * target - v * v) / (2.0 * ds) + resist
@@ -121,7 +126,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     for c in cmd:
         deploy = np.minimum(np.minimum(np.maximum(c, 0.0), cap_k), deploy_max)
         deploy = np.minimum(deploy, soc_limit)
-        ice_h = np.minimum(np.minimum(np.minimum(-c, cap_k), ice), room) if c < 0.0 else np.zeros_like(room)
+        ice_h = np.minimum(np.minimum(np.minimum(-c, cap_h), ice), room) if c < 0.0 else np.zeros_like(room)
         f_drive = np.minimum((ice + deploy - ice_h) * inv_veff, traction)
         a = (f_drive - resist) * inv_mass
         v_acc = np.sqrt(np.maximum(v * v + 2.0 * a * ds, vmin * vmin))
@@ -132,7 +137,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
         deploy = np.where(accel, deploy, 0.0)
         ice_h = np.where(accel, np.minimum(ice_h, superclip),
                          np.where(partial, np.minimum(ice_h, np.maximum(0.0, ice - p_need)), 0.0))
-        brake_h = np.where(braking, np.minimum(np.minimum(-p_need, cap_k), room), 0.0)
+        brake_h = np.where(braking, np.minimum(np.minimum(-p_need, cap_h), room), 0.0)
         if regen_by_command:
             brake_h = np.minimum(brake_h, max(-c, 0.0))
         dt = 2.0 * ds / (v + v_next)

@@ -51,6 +51,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     v_eff = jnp.maximum(v, V_MIN)
     resist = 0.5 * car.rho * cda * v_eff ** 2 + car.crr * mass * G
     cap_k = _mguk_cap(v_eff, car)
+    cap_h = cap_k if car.harvest_taper else car.mguk_power_w
     budget = jnp.maximum(0.0, car.harvest_per_lap_j - harvested)
     space = car.es_capacity_j - soc if hard_soc else jnp.inf
     dt_guess = ds / v_eff
@@ -60,7 +61,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     if hard_soc:
         deploy = jnp.minimum(deploy, soc * ed / dt_guess)
     ice_h = jnp.where(cmd < 0.0,
-                      jnp.minimum(jnp.minimum(jnp.minimum(-cmd, cap_k), p["ice_power_w"]),
+                      jnp.minimum(jnp.minimum(jnp.minimum(-cmd, cap_h), p["ice_power_w"]),
                                   jnp.minimum(budget, space) / (eh * dt_guess)),
                       0.0)
     p_wheel = p["ice_power_w"] + deploy - ice_h
@@ -78,7 +79,7 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     ice_h = jnp.where(accel, jnp.minimum(ice_h, car.superclip_max_w),
                       jnp.where(partial, jnp.minimum(ice_h, jnp.maximum(0.0, p["ice_power_w"] - p_need)), 0.0))
     brake_h = jnp.where(braking,
-                        jnp.minimum(jnp.minimum(-p_need, cap_k),
+                        jnp.minimum(jnp.minimum(-p_need, cap_h),
                                     jnp.minimum(budget, space) / (eh * dt_guess)),
                         0.0)
     if car.regen_by_command:

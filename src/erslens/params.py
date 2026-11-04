@@ -38,6 +38,9 @@ class CarParams:
     # Braking harvest at most what the command asks (brake-by-wire), so a harvest price can steer
     # it too; set only for the DP, whose recharge limit relies on that (research log, 2026-11-03).
     regen_by_command: bool = False
+    # The speed taper (C5.2.8) limits only power used to propel the car; harvesting is limited by the
+    # absolute MGU-K power (C5.2.7). True restores the model before 2026-11-04, which tapered both.
+    harvest_taper: bool = False
 
     def with_(self, **changes) -> "CarParams":
         return replace(self, **changes)

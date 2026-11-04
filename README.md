@@ -393,7 +393,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      152 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      156 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
@@ -427,6 +427,10 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 
 ## Limitations
 
+- Harvest limit correction, 2026-11-04: until now the model applied the MGU-K speed taper to
+  harvesting as well as deployment, but the FIA's taper (C5.2.8) limits only power used to propel
+  the car; harvesting is limited by the absolute 350 kW (C5.2.7). Fixed; every optimizer result
+  is being re-run, and findings 8-11 below are from the tapered-harvest model until that is in.
 - Solver correction, 2026-11-03: where braking alone could recover more than the per-lap recharge
   limit, the DP could return a lap that ended below its starting charge (the price on harvest
   could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price

@@ -41,14 +41,16 @@ def test_profiles_are_charge_neutral_and_within_the_battery(data):
 
 def test_published_verdicts_match_the_evaluated_ones(data):
     cars = {c["id"]: c["verdicts"] for c in data["cars"]}
-    assert all(v["S1"]["held"] and v["S1 (corrected rules)"]["held"] for v in cars.values())
-    assert not cars["high"]["S2"]["held"] and cars["low"]["S2"]["held"]
+    assert all(v["S1"]["held"] for v in cars.values())
+    assert cars["original"]["S1 (corrected rules)"]["held"] and not cars["high"]["S1 (corrected rules)"]["held"]
+    assert cars["original"]["S2"]["held"] and not cars["low"]["S2"]["held"] and not cars["high"]["S2"]["held"]
+    assert not cars["original"]["S3"]["held"] and cars["low"]["S3"]["held"] and cars["high"]["S3"]["held"]
     assert not any(v[k]["held"] for v in cars.values() for k in ("S5", "S6", "S7 (exploratory)"))
 
 
 def test_original_car_reproduces_the_logged_diagnostics(data):
-    """The 2026-10-10 diagnostics (results/strategy/diagnostics.md) used the original car's profiles."""
-    text = Path("results/strategy/diagnostics.md").read_text()
+    """The diagnostics recomputed from the fixed-solver runs (research log, 2026-11-04)."""
+    text = Path("results/strategy_rules_q_fixed/diagnostics.md").read_text()
     for e in EVENTS:
         m = re.search(rf"\| {e} \| \d+ / \d+ m \| \d+ / \d+ m \| (\d+) / (\d+) m \|.*\(n=(\d+)\)", text)
         opt_tail, real_tail, n = map(int, m.groups())

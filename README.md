@@ -205,7 +205,8 @@ What is the fastest way to spend and recover electric energy on a 2026 lap, and 
 Dynamic programming over battery state of charge finds the optimum for one charge-neutral lap
 under the 2026 energy rules (MGU-K cap and speed taper, 4 MJ window, per-lap recharge limit).
 Every result is checked: the optimizer's predicted lap time must match a replay in the lap
-simulator to within 0.05 s, or the result is not used. Seven predictions were recorded on
+simulator to within 0.05 s, and the lap must end with the charge it started with, or the result
+is not used. Seven predictions were recorded on
 2026-10-05, before any code.
 
 The model car could not be calibrated to one drag and engine-power value: the four pole laps
@@ -213,29 +214,38 @@ prefer different points on a ridge of equally good fits. So every prediction was
 three cars (the original car and both ends of that ridge), and a verdict counts only if it is
 the same for all three.
 
-| Prediction | Result on all three cars |
+| Prediction | Result on the three cars |
 | --- | --- |
-| S1: the optimum clips on the longest straight (power at the speed peak ≤ 50% of its earlier mean) | **Held**, with the car-file and the per-race 2026 recharge limits |
-| S3: it still clips with the MGU-K speed taper removed, at ≥ 3 of 4 circuits | **Held** with the car-file limit; with the per-race limits only on two of three cars |
-| S2: the optimum clips for ≥ 80% of 27 legal cars at every circuit | Depends on the car: fails at the high-drag end (Australia 67%) |
+| S1: the optimum clips on the longest straight (power at the speed peak ≤ 50% of its earlier mean) | **Held** on all three with the car-file limit; with the per-race 2026 limits on two of three (high-drag end, Australia 0.70) |
+| S3: it still clips with the MGU-K speed taper removed, at ≥ 3 of 4 circuits | Held on two of three with the car-file limit (original car 2 of 4: Miami 0.51, against 0.50); with the per-race limits on one of three |
+| S2: the optimum clips for ≥ 80% of 27 legal cars at every circuit | Depends on the car: holds for the original car, fails at both ends of the ridge (low-drag China 78%, high-drag Australia 59%) |
 | S4: energy is deployed ≥ 20 km/h below the mean full-throttle speed | Depends on the car: 16-24 km/h at the high-drag end |
 | S5: the optimum is within 0.3 s of the best tuned simple rule | **Not held**: the optimum is 1.7-3.7 s faster |
 | S6: gradient descent through the JAX simulator matches the DP optimum | **Not held**: it stalls in local optima |
 | S7: the optimal speed-peak position lies in the range seen on real laps | **Not held** (0 of 4 circuits, every car) |
 
-Clipping is what the optimizer chooses, not only a side effect of the regulation taper. This
-fits the reasoning recorded before the tests: near top speed, drag absorbs power roughly as
-v³, so a joule deployed there buys little time. The optimum is bang-bang on every car
-(95-99% of full-throttle points at the MGU-K cap or at zero). Compared with real race laps,
-lined up at the braking point, the original car's optimum peaks too late at every circuit,
-but the two calibrated cars land inside the middle half of real laps at one to three of
-four circuits, so that comparison is not robust (exploratory: the battery is not observable). The car
-calibration failed its own acceptance test, so modelled lap times carry about ±0.7 s per lap
-of between-circuit uncertainty, and the pole laps are assumed to be close to energy-optimal.
+These are the results of the corrected solver (2026-11-03; results/strategy_*_fixed). Against the
+first runs, four verdicts changed: S3 for the original car (both limits) and S1 under the
+per-race limits for the high-drag end from held to not held, and S2 for the low-drag end from
+held to not held. Several clip ratios sit close to the 0.50 threshold, so S1 and S3 are fragile:
+a small change of car or rules moves them.
+
+The optimum clips at the end of the longest straight on every car with the car-file limit, and
+with the taper removed it still clips on two of the three cars: near top speed, drag absorbs
+power roughly as v³, so a joule deployed there buys little time. Clipping is therefore partly
+the optimizer's choice and not only a side effect of the taper, but that conclusion holds for
+some cars and limits, not all. The optimum is bang-bang on every car (95-100% of full-throttle
+points at the MGU-K cap or at zero). Compared with real race laps, lined up at the braking point,
+the original car's optimum peaks too late at every circuit, while each calibrated car lands
+inside the middle half of real laps at two of four circuits (exploratory: the battery is not
+observable). The car calibration failed its own acceptance test, so modelled lap
+times carry about ±0.7 s per lap of between-circuit uncertainty, and the pole laps are assumed
+to be close to energy-optimal.
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
-Reproduce: `python scripts/strategy_run.py --car configs/car_2026_q_low.yaml --out results/strategy_q_low`,
-then `--rules` and `--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low/runs.csv`
+Reproduce: `scripts/kaggle_rerun_strategy.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
+results/tracks --car configs/car_2026_q_low.yaml --out results/strategy_q_low_fixed`, then `--rules` and
+`--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low_fixed/runs.csv`
 
 ### 9. The FIA's Miami fix, solved on the same circuits
 
@@ -421,9 +431,8 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   limit, the DP could return a lap that ended below its starting charge (the price on harvest
   could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price
   search tests the planned harvest, and the convergence rule also requires the lap to keep its
-  charge. Findings 9 and 11 are re-run with the fixed solver (C3 and F2 changed to held); the
-  Strategy Lab (finding 8) is re-checked on its saved results, no verdict changed, and its re-run
-  is next (research log, 2026-11-03).
+  charge. Findings 8, 9 and 11 are re-run with the fixed solver; verdicts that changed are
+  listed in each finding (research log, 2026-11-03 and 2026-11-04).
 - The MGU-K taper formula (1800 − 5v kW below 340 km/h, 6900 − 20v kW from 340 to 345 km/h)
   is article C5.2.8 of the FIA 2026 F1 Regulations, Section C, Issue 21 (19 October 2026), as in
   the [2024 Issue 6](https://www.fia.com/sites/default/files/fia_2026_formula_1_technical_regulations_pu_-_issue_6_-_2024-03-29.pdf).

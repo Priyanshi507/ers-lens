@@ -1893,3 +1893,48 @@ where the fix can change the result. Check before anything is reported: rows who
 bind must reproduce the saved rows to 0.001 s; any larger difference is a code or track error,
 and nothing is reported until it is found. Then S1-S7 are re-judged; verdicts recorded before
 stay as recorded.
+
+## 2026-11-04: Strategy Lab re-run with the fixed solver: results
+
+Kaggle T4 x2, CUDA backward pass, commit a15e09f (results/strategy_rules_q_fixed,
+strategy_q_low_fixed, strategy_q_high_fixed). 138 of 138 DP results per car pass the convergence
+rule, now with the end charge (original 0 refined, low-drag end 4, high-drag end 0); no lap ends
+below its start charge.
+
+The check written before the run did not pass as written. Rows whose harvest had been more than
+0.05 MJ under the limit were to reproduce the saved rows to 0.001 s; 17, 28 and 39 of them
+differ, by up to 0.097 s. Found before anything else was looked at:
+- The tracks and the rest of the code are the same: every simple-rule row (no DP) reproduces to
+  the printed digit at all 12 (car, circuit) pairs.
+- One differing row (high-drag end, China, sweep car i2d2m2) re-solved here on the CPU: the code
+  before the fix (e9fcf5e) gives 92.2641 s, the saved row exactly, and the fixed code gives
+  92.1693 s, the new row exactly. The old solve had a harvest price of 4.1e-7 s/J although it
+  harvested only 8.30 of 8.5 MJ and ended 79 kJ above its start: with braking harvest beyond the
+  price's reach, the price could only hold back super-clipping. So "harvest under the limit"
+  was the wrong test for "the fix cannot change this row"; the right one is a zero price, which
+  runs.csv does not record.
+- Of all DP rows, 74, 89 and 105 per car are faster now, 56, 39 and 19 within 0.005 s; 20 are
+  slower, 14 of them laps that had ended short, the other 6 by 0.007-0.034 s, inside the 0.05 s
+  rule. The M2 (gradient) rows differ by up to 1.9 s: M2 is not touched by the fix, and as found
+  in S6 it stalls in local optima, so different floating-point hardware lands it elsewhere.
+
+Re-judged on these runs (verdicts recorded 2026-10-22 and 2026-10-28 stay as recorded):
+- Changed, held to not held: S3 for the original car with the car-file limit (2 of 4: Miami's
+  clip ratio without the taper is 0.51 against the 0.50 threshold, 0.00 before) and with the
+  per-race limits (2 of 4, the same Miami case); S1 with the per-race limits for the high-drag end
+  (Australia 0.70); S2 for the low-drag end (China 21 of 27, 78%).
+- Unchanged: S1 with the car-file limit held on all three cars; S2 held for the original car and
+  not held at the high-drag end; S4 held for the original and low-drag cars, not at the high-drag
+  end; S5, S6, S7 not held on every car. S3 still holds for both ridge ends with the car-file
+  limit and for the low-drag end with the per-race limits.
+- Several clip ratios lie within 0.01-0.2 of the 0.50 threshold, so S1 and S3 are fragile:
+  "clipping is chosen, not only forced by the taper" now holds for two of the three cars with the
+  car-file limit and one of three with the per-race limits.
+- Recomputed with scripts/strategy_diagnose.py (diagnostics.md in each _fixed folder): the
+  optimum is bang-bang on every car (95-100% of full-throttle points at the cap or at zero; first
+  runs 95-99%). Peak to braking point against the middle half of real laps: the original car's
+  optimum peaks too late at all four circuits (as before); the low-drag end is inside at
+  Australia and China, the high-drag end at China and Canada, two of four each (first runs: one
+  to three). Not recomputed: plausibility and correlation (results/strategy).
+
+The Strategy Lab page and the README now use these runs; the first runs stay in results/.

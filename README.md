@@ -246,6 +246,12 @@ inside the middle half of real laps at two of four circuits (exploratory: the ba
 observable). The car calibration failed its own acceptance test, so modelled lap
 times carry about ±0.7 s per lap of between-circuit uncertainty, and the pole laps are assumed
 to be close to energy-optimal.
+Against real 2026 races (predictions Y1-Y2, written before the comparison): across 16 circuits the
+optimum's speed loss at full throttle on the longest straight ranks circuits as real cars' does
+(Spearman 0.79, Y1 held), but its size is wrong: it loses 1.6-3 times as much speed where real cars
+clip, and it clips at five circuits where they barely do (Y2 not held, 11 of 16;
+`scripts/hindcast_2026.py`). So the model is used for how circuits compare, not for how much a real
+car clips.
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
 Reproduce: `scripts/kaggle_rerun_harvest.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
@@ -421,7 +427,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      163 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      164 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

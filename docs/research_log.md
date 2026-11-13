@@ -2145,3 +2145,39 @@ Fix: README finding 2 corrected. New tests/test_readme_claims.py recomputes the 
 table and finding 2 numbers and fails if the text differs, so these cannot go stale again
 silently. Real-data findings (3, 4, 6 on real laps) need the FastF1 cache on the Mac and are still
 listed as pending.
+
+## 2026-11-13: Before a 2027 forecast, a 2026 hindcast; predictions Y1-Y2
+
+A forecast for 2027 (rules ratified: Section C Issue 04, Section B Issue 01) is only worth making if
+the same model reproduces what 2026 cars did. The Strategy Lab has the lap-time optimum at 18
+circuits (results/fia_fix_calendar_h); the clipping detector has what real cars did on 17 of them
+(results/multi_rebased/R/race_summary.csv). They have never been compared circuit by circuit.
+
+Model quantity: on the lap's longest full-throttle run (longest_free_run of v_limit, as in
+fia_fix_figures.location_split), the speed lost between the run's peak speed and its end, in km/h,
+for the original car under the super-clip cap in force at that race (250 kW before Miami, 350 kW
+from Miami). Observed quantity: the race's median flat-out speed drop (drop_kmh_median), races with
+used = True. Written before computing either side; not blind, because both tables' clipping
+summaries have been seen separately (findings 3 and 9), never paired.
+
+Y1. Spearman correlation between the two over the races they share is at least 0.6.
+Y2. The model loses at least 3 km/h exactly where at least half the real laps clip
+    (clip_share >= 0.5), at 80% or more of the shared races.
+If Y1 fails, the model does not rank circuits as real cars do, and a 2027 forecast of clipping by
+circuit is not made; a forecast of the direction of change may still be.
+
+Results (scripts/hindcast_2026.py, results/fia_fix_calendar_h; 16 races are in both tables,
+Australia is not in the re-based detector run):
+- Y1 held: Spearman 0.79 over 16 races. The optimum ranks circuits by how much real cars lose at
+  full throttle on their longest straight.
+- Y2 not held, 11 of 16. All five misses go one way: the model loses speed where real cars do not
+  clip (Monaco 30 km/h against 4% of real laps clipping, Barcelona 25 km/h against 39%, Hungary,
+  Bahrain and Singapore 6-7 km/h against 0-40%). Where real cars do clip, the model's drop is 1.6-3
+  times theirs (China 44 against 15 km/h, Miami 33 against 15, Japan 74 against 46).
+Not established: why. Candidates, untested: real race laps are not lap-time optimal (traffic,
+tyre and fuel saving, team energy plans), and the model's longest free run (from v_limit) is not
+always the straight the detector measures (Monaco). The model's speed peak is also too late at
+every circuit for the original car (S7, finding 8), which fits a model that clips too hard.
+Consequence for 2027, as written before: Y1 held, so a forecast of how circuits rank and of the
+direction of change may be made; Y2 failed, so the model's absolute clipping is not used as a
+forecast. To be re-checked on the certified re-run (results/fia_fix_calendar_c).

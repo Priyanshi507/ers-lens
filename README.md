@@ -248,7 +248,7 @@ times carry about ±0.7 s per lap of between-circuit uncertainty, and the pole l
 to be close to energy-optimal.
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
-Reproduce: `scripts/kaggle_rerun_strategy.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
+Reproduce: `scripts/kaggle_rerun_harvest.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
 results/tracks --car configs/car_2026_q_low.yaml --out results/strategy_q_low_h`, then `--rules` and
 `--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low_h/runs.csv`
 
@@ -322,6 +322,8 @@ room to harvest). At Australia and Canada 2 MJ is below the plateau, so the best
 The per-lap differences are small (0.008 s at Australia, 0.023 s at Canada) and are confirmed by
 single-lap solves whose proven optimality gap is at most 0.003 s; over 58-68 laps they add up.
 results/race_h2; research log, 2026-11-13.
+Reproduce: `scripts/kaggle_race_refined.md` (free Kaggle T4 x2), then `python scripts/race_plan.py plans
+--out results/race_h2` (reads race lengths from the Jolpica API).
 
 ### 11. The FIA's real 250 kW sectors
 
@@ -346,6 +348,8 @@ first run, with the solver bug, recorded P1-P3 not held; its two impossible laps
 limit giving a faster lap) are what exposed the bug. These numbers use the corrected solver and
 harvest limit (results/sectors_h, 2026-11-13); the harvest correction changed P3 from 13 to 14
 of 14 and no other verdict.
+Reproduce: `scripts/kaggle_rerun_harvest.md`, or `python scripts/sectors_run.py --out results/sectors_h`,
+then the same with `--verdicts`.
 
 ### Performance: the solver on a free GPU
 

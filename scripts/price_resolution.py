@@ -20,7 +20,7 @@ def main():
     args = ap.parse_args()
     track = load_track(f"results/tracks/{args.event}.npz")
     base = race_rules(load_car_params("configs/car_2026.yaml"), args.event)
-    print("event,cap_kw,fine_bisect,lap_s,dp_pred_s,converged,harvest_mj,budget_mj,price,seconds")
+    print("event,cap_kw,fine_bisect,lap_s,dp_pred_s,converged,harvest_mj,budget_mj,price,optimality_gap_s,seconds")
     for cap in args.caps:
         car = base.with_(superclip_max_w=cap * 1e3)
         for n in args.bisect:
@@ -28,6 +28,7 @@ def main():
             s = solve_refined(track, car, fine_bisect=n)
             print(f"{args.event},{cap},{n},{s.lap_time_sim_s:.4f},{s.lap_time_dp_s:.4f},{solution_ok(s)},"
                   f"{s.harvested_j / 1e6:.4f},{car.harvest_per_lap_j / 1e6:.2f},{s.harvest_price_s_per_j:.4e},"
+                  f"{s.optimality_gap_s:.4f},"
                   f"{time.perf_counter() - t:.0f}", flush=True)
 
 

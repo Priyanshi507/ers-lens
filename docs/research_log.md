@@ -2049,3 +2049,24 @@ R3. With ten steps, Bahrain's 350 kW lap is no slower than its 250 kW lap.
 If R2 holds, solve_refined's default becomes the larger number of steps and H1's failure is
 recorded as a solver-resolution limit; findings 8, 9 and 11 are not re-run for it, because every
 other pair got slower by more than 0.02 s.
+
+## 2026-11-13: An optimality certificate for every solve; prediction R4
+
+Before running R1-R3, a better question than "is the price search fine enough?": how far can any
+solve be from the best lap the recharge limit allows? Weak duality answers it at no extra cost.
+For a harvest price p the DP returns J(p) = min (T + p H) over the laps it can represent; any lap
+with H <= B therefore has T >= J(p) - p B. The best of these values over every price a solve tries
+is a lower bound, and the solve's DP lap time minus it is a proven optimality gap on the DP's own
+model and grid (src/erslens/optimal.py: Solution.dual_bound_s, optimality_gap_s; the lap table
+keeps one bound per start and end charge). It says nothing about grid or model error, which the
+convergence rule and the calibration cover, and a non-convex problem can keep a gap that no price
+closes, which is why it is reported and not assumed. Tests: tests/test_optimal.py (no lap within
+the limit at any price beats the bound; no gap without a binding limit).
+
+Alternatives considered: the harvest used so far as a third DP state makes the limit exact but
+multiplies the work by the number of harvest levels (about 40 for 0.2 MJ steps); a denser price
+ladder is cheaper but proves nothing.
+
+R4, written before the run: with ten bisection steps, Bahrain's 350 kW solve has an optimality gap
+of at most 0.01 s; with four, its gap is larger than with ten. Exploratory, not a prediction:
+the gaps of every table lap and single-lap solve, printed by race_plan.py tables.

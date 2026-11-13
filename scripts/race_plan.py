@@ -50,12 +50,15 @@ def tables(events, out: Path):
         np.savez(path, levels_j=t.levels_j, lap_s=t.lap_s, harvest_j=t.harvest_j, end_j=t.end_j, price=t.price,
                  budget_j=t.budget_j, unconverged=t.unconverged,
                  single_lap_s=np.array([s.lap_time_sim_s for s in singles]),
-                 single_ok=np.array([solution_ok(s) for s in singles]))
+                 single_ok=np.array([solution_ok(s) for s in singles]), bound_s=t.bound_s,
+                 single_gap_s=np.array([s.optimality_gap_s for s in singles]))
         gap = np.abs(np.diag(t.lap_s) - [s.lap_time_sim_s for s in singles])
         print(f"{e}: same-charge laps against single-lap solves, largest gap {gap.max():.3f} s (level "
               f"{t.levels_j[int(np.argmax(gap))] / 1e6:g} MJ); single solves converged {sum(map(solution_ok, singles))} "
               f"of {len(singles)}; {int(np.isfinite(t.lap_s).sum())} of {t.lap_s.size} pairs found, "
-              f"{int(t.unconverged.sum())} candidates dropped", flush=True)
+              f"{int(t.unconverged.sum())} candidates dropped; largest optimality gap: table "
+              f"{np.nanmax(np.where(np.isfinite(t.lap_s), t.gap_s, np.nan)):.3f} s, single solves "
+              f"{max(s.optimality_gap_s for s in singles):.3f} s", flush=True)
 
 
 def plans(events, out: Path, year: int = 2026):

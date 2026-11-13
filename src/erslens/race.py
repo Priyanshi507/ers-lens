@@ -30,6 +30,11 @@ class LapTable:
     price: np.ndarray
     budget_j: float
     unconverged: np.ndarray  # [start, end]: candidates dropped because the DP and its replay disagreed
+    bound_s: np.ndarray | None = None  # [start, end]: no lap within the limit can beat this (DP model, weak duality)
+
+    @property
+    def gap_s(self) -> np.ndarray:
+        return self.lap_s - self.bound_s
 
 
 def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int = 321,
@@ -43,10 +48,12 @@ def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int
                                      np.full(shape, np.nan), np.full(shape, np.nan))
     budget = rc.harvest_per_lap_j
     dropped = np.zeros(shape, dtype=int)
+    bound = np.full(shape, -np.inf)
 
     def lap_at(values, v_end, i, start, target, price):
         """(time, harvest, end charge, feasible) of the replayed lap, or None if the DP disagrees with it."""
         cmd, start_cost = c.forward(values, v_end, float(start), float(price))
+        bound[i, j] = max(bound[i, j], float(start_cost) - price * budget)
         out = {k: np.asarray(a) for k, a in c.replay(cmd, float(start)).items()}
         h = float((out["harvest"] * out["dt"]).sum() * rc.eta_harvest)
         e = float(out["soc"][-1] + (rc.eta_harvest * out["harvest"][-1]
@@ -82,7 +89,7 @@ def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int
                 del values
                 keep(i, r, mid)
                 lo, hi = (mid, hi) if r is None or not r[3] else (lo, mid)
-    return LapTable(np.asarray(levels_j, float), lap, harvest, end, price_used, budget, dropped)
+    return LapTable(np.asarray(levels_j, float), lap, harvest, end, price_used, budget, dropped, bound)
 
 
 @dataclass

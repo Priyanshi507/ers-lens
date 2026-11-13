@@ -58,6 +58,16 @@ class Solution:
     lap_time_dp_s: float
     lap_time_sim_s: float
     out: dict
+    dual_bound_s: float = float("-inf")
+
+    @property
+    def optimality_gap_s(self) -> float:
+        """How much faster any lap within the recharge limit could be, on the DP's own model and grid.
+
+        For any harvest price p the DP returns J(p) = min(T + p H); every lap with H <= budget B
+        has T >= J(p) - p B (weak duality). The bound is the best such value over the prices tried.
+        """
+        return self.lap_time_dp_s - self.dual_bound_s
 
     @property
     def harvested_j(self) -> float:
@@ -185,6 +195,23 @@ def _priced(attempt, budget: float, lo: float, hi: float, n_bisect: int):
     return attempt(hi)[0]
 
 
+class _Bounded:
+    """Wraps an attempt function and keeps the best dual bound J(p) - p B over every price it is called with."""
+
+    def __init__(self, attempt, budget: float):
+        self.attempt, self.budget, self.bound = attempt, budget, float("-inf")
+
+    def __call__(self, price):
+        sol, planned = self.attempt(price)
+        start_cost = sol.lap_time_dp_s + price * sol.harvested_j
+        self.bound = max(self.bound, start_cost - price * self.budget)
+        return sol, planned
+
+    def stamp(self, sol: Solution) -> Solution:
+        sol.dual_bound_s = self.bound
+        return sol
+
+
 def solve(track: Track, car: CarParams, grid: Grid | None = None, soc0_fracs=(0.25, 0.5, 0.75),
           terminal: bool = True, max_bisect: int = 12) -> Solution:
     """Optimal one-lap strategy for a mid-race car, with the harvest limit enforced.
@@ -201,13 +228,14 @@ def solve(track: Track, car: CarParams, grid: Grid | None = None, soc0_fracs=(0.
 
     best = None
     for frac in soc0_fracs:
-        attempt = lambda price, soc0=frac * car.es_capacity_j: _attempt(c, car, track, soc0, price)
+        attempt = _Bounded(lambda price, soc0=frac * car.es_capacity_j: _attempt(c, car, track, soc0, price), budget)
         sol, harvested = attempt(0.0)
         if harvested > budget:
             hi = 1e-6
             while attempt(hi)[1] > budget:
                 hi *= 4.0
             sol = _priced(attempt, budget, 0.0, hi, max_bisect)
+        sol = attempt.stamp(sol)
         if best is None or sol.lap_time_sim_s < best.lap_time_sim_s:
             best = sol
     return best
@@ -231,11 +259,11 @@ def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 
     tr = start_at_slowest_point(track, rc)
     c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
     budget = rc.harvest_per_lap_j
-    attempt = lambda price: _attempt(c, rc, tr, soc0_frac * rc.es_capacity_j, price)
+    attempt = _Bounded(lambda price: _attempt(c, rc, tr, soc0_frac * rc.es_capacity_j, price), budget)
     price = coarse.harvest_price_s_per_j
     sol, harvested = attempt(price)
     if harvested <= budget and price == 0.0:
-        return sol
+        return attempt.stamp(sol)
     if harvested > budget:
         lo, hi = price, max(2.0 * price, 1e-7)
         while attempt(hi)[1] > budget:
@@ -244,4 +272,4 @@ def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 
         lo, hi = 0.5 * price, price
         while lo > 1e-9 and attempt(lo)[1] <= budget:
             lo, hi = 0.5 * lo, lo
-    return _priced(attempt, budget, lo, hi, fine_bisect)
+    return attempt.stamp(_priced(attempt, budget, lo, hi, fine_bisect))

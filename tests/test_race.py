@@ -58,6 +58,7 @@ def test_price_refinement_only_speeds_up_feasible_laps():
     assert np.all(refined.harvest_j[found] <= refined.budget_j * (1 + 1e-9))
     bound = found & (ladder.price > 0)
     assert np.all(refined.harvest_j[bound] >= ladder.harvest_j[bound])
+    assert np.all(refined.gap_s[found] >= -0.05)
 
 
 def test_verdicts_need_the_check_first():

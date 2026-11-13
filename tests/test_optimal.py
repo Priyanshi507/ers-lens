@@ -59,3 +59,23 @@ def test_a_binding_recharge_limit_never_drains_the_battery(limit_j):
     sol = solve(demo_circuit(), CAR.with_(harvest_per_lap_j=limit_j, superclip_max_w=350e3), soc0_fracs=(0.5,))
     assert sol.soc_end_j >= sol.soc0_j - 5e3
     assert sol.harvested_j <= limit_j * (1 + 1e-9)
+
+
+def test_dual_bound_is_below_every_lap_within_the_limit():
+    """Weak duality: no lap within the recharge limit, found at any price, beats the bound."""
+    from erslens.optimal import _attempt, _Compiled, default_grid, dp_car
+
+    car = dp_car(CAR.with_(harvest_per_lap_j=1.0e6, superclip_max_w=350e3))
+    sol = solve(TRACK, car, soc0_fracs=(0.5,))
+    assert np.isfinite(sol.dual_bound_s) and sol.optimality_gap_s >= -1e-9
+    tr = start_at_slowest_point(TRACK, car)
+    c = _Compiled(tr, car, default_grid(car), True)
+    for price in (1e-7, 5e-7, 2e-6, 1e-5):
+        other, planned = _attempt(c, car, tr, sol.soc0_j, price)
+        if planned <= car.harvest_per_lap_j:
+            assert other.lap_time_dp_s >= sol.dual_bound_s - 1e-9
+
+
+def test_an_unconstrained_optimum_has_no_gap(nominal):
+    free = solve(TRACK, CAR.with_(harvest_per_lap_j=1e12), soc0_fracs=(0.5,))
+    assert free.optimality_gap_s == pytest.approx(0.0, abs=1e-9)

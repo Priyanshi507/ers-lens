@@ -1,6 +1,6 @@
 # Refined lap tables and the harvest-price check (Kaggle, GPU T4 x2)
 
-Predictions R1-R3: research log, 2026-11-13. Accelerator "GPU T4 x2", Internet on, and in Session
+Predictions R1-R4: research log, 2026-11-13. Accelerator "GPU T4 x2", Internet on, and in Session
 options set Persistence to "Files only", so the results survive if the session restarts. Run the
 cells in order and keep the tab open. If the session restarts, run only Cell 2 again: it continues
 where it stopped. Never re-run Cell 1 after Cell 2 has started: it deletes the folder.

@@ -44,6 +44,22 @@ def test_lap_table_respects_the_recharge_limit_and_end_charge():
     assert np.all(t.end_j[found] >= t.levels_j[None, :].repeat(2, 0)[found] - 5e3)
 
 
+def test_price_refinement_only_speeds_up_feasible_laps():
+    from erslens.params import load_car_params
+    from erslens.track import demo_circuit
+
+    car = load_car_params("configs/car_2026_q_low.yaml").with_(harvest_per_lap_j=6.5e6)
+    kw = dict(prices=(0.0, 3e-7, 1.2e-6), dv=0.25, n_soc=81)
+    ladder = lap_table(demo_circuit(), car, np.array([2e6, 3e6]), refine_bisect=0, **kw)
+    refined = lap_table(demo_circuit(), car, np.array([2e6, 3e6]), **kw)
+    found = np.isfinite(ladder.lap_s)
+    assert found.any() and np.all(np.isfinite(refined.lap_s[found]))
+    assert np.all(refined.lap_s[found] <= ladder.lap_s[found])
+    assert np.all(refined.harvest_j[found] <= refined.budget_j * (1 + 1e-9))
+    bound = found & (ladder.price > 0)
+    assert np.all(refined.harvest_j[bound] >= ladder.harvest_j[bound])
+
+
 def test_verdicts_need_the_check_first():
     good = {"check_ok": True, "best_minus_simple_s": 0.02, "gain_s": 0.4, "finish_level_mj": 0.0}
     assert verdicts([good, {**good, "gain_s": 1.5}]) == {"W1": [2, 2, True], "W2": [1, 2, False], "W3": [2, 2, True]}

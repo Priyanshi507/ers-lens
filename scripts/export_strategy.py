@@ -25,11 +25,11 @@ EVENTS = ("Australia", "China", "Miami", "Canada")
 SITE_ID = {"Australia": "australian", "China": "chinese", "Miami": "miami", "Canada": "canadian"}
 CARS = (
     {"id": "original", "label": "Original car", "detail": "CdA 0.95, 400 kW (estimates)",
-     "results": "results/strategy_rules_q_fixed", "config": "configs/car_2026.yaml"},
+     "results": "results/strategy_rules_q_h", "config": "configs/car_2026.yaml"},
     {"id": "low", "label": "Low-drag end", "detail": "CdA 1.00, 310 kW (fitted)",
-     "results": "results/strategy_q_low_fixed", "config": "configs/car_2026_q_low.yaml"},
+     "results": "results/strategy_q_low_h", "config": "configs/car_2026_q_low.yaml"},
     {"id": "high", "label": "High-drag end", "detail": "CdA 1.35, 400 kW (fitted)",
-     "results": "results/strategy_q_high_fixed", "config": "configs/car_2026_q_high.yaml"},
+     "results": "results/strategy_q_high_h", "config": "configs/car_2026_q_high.yaml"},
 )
 LIMITS = {"race": "profile_rules_", "car": "profile_"}
 VARIANT = {"race": "rules", "car": "nominal"}

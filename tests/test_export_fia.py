@@ -10,7 +10,7 @@ from export_fia import build  # noqa: E402
 
 @pytest.fixture(scope="module")
 def data():
-    return build(Path("results/fia_fix_calendar_fixed"), Path("results/fia_fix_fixed"))
+    return build(Path("results/fia_fix_calendar_h"), Path("results/fia_fix_h"))
 
 
 def test_every_circuit_has_both_caps(data):
@@ -25,9 +25,9 @@ def test_every_circuit_has_both_caps(data):
 
 def test_verdicts_match_the_research_log(data):
     got = {p["id"]: (p["count"], p["total"], p["held"]) for p in data["predictions"]}
-    assert got == {"C1": (17, 18, True), "C2": (14, 18, False), "C3": (18, 18, True), "F1": (10, 12, False),
+    assert got == {"C1": (15, 18, True), "C2": (13, 18, False), "C3": (18, 18, True), "F1": (10, 12, False),
                    "F2": (12, 12, True), "F3": (12, 12, True), "F4": (4, 4, True)}
-    assert data["straight_down"] == {"count": 16, "total": 18}
+    assert data["straight_down"] == {"count": 13, "total": 18}
 
 
 def test_published_data_is_current(data):

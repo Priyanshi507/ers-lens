@@ -32,7 +32,8 @@ class LapTable:
     unconverged: np.ndarray  # [start, end]: candidates dropped because the DP and its replay disagreed
 
 
-def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int = 321) -> LapTable:
+def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int = 321,
+              refine_bisect: int = 4) -> LapTable:
     rc = dp_car(car)
     tr = start_at_slowest_point(track, rc)
     c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
@@ -42,22 +43,45 @@ def lap_table(track, car, levels_j, prices=PRICES, dv: float = 0.125, n_soc: int
                                      np.full(shape, np.nan), np.full(shape, np.nan))
     budget = rc.harvest_per_lap_j
     dropped = np.zeros(shape, dtype=int)
+
+    def lap_at(values, v_end, i, start, target, price):
+        """(time, harvest, end charge, feasible) of the replayed lap, or None if the DP disagrees with it."""
+        cmd, start_cost = c.forward(values, v_end, float(start), float(price))
+        out = {k: np.asarray(a) for k, a in c.replay(cmd, float(start)).items()}
+        h = float((out["harvest"] * out["dt"]).sum() * rc.eta_harvest)
+        e = float(out["soc"][-1] + (rc.eta_harvest * out["harvest"][-1]
+                                    - out["deploy"][-1] / rc.eta_deploy) * out["dt"][-1])
+        t = float(out["dt"].sum())
+        if abs(float(start_cost) - price * h - t) > CONVERGED_S:
+            dropped[i, j] += 1
+            return None
+        return t, h, e, h <= budget * (1 + 1e-9) and e >= target - END_TOL_J
+
+    def keep(i, r, price):
+        if r is not None and r[3] and r[0] < lap[i, j]:
+            lap[i, j], harvest[i, j], end[i, j], price_used[i, j] = r[0], r[1], r[2], price
+
     for j, target in enumerate(levels_j):
         for price in prices:
             values, v_end = c.backward(float(target), float(price))
             for i, start in enumerate(levels_j):
-                cmd, start_cost = c.forward(values, v_end, float(start), float(price))
-                out = {k: np.asarray(a) for k, a in c.replay(cmd, float(start)).items()}
-                h = float((out["harvest"] * out["dt"]).sum() * rc.eta_harvest)
-                e = float(out["soc"][-1] + (rc.eta_harvest * out["harvest"][-1]
-                                            - out["deploy"][-1] / rc.eta_deploy) * out["dt"][-1])
-                t = float(out["dt"].sum())
-                if abs(float(start_cost) - price * h - t) > CONVERGED_S:
-                    dropped[i, j] += 1
-                    continue
-                if h <= budget * (1 + 1e-9) and e >= target - END_TOL_J and t < lap[i, j]:
-                    lap[i, j], harvest[i, j], end[i, j], price_used[i, j] = t, h, e, price
+                keep(i, lap_at(values, v_end, i, start, target, price), price)
             del values
+        # A ladder price can sit well above the price at which the recharge limit just binds, and
+        # the lap then leaves energy unused (up to 0.1 s at 2026-11-13). Bisect between the chosen
+        # price and the ladder step below it, as the single-lap solve does.
+        for i, start in enumerate(levels_j):
+            if not np.isfinite(lap[i, j]) or price_used[i, j] == 0.0:
+                continue
+            k = prices.index(price_used[i, j])
+            lo, hi = prices[k - 1], prices[k]
+            for _ in range(refine_bisect):
+                mid = 0.5 * (lo + hi)
+                values, v_end = c.backward(float(target), float(mid))
+                r = lap_at(values, v_end, i, start, target, mid)
+                del values
+                keep(i, r, mid)
+                lo, hi = (mid, hi) if r is None or not r[3] else (lo, mid)
     return LapTable(np.asarray(levels_j, float), lap, harvest, end, price_used, budget, dropped)
 
 

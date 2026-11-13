@@ -137,8 +137,9 @@ function renderAnswer() {
   $("answer-main").innerHTML = clipsEverywhere
     ? "On every car tested, the fastest lap <strong>cuts electric power before the end of the longest straight</strong>."
     : "The optimum does not clip on every car tested.";
-  $("answer-detail").textContent = "Clipping is what an optimizer chooses, not only a side effect of the regulation taper: near top " +
-    "speed, drag absorbs power roughly as v³, so a joule deployed there buys little time. How widespread clipping is " +
+  $("answer-detail").textContent = "Clipping is partly what an optimizer chooses, not only a side effect of the regulation taper: near top " +
+    "speed, drag absorbs power roughly as v³, so a joule deployed there buys little time. With the taper removed, it " +
+    "still clips on two of the three cars tested (one of three with the per-race limits). How widespread clipping is " +
     "across legal cars, and how far below top speed the energy goes, depend on the car's drag and engine power.";
 }
 

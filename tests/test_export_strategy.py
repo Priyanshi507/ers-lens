@@ -50,7 +50,7 @@ def test_published_verdicts_match_the_evaluated_ones(data):
 
 def test_original_car_reproduces_the_logged_diagnostics(data):
     """The diagnostics recomputed from the fixed-solver runs (research log, 2026-11-04)."""
-    text = Path("results/strategy_rules_q_fixed/diagnostics.md").read_text()
+    text = Path("results/strategy_rules_q_h/diagnostics.md").read_text()
     for e in EVENTS:
         m = re.search(rf"\| {e} \| \d+ / \d+ m \| \d+ / \d+ m \| (\d+) / (\d+) m \|.*\(n=(\d+)\)", text)
         opt_tail, real_tail, n = map(int, m.groups())

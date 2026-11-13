@@ -54,9 +54,9 @@ function renderAnswer() {
   const d = state.data, c1 = d.predictions.find((p) => p.id === "C1");
   $("answer-main").innerHTML = `In the model, the 350 kW cap <strong>takes more energy by super-clipping</strong> at ` +
     `${c1.count} of ${c1.total} circuits, and less at the end of the longest straight at ${d.straight_down.count} of ${d.straight_down.total}.`;
-  $("answer-detail").textContent = "The part of super-clipping that spectators see on the long straights shrinks, while super-clipping " +
-    "as a whole grows. The extra energy is taken at lower speeds, where the MGU-K can use more than 250 kW: its limit tapers " +
-    "from 350 kW at 290 km/h to 250 kW at 310 km/h.";
+  $("answer-detail").textContent = "At most circuits the super-clipping at the end of the longest straight shrinks, while " +
+    "super-clipping as a whole takes more energy, mostly at lower speeds. This is the lap-time optimum of a simplified car, " +
+    "not a measurement of real cars.";
 }
 
 function renderCalendar() {

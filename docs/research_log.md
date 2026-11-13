@@ -1984,3 +1984,68 @@ H2. Under the 350 kW cap, super-clipping energy on the longest straight is highe
     tapered harvest at 80% or more of the circuits that super-clip there in either run.
 H3. The exploratory count "less super-clipping energy on the longest straight under 350 kW than
     under 250 kW" (16 of 18 with the tapered harvest) falls below 15 of 18.
+
+## 2026-11-13: Harvest-limit correction: results, and a price-resolution limit found
+
+The combined re-run of 2026-11-04 (scripts/kaggle_rerun_harvest.md, commit add46ee, two T4s) is in
+the *_h folders; its two logs are in results/rerun_h_logs. No run failed. Two earlier attempts were
+lost when the Kaggle session ended before the zip was downloaded; this run's printed summary lines
+match the first of them to the last digit.
+
+Verdicts on the predictions written before the run (scripts/harvest_verdicts.py):
+- H1 not held. 118 converged pairs (36 calendar, 40 four-circuit, 42 sectors); two are slower than
+  with the tapered harvest by more than 0.02 s, and they are one solve run twice: Bahrain, 350 kW,
+  no sector limit, 92.556 to 92.583 s (+0.026 s). Mean change -0.016, -0.011 and -0.025 s. A
+  freer car cannot be slower at the true optimum, so this is the solver: the new solve harvests
+  8.34 of the 8.5 MJ limit (the old one 8.42), and its own prediction is also 0.025 s slower, so
+  the harvest price was left above the one at which the limit just binds. solve_refined bisects
+  that price only four times on the fine grid. Bahrain's 250 kW solve lost 0.012 s the same way,
+  which is also why Bahrain is the one circuit where 350 kW is slower than 250 kW (by 0.020 s,
+  exactly at C3's limit).
+- H2 held: under 350 kW, super-clipping energy on the longest straight is higher at 16 of 16
+  circuits that super-clip there (Monaco and Singapore none), by 0.01-0.18 MJ.
+- H3 held: "less on the longest straight under 350 than under 250 kW" falls from 16 to 13 of 18
+  (not China, 0.06 kJ higher; Netherlands; Spain; Monaco and Singapore, none).
+
+Earlier predictions re-judged on these runs (as a correction; earlier verdicts stay as recorded):
+- C1 held 15 of 18 (17 before; not Bahrain, Spain, Monaco). C2 not held 13 of 18 (14). C3 held
+  18 of 18 (Bahrain -0.020 s). Super-clip energy below 250 km/h is higher at 14 of 18 (17 before).
+- F1 not held 10 of 12 (Australia, low and high-drag cars, 0.278 and 0.270 s against 0.20); F2, F3,
+  F4 held as before. Super-clip energy rises 3.5-21.9% with the cap (3-20% before).
+- P1 and P2 held 14 of 14; P3 now 14 of 14 (13 before; Singapore now moves energy out of its
+  sectors). The sectors cost 0.028-0.226 s per lap (Britain and Italy least, Spain most) against
+  0.267-0.568 s for 250 kW everywhere; summed over the 14 circuits, the old bound is 5.5 times the
+  sectors' cost.
+- Strategy Lab, all three cars: every verdict is the same as on the _fixed runs (S1-S7, and S1, S3,
+  S4 with the per-race limits); 138 of 138 DP results per car pass the convergence rule. Values that
+  moved: the original car's S3 ratios are Australia 0.51 and Miami 0.51 (threshold 0.50); the
+  high-drag end's S2 at Australia is 70% (59%); S5's gap is 1.77-3.66 s. The optimum is bang-bang
+  on every car (95-99% of full-throttle points at the cap or zero); peak to braking point inside the
+  middle half of real laps: original car 0 of 4, low-drag end Australia and China, high-drag end
+  China and Canada (unchanged).
+- Whole-race plans: the check written before the run failed (same-charge laps against single-lap
+  solves: Australia 0.003 s, China 0.074 s at 3.5 MJ, Miami 0.107 s at 2.5 MJ, Canada 0.034 s;
+  limit 0.05 s), so W1-W3 are again not judged.
+
+Looking at the failed check before anything else: every table lap that misses is slower than the
+single solve, never faster, and it is a lap whose harvest limit binds: at Miami 2.5 MJ the table lap
+harvests 8.06 of 8.5 MJ at the ladder price 3e-7 s/J. The table takes the best of a fixed price
+ladder (... 2e-7, 3e-7, 4e-7 ...); where the binding price falls between two steps, the next step up
+leaves energy unused. The single-lap solve bisects the price. The same cause, at a smaller scale
+(four bisection steps), explains H1's Bahrain case.
+
+Fix to the lap table (src/erslens/race.py): after the ladder, every lap with a non-zero price is
+re-solved by four bisection steps between its ladder price and the step below, keeping a lap only
+if it is faster, within the recharge limit and ends at its target; the same rule as solve_refined.
+Test: tests/test_race.py (refinement never slows a feasible lap or breaks the limit).
+
+Predictions for the next run, written before it (scripts/kaggle_race_refined.md; tables into
+results/race_h2, the price check into results/price_resolution):
+R1. With the refined table, the every-level check passes at all four circuits (every same-charge lap
+    within 0.05 s of its single-lap solve). Only then are W1-W3 judged, unchanged from 2026-11-02.
+R2. Bahrain with ten fine bisection steps instead of four: the 350 kW lap is no slower than the
+    tapered-harvest solve (92.556 s), and it harvests at least 8.45 MJ.
+R3. With ten steps, Bahrain's 350 kW lap is no slower than its 250 kW lap.
+If R2 holds, solve_refined's default becomes the larger number of steps and H1's failure is
+recorded as a solver-resolution limit; findings 8, 9 and 11 are not re-run for it, because every
+other pair got slower by more than 0.02 s.

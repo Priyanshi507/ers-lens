@@ -2070,3 +2070,49 @@ ladder is cheaper but proves nothing.
 R4, written before the run: with ten bisection steps, Bahrain's 350 kW solve has an optimality gap
 of at most 0.01 s; with four, its gap is larger than with ten. Exploratory, not a prediction:
 the gaps of every table lap and single-lap solve, printed by race_plan.py tables.
+
+## 2026-11-13: Results of R1-R4, and W1-W3 judged at last
+
+Run: scripts/kaggle_race_refined.md, commit 9922ba4 (the certificate patch), two T4s. Tables in
+results/race_h2 (logs in results/race_h2/logs), the price check in results/price_resolution.
+
+- R1 held: same-charge table laps against single-lap solves, largest gap per circuit Australia
+  0.002 s, China 0.006 s, Miami 0.005 s, Canada 0.002 s (was 0.003, 0.074, 0.107, 0.034); every
+  single solve passes the convergence rule.
+- R2 held: Bahrain, 350 kW, ten steps: 92.528 s (tapered-harvest solve 92.556 s), 8.49 of 8.5 MJ.
+- R3 held: with ten steps, 350 kW (92.528 s) is faster than 250 kW (92.531 s); with four it was
+  slower by 0.020 s.
+- R4 held: optimality gap at 350 kW 0.056 s with four steps, 0.003 s with ten (250 kW: 0.034 and
+  0.002 s).
+
+W1-W3 (2026-11-02), judged because R1 held (scripts/race_plan.py plans; the race lengths, which
+the script reads from the Jolpica API, were taken from results/race/plans.csv because this
+session cannot reach the API: 58, 56, 57, 68 laps):
+- W1 not held, 2 of 4: the best plan beats the simple plan by 0.45 s at Australia and 1.42 s at
+  Canada (China 0.015 s, Miami 0.009 s).
+- W2 not held, 3 of 4: gain over the neutral plan 0.87, 0.73, 0.49 s, and 1.88 s at Canada.
+- W3 not held, 3 of 4: Miami finishes at 0.5 MJ.
+Looking afterwards: at Australia and Canada the plan raises the charge from 2 to 2.5 MJ on lap 1,
+holds it, and spends it on the last lap. The single-lap solves, whose optimality gaps are at most
+0.003 s there, confirm that a charge-neutral lap at 2.5-3.5 MJ is faster than at 2 MJ by 0.008 s
+(Australia) and 0.023 s (Canada), so the 2 MJ neutral plan was not the best neutral plan; the
+lap-time curve over charge is flat from 2.5 to 3.5 MJ and rises at both ends (low charge runs the
+battery short within the lap, 4 MJ leaves no room to harvest). At China and Miami 2 MJ is already
+on the flat part and the plan only spends at the end. Table laps' own optimality gaps are up to
+0.052 s (China), larger than these per-lap differences, which is why the single-lap solves are
+the evidence here; a table lap can also sit up to 0.011 s below its bound because the bound is on
+the DP's model and the lap is a replay.
+
+The decision written before the run, "findings 8, 9 and 11 are not re-run", assumed every other
+solve was as close to optimal as H1's 0.02 s; R4 shows a four-step solve can be 0.056 s off, more
+than the 0.02 s tolerances in C3 and P1. So that decision is reversed, before any new result: the
+default becomes ten steps (solve_refined), every experiment records its optimality gap (runs.csv
+column optimality_gap_s), and findings 8, 9 and 11 are re-run into *_c folders
+(scripts/kaggle_rerun_certified.md). The *_h results stay in results/.
+
+Predictions for that re-run, written before it:
+K1. At least 95% of DP solves in the FIA-fix (calendar and four circuits), sectors and Strategy
+    Lab runs have an optimality gap of at most 0.01 s.
+K2. No verdict among C1-C3, F1-F4, P1-P3 and S1-S7 (with the per-race variants) differs from the
+    *_h runs.
+K3. Under 350 kW no circuit's lap is slower than under 250 kW (C3 with a zero tolerance).

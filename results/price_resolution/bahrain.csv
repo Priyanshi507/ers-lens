@@ -1,0 +1,5 @@
+event,cap_kw,fine_bisect,lap_s,dp_pred_s,converged,harvest_mj,budget_mj,price,optimality_gap_s,seconds
+Bahrain Grand Prix,250.0,4,92.5629,92.5574,True,8.4016,8.50,3.4326e-07,0.0338,44
+Bahrain Grand Prix,250.0,10,92.5312,92.5257,True,8.4942,8.50,3.3169e-07,0.0019,61
+Bahrain Grand Prix,350.0,4,92.5829,92.5765,True,8.3429,8.50,3.6145e-07,0.0560,35
+Bahrain Grand Prix,350.0,10,92.5279,92.5233,True,8.4922,8.50,3.4513e-07,0.0027,61

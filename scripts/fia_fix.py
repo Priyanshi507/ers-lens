@@ -29,7 +29,7 @@ SWEEP_W = (150e3, 200e3, 250e3, 300e3, 350e3, 450e3)
 ACTIVE_W = 1e3
 FIELDS = ["event", "car", "cap_kw", "lap_s", "dp_pred_s", "converged", "harvest_mj", "superclip_mj",
           "superclip_s", "superclip_m", "longest_superclip_s", "superclip_at_cap_share",
-          "peak_superclip_kw", "clip_ratio", "seconds"]
+          "peak_superclip_kw", "clip_ratio", "optimality_gap_s", "seconds"]
 
 
 def superclip_metrics(out: dict, ds: float, cap_w: float) -> dict:
@@ -107,7 +107,8 @@ def main():
              "dp_pred_s": sol.lap_time_dp_s,
              "converged": solution_ok(sol),
              "harvest_mj": sol.harvested_j / 1e6, **superclip_metrics(o, sol.track.ds, cap),
-             "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "seconds": round(seconds, 1)}
+             "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "optimality_gap_s": sol.gap_or_nan,
+             "seconds": round(seconds, 1)}
         return r, sol, o
 
     if args.refine:

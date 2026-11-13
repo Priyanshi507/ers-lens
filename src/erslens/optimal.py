@@ -70,6 +70,10 @@ class Solution:
         return self.lap_time_dp_s - self.dual_bound_s
 
     @property
+    def gap_or_nan(self) -> float:
+        return self.optimality_gap_s if np.isfinite(self.dual_bound_s) else float("nan")
+
+    @property
     def harvested_j(self) -> float:
         return float((self.out["harvest"] * self.out["dt"]).sum() * self.car.eta_harvest)
 
@@ -247,12 +251,14 @@ def grid_with(car: CarParams, dv: float, n_soc: int) -> Grid:
 
 
 def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 321,
-                  soc0_frac: float = 0.5, fine_bisect: int = 4) -> Solution:
+                  soc0_frac: float = 0.5, fine_bisect: int = 10) -> Solution:
     """solve() on a fine grid, with the harvest price found on the coarse grid first.
 
     The coarse price brackets the fine one, so only a few fine-grid solves are needed. Grid
     convergence on the demo circuit: dv 0.125 m/s with 321 charge levels changes the lap time by
-    0.016 s from dv 0.25, and the DP prediction matches the replay to within 0.02 s.
+    0.016 s from dv 0.25, and the DP prediction matches the replay to within 0.02 s. Ten fine
+    bisection steps (four until 2026-11-13): at Bahrain four left an optimality gap of 0.056 s,
+    ten 0.003 s (research log, 2026-11-13).
     """
     coarse = solve(track, car, soc0_fracs=(soc0_frac,), max_bisect=10)
     rc = dp_car(car)

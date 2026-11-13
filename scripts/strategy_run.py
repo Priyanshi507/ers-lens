@@ -26,7 +26,7 @@ from erslens.track import demo_circuit
 
 FIELDS = ["event", "variant", "car_id", "lap_s", "dp_pred_s", "harvest_mj", "soc_start_mj",
           "soc_end_mj", "clip_ratio", "peak_from_start_m", "run_length_m", "deploy_weighted_kmh",
-          "full_throttle_mean_kmh", "corr_with_nominal", "seconds"]
+          "full_throttle_mean_kmh", "corr_with_nominal", "optimality_gap_s", "seconds"]
 
 
 def load_track(event: str, year: int, saved: str | None = None):
@@ -46,7 +46,7 @@ def row(event, variant, car_id, sol, seconds, corr=np.nan):
     return {"event": event, "variant": variant, "car_id": car_id, "lap_s": sol.lap_time_sim_s,
             "dp_pred_s": sol.lap_time_dp_s, "harvest_mj": sol.harvested_j / 1e6,
             "soc_start_mj": sol.soc0_j / 1e6, "soc_end_mj": sol.soc_end_j / 1e6, **m,
-            "corr_with_nominal": corr, "seconds": seconds}
+            "corr_with_nominal": corr, "optimality_gap_s": sol.gap_or_nan, "seconds": seconds}
 
 
 def main():

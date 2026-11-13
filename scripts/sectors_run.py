@@ -23,7 +23,7 @@ CAR = "configs/car_2026.yaml"
 VARIANTS = ("none", "fia", "everywhere")
 TOL_S = 0.02
 FIELDS = ["event", "variant", "lap_s", "dp_pred_s", "converged", "clip_ratio", "superclip_mj", "deploy_mj",
-          "deploy_in_sectors_mj", "deploy_outside_mj", "peak_deploy_in_sectors_kw", "sector_share", "seconds"]
+          "deploy_in_sectors_mj", "deploy_outside_mj", "peak_deploy_in_sectors_kw", "sector_share", "optimality_gap_s", "seconds"]
 
 
 def solve_all(events, out_dir: Path):
@@ -56,7 +56,7 @@ def solve_all(events, out_dir: Path):
                 o = {k: np.asarray(v) for k, v in sol.out.items()}
                 d = o["deploy"] * o["dt"] / 1e6
                 r = {"event": e, "variant": variant, "lap_s": sol.lap_time_sim_s, "dp_pred_s": sol.lap_time_dp_s,
-                     "converged": solution_ok(sol),
+                     "converged": solution_ok(sol), "optimality_gap_s": sol.gap_or_nan,
                      "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"],
                      "superclip_mj": float((o["superclip"] * o["dt"]).sum() / 1e6), "deploy_mj": float(d.sum()),
                      "deploy_in_sectors_mj": float(d[mask].sum()), "deploy_outside_mj": float(d[~mask].sum()),

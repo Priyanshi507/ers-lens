@@ -280,8 +280,9 @@ limits harvesting by the absolute 350 kW (C5.2.7). Against the tapered runs it c
 but it moved the counts (C1 17 to 15, C2 14 to 13, less on the longest straight 16 to 13), so the
 earlier explanation of this finding, which relied on the taper, has been withdrawn. Bahrain is
 the one circuit where 350 kW gives a slower lap than 250 kW (by 0.020 s); that solve leaves
-0.16 MJ of its recharge limit unused because the solver's harvest-price search is coarse, a
-limit that is being checked (research log, 2026-11-13). The first runs, kept unchanged, recorded
+0.16 MJ of its recharge limit unused because the solver's harvest-price search was coarse; with
+a finer search 350 kW is faster there too (92.528 against 92.531 s), and the re-run of this
+finding with it is pending (research log, 2026-11-13). The first runs, kept unchanged, recorded
 C1 held (16), C2 not held (12), C3 not held (17), F2 not held (8 of 12) and F3 held (10 of 12);
 the failures there came from solves that the solver bug broke (research log, 2026-11-03).
 
@@ -294,24 +295,29 @@ results/fia_fix_h` (four circuits) and `--cars original --caps 250 350 --out
 results/fia_fix_calendar_h --events ...` (every circuit), then `python scripts/fia_fix_verdicts.py
 [--calendar] --runs <out>/runs.csv`.
 
-### 10. Whole-race energy plans: not yet trustworthy
+### 10. Whole-race energy plans: carry a little more charge, spend it at the end
 
 Which charge should a car carry from lap to lap over a race? A lap table (fastest lap from every
-start charge to every end charge, 0-4 MJ, within the recharge limit, every lap a simulator
-replay) feeds a race-level plan. Prior work on race allocation for the 2014-2025 power unit:
-Duhr et al., *IEEE Transactions on Vehicular Technology* 72(6), 2023. On four circuits the
-check written before the run failed at Miami (the table's 2 MJ lap 0.077 s off the single-lap
-solve, limit 0.05 s), so the three predictions were not judged. Looking afterwards: at
-Australia and China the plan holds 2 MJ and spends it on the last lap (0.4-0.7 s); at Miami and
-Canada it moves to another charge level whose lap is 0.04-0.05 s faster and repeats it for
-about 55-66 laps, which is most of the apparent 3 s gain, and at Miami that advantage is at
-least partly grid error. A race plan multiplies any per-lap error by the number of laps, so
-every charge level is now checked. On the re-run with the fixed solver and harvest limit
-(2026-11-13) that stricter check failed again, at China (0.074 s) and Miami (0.107 s); the cause is
-found: the table chose each lap's harvest price from a fixed ladder, and where the limit binds
-between two steps the lap leaves energy unused (0.44 MJ at Miami's 2.5 MJ level). The table now bisects that price as the
-single-lap solve does; the re-run, with its predictions, is pending. Research log, 2026-11-02 and
-2026-11-13.
+start charge to every end charge, 0-4 MJ in 0.5 MJ steps, within the recharge limit, every lap a
+simulator replay) feeds a race-level plan. Prior work on race allocation for the 2014-2025 power
+unit: Duhr et al., *IEEE Transactions on Vehicular Technology* 72(6), 2023. Before the plans are
+judged, every same-charge lap in the table must be within 0.05 s of an independent single-lap
+solve; this failed twice (price search too coarse, research log 2026-11-02 and 2026-11-13) and
+passes on the corrected tables (largest difference 0.006 s).
+
+| Prediction (2026-11-02), original car, 4 circuits | Result |
+| --- | --- |
+| W1: the best plan is within 0.1 s of a simple plan (hold 2 MJ, spend on the last lap) | **Not held**, 2 of 4 (Australia 0.45 s, Canada 1.42 s better) |
+| W2: the best plan gains 0.1-1.0 s over holding 2 MJ all race | **Not held**, 3 of 4 (Canada 1.88 s) |
+| W3: the best plan ends the race at 0 MJ | **Not held**, 3 of 4 (Miami ends at 0.5 MJ) |
+
+Found afterwards: a charge-neutral lap is fastest on a plateau from about 2.5 to 3.5 MJ and slower
+at both ends (too little charge runs the battery short within the lap; a full battery leaves no
+room to harvest). At Australia and Canada 2 MJ is below the plateau, so the best plan builds
+0.5 MJ on lap 1, holds it and spends it on the last lap; at China and Miami 2 MJ is already on it.
+The per-lap differences are small (0.008 s at Australia, 0.023 s at Canada) and are confirmed by
+single-lap solves whose proven optimality gap is at most 0.003 s; over 58-68 laps they add up.
+results/race_h2; research log, 2026-11-13.
 
 ### 11. The FIA's real 250 kW sectors
 
@@ -446,10 +452,12 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   harvesting is limited by the absolute 350 kW (C5.2.7). Fixed, and findings 8, 9 and 11 are
   re-run with it (2026-11-13): no verdict changed except P3 (13 to 14 of 14). The prediction that
   no solve would get slower by more than 0.02 s failed once (Bahrain, +0.026 s), traced to the
-  solver's coarse harvest-price search; a finer search is being checked.
-- Solver resolution: lap times are trusted to 0.05 s (the convergence rule). Differences smaller
-  than that between two solves, such as Bahrain's 0.020 s in finding 9, are within the solver's
-  resolution and are not findings.
+  solver's coarse harvest-price search; ten bisection steps fix it (0.003 s gap, research log 2026-11-13).
+- Solver resolution: lap times are trusted to 0.05 s (the convergence rule). Since 2026-11-13 each
+  solve also carries a proven optimality gap (weak duality on the harvest price) on the DP's own
+  model and grid. Findings 8, 9 and 11 were solved with a coarser price search (gaps up to 0.056 s
+  at Bahrain) and are being re-run with the finer one; until then, differences under about 0.05 s
+  between two of their solves, such as Bahrain's 0.020 s in finding 9, are not findings.
 - Solver correction, 2026-11-03: where braking alone could recover more than the per-lap recharge
   limit, the DP could return a lap that ended below its starting charge (the price on harvest
   could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price

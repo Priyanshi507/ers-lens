@@ -34,7 +34,8 @@ telemetry, battery energy used on one straight spans:
 | ±5% | ±10% | 1.65 MJ | 41% |
 | ±2% | ±5% | 0.76 MJ | 19% |
 
-Reproduce: `python scripts/identifiability_demo.py`
+Reproduce: `python scripts/identifiability_demo.py` (rows 2 and 3: `--max-ice-change 0.05
+--max-cda-change 0.10` and `0.02 0.05`; checked against this table by `tests/test_readme_claims.py`)
 
 ### 2. The drop in electric power during clipping *can* be measured
 
@@ -48,8 +49,11 @@ power cancel, leaving only the change in electric power:
 
 It needs only the car's mass and the circuit's elevation profile, never drag or engine
 power, so it returns the same answer for every car in finding 1. On 40 simulated cars
-with 4 Hz sampling, whole-km/h rounding and noise: correlation **0.992** with the true
-power drop, mean error **19.5 kW** on a 328 kW mean, no false detections.
+with 4 Hz sampling, whole-km/h rounding and noise: correlation **0.98** with the true
+power drop, mean error **19.6 kW** on a 265 kW mean (bias -5%), no false detections, and
+62% of clipping laps measurable. A 5% error in the assumed mass shifts estimates by about 5%.
+Reproduce: `python scripts/energy_validate.py` (checked against this text by
+`tests/test_readme_claims.py`).
 
 ### 3. Clipping is common on long straights, not on every circuit
 
@@ -413,7 +417,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      159 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      163 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

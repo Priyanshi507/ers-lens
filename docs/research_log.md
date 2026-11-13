@@ -2116,3 +2116,32 @@ K1. At least 95% of DP solves in the FIA-fix (calendar and four circuits), secto
 K2. No verdict among C1-C3, F1-F4, P1-P3 and S1-S7 (with the per-race variants) differs from the
     *_h runs.
 K3. Under 350 kW no circuit's lap is slower than under 250 kW (C3 with a zero tolerance).
+
+## 2026-11-13: Re-checking the estimator findings; finding 2's numbers were stale
+
+The harvest correction left findings 1, 2, 5 and 6 to be re-checked (2026-11-04). Each was re-run
+here where a laptop can, at the current commit and at older ones (git worktree), to see what moved
+and why.
+- Finding 1 (identifiability): reproduces exactly (2.53, 1.65 and 0.76 MJ). It involves only
+  deployment.
+- Finding 2 (matched-speed power drop): does not reproduce. scripts/energy_validate.py gives
+  correlation 0.98, mean absolute error 19.6 kW on a 265 kW mean, bias -14.2 kW, 62% of clipping
+  laps measurable, no false positives; the README said 0.992, 19.5 kW, 328 kW. Running the script
+  at each commit that touched its code: 8f62b40 (2026-10-01) gives the README's numbers; 7c232b2
+  (2026-10-02, the regulation taper) gives 0.976, 21.4 kW on 296 kW; it stays there until the
+  harvest correction (add46ee) gives today's. So the README's numbers were stale from 2026-10-02,
+  a day after they were measured, and nobody noticed because nothing re-ran them. Why each change
+  lowers the mean true drop was not investigated. The conclusion (the estimator
+  tracks the true power drop within about 20 kW without knowing drag or engine power) stands. A 5%
+  mass error still shifts estimates by about 5% (238 and 263 kW against 250 kW).
+- Finding 6 (lap time lost): the stress test reproduces the logged numbers exactly with 20 laps
+  per scenario (0.028, 0.051, 0.028, 0.030 and 0.062 s median error); its fitted model never
+  tapered harvesting. The script's default is now 30 laps per scenario, which gives 0.026-0.051 s.
+- Finding 5 (neural networks): not re-run (five seeds of training). Its data generator
+  (src/erslens/synthstraight.py) and the physics it calls are unchanged since the results, and the
+  fields added to CarParams since then all default to no effect, so the same code path produces it.
+
+Fix: README finding 2 corrected. New tests/test_readme_claims.py recomputes the README's finding 1
+table and finding 2 numbers and fails if the text differs, so these cannot go stale again
+silently. Real-data findings (3, 4, 6 on real laps) need the FastF1 cache on the Mac and are still
+listed as pending.

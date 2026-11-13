@@ -18,7 +18,12 @@ NAMES = {"Australian Grand Prix": "Australia", "Chinese Grand Prix": "China", "J
 
 
 def model_drop_kmh(profiles: Path, event: str, cap: int) -> float:
-    z = np.load(profiles / f"{event}_original_{cap}.npz")
+    return drop_from_profile(profiles / f"{event}_original_{cap}.npz")
+
+
+def drop_from_profile(path: Path) -> float:
+    """Speed lost between the peak and the end of the lap's longest full-throttle run, km/h."""
+    z = np.load(path)
     i, j = longest_free_run(z["v_limit"])
     v = z["v"][i:j] * 3.6
     return float(v.max() - v[-1])

@@ -1,8 +1,8 @@
 # Every DP experiment with ten bisection steps and the optimality certificate (Kaggle, GPU T4 x2)
 
-Predictions K1-K3: research log, 2026-11-13. Accelerator "GPU T4 x2", Internet on, Persistence
-"Files only". About four to five hours on both GPUs, so start it with at least six hours of GPU
-quota left. Keep the tab open. If the session restarts, run only Cell 2 again: every script
+Predictions K1-K3 and G1-G3: research log, 2026-11-13. Accelerator "GPU T4 x2", Internet on, Persistence
+"Files only". About six to seven hours on both GPUs (the certified re-run, then the 2027
+forecast solves), so start it with at least eight hours of GPU quota left. Keep the tab open. If the session restarts, run only Cell 2 again: every script
 continues where it stopped. Never re-run Cell 1 after Cell 2 has started: it deletes the folder.
 
 Cell 1:
@@ -28,16 +28,18 @@ strat() { for stage in "" --rules --refine; do python scripts/strategy_run.py --
   eval python scripts/fia_fix.py --cars original --caps 250 350 --out results/fia_fix_calendar_c --events $CAL
   python scripts/sectors_run.py --out results/sectors_c
   strat configs/car_2026.yaml results/strategy_rules_q_c
+  python scripts/forecast_2027.py --out results/forecast_2027_a --events Australia China Miami Canada Japan Austria Belgium "Monaco Grand Prix" "Barcelona Grand Prix"
 ) >> /kaggle/working/gpu0.log 2>&1 &
 (
   export CUDA_VISIBLE_DEVICES=1
   python scripts/fia_fix.py --out results/fia_fix_c
   strat configs/car_2026_q_low.yaml results/strategy_q_low_c
   strat configs/car_2026_q_high.yaml results/strategy_q_high_c
+  python scripts/forecast_2027.py --out results/forecast_2027_b --events "British Grand Prix" "Hungarian Grand Prix" "Dutch Grand Prix" "Italian Grand Prix" "Spanish Grand Prix" "Azerbaijan Grand Prix" "Bahrain Grand Prix" "Singapore Grand Prix" "United States Grand Prix"
 ) >> /kaggle/working/gpu1.log 2>&1 &
 wait
 tail -n 3 /kaggle/working/gpu0.log; tail -n 3 /kaggle/working/gpu1.log
-zip -qr /kaggle/working/rerun_certified.zip results/*_c /kaggle/working/gpu0.log /kaggle/working/gpu1.log
+zip -qr /kaggle/working/rerun_certified.zip results/*_c results/forecast_2027_* /kaggle/working/gpu0.log /kaggle/working/gpu1.log
 ls -lh /kaggle/working/rerun_certified.zip
 ```
 

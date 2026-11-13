@@ -2181,3 +2181,45 @@ every circuit for the original car (S7, finding 8), which fits a model that clip
 Consequence for 2027, as written before: Y1 held, so a forecast of how circuits rank and of the
 direction of change may be made; Y2 failed, so the model's absolute clipping is not used as a
 forecast. To be re-checked on the certified re-run (results/fia_fix_calendar_c).
+
+## 2026-11-13: 2027 forecast: design, model predictions G1-G3 and the forecast rule, before any run
+
+Rules (FIA 2027 Section C Issue 04, re-read today; Formula 1's table of 10 June 2026 agrees): fuel
+energy flow 3150 MJ/h (+5%, ICE 400 to 420 kW), absolute ERS-K power 375 kW (harvesting),
+propulsion 300 kW without Overtake in the race (C5.2.8 ii), ES window 4.5 MJ (C5.2.9), recharge
+8.5 MJ per lap, reducible to 7 MJ (C5.2.10, worded as in 2026). configs/car_2027.yaml is the 2026
+model car with these values; the 2027 aerodynamic changes and Overtake are not modelled.
+
+Unknowns, and how they are handled (scripts/forecast_2027.py):
+- The speed-dependent deployment curves are in FIA-F1-DOC-111, not public (searched again today).
+  Family: 300 kW up to a taper start of 280, 300 or 320 km/h then the 2026 slope (5 kW per km/h),
+  or no taper.
+- The super-clip limit for 2027 is not stated: 350 kW (the 2026 value) and 375 kW (the new
+  absolute ERS-K power).
+- Each circuit keeps its 2026 race recharge limit (the article's wording is unchanged and the 2027
+  per-event documents are not public).
+That is 8 solves per circuit, 144 in all, with ten bisection steps and the optimality gap recorded.
+The 2026 baseline is the certified re-run (results/fia_fix_calendar_c), original car, under the
+super-clip cap in force at that circuit's 2026 race. No sector limits in either year.
+
+Model predictions, judged when the runs are in:
+G1. Under the 300 km/h curve with 375 kW super-clip, the 2027 lap is faster than the 2026 lap at
+    16 or more of 18 circuits.
+G2. The full-throttle speed drop on the longest straight (hindcast measure) is lower in 2027 than in
+    2026 at 80% or more of the circuits, under every member of the family.
+G3. At least 95% of the 144 solves pass the convergence rule with an optimality gap of 0.01 s or
+    less.
+
+Forecast rule (rule R), fixed now and applied unchanged to the runs (forecast_2027.py --forecast):
+- A circuit gets a direction forecast, "less" or "more" full-throttle speed loss in 2027 than in
+  2026, only if all 8 solves converge and the change has the same sign under all 8; otherwise
+  "no forecast".
+- Circuits are ranked by the median 2027 drop over the 8 solves.
+- Only the ranking and the directions are forecast, not sizes: the hindcast showed the model ranks
+  circuits well (Y1) but misjudges how much real cars clip (Y2).
+The resulting table is to be frozen, and registered with a timestamp outside GitHub, before the
+first 2027 race. Judged on 2027 races with the same detector and settings
+(multi_race.py --rebase), circuits measured in both years:
+F-a. The observed change in median full-throttle drop has the forecast sign at 70% or more of the
+     circuits with a direction forecast.
+F-b. Spearman between the forecast 2027 ranking and the observed 2027 median drop is 0.6 or more.

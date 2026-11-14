@@ -2236,3 +2236,52 @@ gaps). As far as Saxena's abstract and Nguyen and Pulsipher's case study say, ne
 recharge limits, real telemetry or a comparison with real laps (Saxena's full text was not
 reachable); Kleisarchaki (arXiv 2603.01290), already cited, remains the closest. Their numbers are on
 their own models and are not comparable with ERS-Lens lap times.
+
+## 2026-11-14: Certified re-run: K1-K3, G1-G3, the hindcast again, and the 2027 forecast
+
+Run: scripts/kaggle_rerun_certified.md at commit 07bf71d, two T4s, about 6.5 hours; results in
+the *_c folders and results/forecast_2027_a and _b, logs in results/rerun_c_logs. No run failed.
+
+K1 held: 535 of 538 DP solves (99.4%) pass the convergence rule with a proven optimality gap of at
+most 0.01 s (largest 0.015 s, high-drag car). The 48 Strategy Lab rows without a gap are the
+simple-rule and gradient-optimiser rows, which have no DP bound.
+
+K2 not held: four verdicts differ from the *_h runs.
+- F4 (super-clipping energy never steps down by more than 0.05 MJ as the cap rises) 4 of 4 to 3 of
+  4: China goes from 1.628 MJ at 300 kW to 1.572 MJ at 350 kW, a step of 0.056 MJ, with laps of
+  89.224 and 89.221 s.
+- Low-drag car: S2 not held to held (China's sweep 21 to 26 of 27 cars clipping); S1 with the
+  per-race limits held to not held (Australia's clip ratio 0.07 to 0.58, laps 77.887 and 77.894 s).
+- High-drag car: S3 with the per-race limits not held to held (Miami without the taper, clip ratio
+  0.79 to 0.07, laps 88.187 and 88.185 s).
+Every change is a choice between two strategies whose lap times differ by less than 0.01 s, one
+clipping at the speed peak and one not, or one moving 0.06 MJ more energy into super-clipping. The
+optimality gap bounds lap time, not the strategy: where the lap-time landscape is this flat, the
+optimum's binary features (does it clip, which harvest source it uses) are not determined by the
+model. All other verdicts are unchanged; C1 is still 15 of 18 but the three circuits without more
+super-clipping energy are now Monaco, Singapore and Spain (Bahrain's solve no longer misses).
+Consequence: in the paper and README, binary clip verdicts at single solves are reported with this
+caveat, and claims rest on counts across circuits, cars and caps.
+
+K3 not held: the United States is 0.0014 s slower under 350 kW than under 250 kW, with a proven gap
+of 0.0069 s on the 350 kW solve; the difference is inside the bound and is not evidence either way.
+Every other circuit is as fast or faster under 350 kW (C3 with its 0.02 s tolerance holds, 18 of 18).
+A prediction with zero tolerance was stricter than the certificate can support.
+
+Hindcast on the certified runs (Y1, Y2), with the corrected whole-straights detector run
+(results/multi_rebased_mid): unchanged, Spearman 0.79 and 11 of 16.
+
+2027 predictions:
+- G1 held: under the 300 km/h curve with 375 kW super-clipping, the 2027 lap is faster at 16 of 18
+  circuits, by up to 0.62 s (Italy); Monaco (+0.110 s) and Hungary (+0.037 s) are slower, where the
+  300 kW deployment cap costs more than the extra engine power gives.
+- G2 not held: the speed drop on the longest straight is lower in 2027 at 17 of 18 circuits if the
+  taper starts at 280 km/h, but at only 6 to 8 of 18 under the other three curves. Whether 2027 cars
+  slow less on the straights depends mostly on the unpublished DOC-111 curve.
+- G3 held: 144 of 144 solves converge with a gap of at most 0.0073 s.
+
+Forecast by rule R (results/forecast_2027.csv): a direction holds across all 8 solves at 7 of 18
+circuits: less full-throttle speed loss on the longest straight at Italy, Azerbaijan, Canada, the
+Netherlands, Barcelona and the United States; more at Singapore. The other 11 get no direction. The
+ranking by median 2027 drop starts Japan, Britain, Australia, China, Spain and ends Bahrain, the
+United States, Hungary. Not yet frozen or registered outside GitHub.

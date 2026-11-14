@@ -220,20 +220,22 @@ the same for all three.
 
 | Prediction | Result on the three cars |
 | --- | --- |
-| S1: the optimum clips on the longest straight (power at the speed peak ≤ 50% of its earlier mean) | **Held** on all three with the car-file limit; with the per-race 2026 limits on two of three (high-drag end, Australia 0.70) |
-| S3: it still clips with the MGU-K speed taper removed, at ≥ 3 of 4 circuits | Held on two of three with the car-file limit (original car 2 of 4: Australia and Miami 0.51, against 0.50); with the per-race limits on one of three |
-| S2: the optimum clips for ≥ 80% of 27 legal cars at every circuit | Depends on the car: holds for the original car, fails at both ends of the ridge (low-drag China 78%, high-drag Australia 70%) |
+| S1: the optimum clips on the longest straight (power at the speed peak ≤ 50% of its earlier mean) | **Held** on all three with the car-file limit; with the per-race 2026 limits on one of three (Australia: low-drag end 0.58, high-drag end 0.70) |
+| S3: it still clips with the MGU-K speed taper removed, at ≥ 3 of 4 circuits | Held on two of three with the car-file limit (original car 2 of 4: Australia and Miami 0.51, against 0.50); with the per-race limits on two of three |
+| S2: the optimum clips for ≥ 80% of 27 legal cars at every circuit | Depends on the car: holds for the original car and the low-drag end, fails at the high-drag end (Australia 67%) |
 | S4: energy is deployed ≥ 20 km/h below the mean full-throttle speed | Depends on the car: 16-24 km/h at the high-drag end |
 | S5: the optimum is within 0.3 s of the best tuned simple rule | **Not held**: the optimum is 1.8-3.7 s faster |
 | S6: gradient descent through the JAX simulator matches the DP optimum | **Not held**: it stalls in local optima |
 | S7: the optimal speed-peak position lies in the range seen on real laps | **Not held** (0 of 4 circuits, every car) |
 
-These are the results of the corrected solver and harvest limit (2026-11-13; results/strategy_*_h).
-The harvest-limit correction changed no verdict here. Against the
-first runs, the solver fix changed four verdicts: S3 for the original car (both limits) and S1 under the
-per-race limits for the high-drag end from held to not held, and S2 for the low-drag end from
-held to not held. Several clip ratios sit close to the 0.50 threshold, so S1 and S3 are fragile:
-a small change of car or rules moves them.
+These are the certified results (2026-11-14; results/strategy_*_c): ten bisection steps, and 535
+of 538 DP solves across findings 8, 9 and 11 are proven within 0.01 s of the best lap on the
+model. Against the previous runs three verdicts here changed (S2 and S1 with per-race limits for
+the low-drag end, S3 with per-race limits for the high-drag end), and each change is a switch
+between two strategies whose lap times differ by less than 0.01 s, one clipping at the speed peak
+and one not. The proven gap bounds lap time, not the strategy: where the optimum is this flat,
+whether it clips at one circuit is not determined by the model, so S1-S3 are read as counts
+across circuits and cars, not as single-solve facts (research log, 2026-11-14).
 
 The optimum clips at the end of the longest straight on every car with the car-file limit, and
 with the taper removed it still clips on two of the three cars: near top speed, drag absorbs
@@ -250,13 +252,13 @@ Against real 2026 races (predictions Y1-Y2, written before the comparison): acro
 optimum's speed loss at full throttle on the longest straight ranks circuits as real cars' does
 (Spearman 0.79, Y1 held), but its size is wrong: it loses 1.6-3 times as much speed where real cars
 clip, and it clips at five circuits where they barely do (Y2 not held, 11 of 16;
-`scripts/hindcast_2026.py`). So the model is used for how circuits compare, not for how much a real
-car clips.
+`scripts/hindcast_2026.py`; unchanged on the certified runs). So the model is used for how circuits
+compare, not for how much a real car clips.
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
-Reproduce: `scripts/kaggle_rerun_harvest.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
-results/tracks --car configs/car_2026_q_low.yaml --out results/strategy_q_low_h`, then `--rules` and
-`--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low_h/runs.csv`
+Reproduce: `scripts/kaggle_rerun_certified.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
+results/tracks --car configs/car_2026_q_low.yaml --out results/strategy_q_low_c`, then `--rules` and
+`--refine`, then `python scripts/strategy_evaluate.py --runs results/strategy_q_low_c/runs.csv`
 
 ### 9. The FIA's Miami fix, solved on the same circuits
 
@@ -268,31 +270,32 @@ both caps with everything else equal. Predictions were recorded before each run 
 
 | Result under 350 kW, original car, 18 circuits | Circuits |
 | --- | --- |
-| Super-clipping harvests more energy (C1) | **15 of 18, held** (not Bahrain or Spain; Monaco: none under either cap) |
+| Super-clipping harvests more energy (C1) | **15 of 18, held** (not Singapore or Spain; Monaco: none under either cap) |
 | Less of it on the longest straight (not predicted) | 13 of 18 (not China, the Netherlands or Spain; Monaco and Singapore: none there) |
-| More of it below 250 km/h (not predicted) | 14 of 18 (not Bahrain, Monaco, Singapore, Spain) |
-| More of it below 200 km/h (C2) | 13 of 18, **not held** (not Bahrain, Hungary, Monaco, Singapore, Spain) |
-| Lap never slower by more than 0.02 s (C3) | **18 of 18, held** (Bahrain 0.020 s slower, see below) |
+| More of it below 250 km/h (not predicted) | 15 of 18 (not Monaco, Singapore, Spain) |
+| More of it below 200 km/h (C2) | 13 of 18, **not held** (not Hungary, Monaco, Singapore, Spain, United States) |
+| Lap never slower by more than 0.02 s (C3) | **18 of 18, held** (United States 0.0014 s slower, inside its proven gap of 0.007 s) |
 
 In the model, the fix does what it aimed at on the straights at most circuits, less super-clipping
 at the end of the longest one, while super-clipping as a whole takes more energy, mostly at lower
-speeds. On four circuits with three cars, total super-clipping time fell at all 12 pairs while its
-energy rose by 3.5-22% (predictions F1-F4: F2, F3 and F4 held; F1 not held, because the lap gain
-exceeded the predicted 0.20 s for two cars at Australia). This is the lap-time optimum of a
+speeds. On four circuits with three cars, total super-clipping time fell at all 12 pairs (by
+2-19%) while its energy rose by 3.5-23% (predictions F1-F4: F2 and F3 held; F1 not held, because
+the lap gain exceeded the predicted 0.20 s for two cars at Australia, 0.28 and 0.27 s; F4 not held,
+3 of 4, because at China super-clipping energy steps down by 0.056 MJ from 300 to 350 kW, between
+laps 0.003 s apart). This is the lap-time optimum of a
 simplified car, not a measurement of real cars. Every circuit uses its recharge limit from the
 FIA's per-race Power Unit Information document
 ([`configs/rules_2026_races.yaml`](configs/rules_2026_races.yaml)).
 
-These results use the corrected solver and the corrected harvest limit (results/fia_fix_calendar_h
-and results/fia_fix_h, 2026-11-13). The harvest correction: the model had applied the MGU-K's
+These results are the certified re-run (results/fia_fix_calendar_c and results/fia_fix_c,
+2026-11-14): every solve is proven within 0.0125 s of the best lap on the model. Against the
+previous run only F4 changed (held to not held). The harvest correction (2026-11-13): the model had applied the MGU-K's
 speed taper, which the rules apply only to propulsion (C5.2.8), to harvesting as well; it now
 limits harvesting by the absolute 350 kW (C5.2.7). Against the tapered runs it changed no verdict,
 but it moved the counts (C1 17 to 15, C2 14 to 13, less on the longest straight 16 to 13), so the
-earlier explanation of this finding, which relied on the taper, has been withdrawn. Bahrain is
-the one circuit where 350 kW gives a slower lap than 250 kW (by 0.020 s); that solve leaves
-0.16 MJ of its recharge limit unused because the solver's harvest-price search was coarse; with
-a finer search 350 kW is faster there too (92.528 against 92.531 s), and the re-run of this
-finding with it is pending (research log, 2026-11-13). The first runs, kept unchanged, recorded
+earlier explanation of this finding, which relied on the taper, has been withdrawn. The finer
+price search also removed the one circuit (Bahrain) where 350 kW had looked slower than 250 kW
+by 0.020 s. The first runs, kept unchanged, recorded
 C1 held (16), C2 not held (12), C3 not held (17), F2 not held (8 of 12) and F3 held (10 of 12);
 the failures there came from solves that the solver bug broke (research log, 2026-11-03).
 
@@ -300,9 +303,9 @@ the failures there came from solves that the solver bug broke (research log, 202
 
 Explore every circuit under both caps on the [FIA-fix page](https://priyanshi507.github.io/ers-lens/fia.html).
 
-Reproduce: `scripts/kaggle_rerun_harvest.md` (free Kaggle T4 x2), or `python scripts/fia_fix.py --out
-results/fia_fix_h` (four circuits) and `--cars original --caps 250 350 --out
-results/fia_fix_calendar_h --events ...` (every circuit), then `python scripts/fia_fix_verdicts.py
+Reproduce: `scripts/kaggle_rerun_certified.md` (free Kaggle T4 x2), or `python scripts/fia_fix.py --out
+results/fia_fix_c` (four circuits) and `--cars original --caps 250 350 --out
+results/fia_fix_calendar_c --events ...` (every circuit), then `python scripts/fia_fix_verdicts.py
 [--calendar] --runs <out>/runs.csv`.
 
 ### 10. Whole-race energy plans: carry a little more charge, spend it at the end
@@ -345,17 +348,43 @@ sector limit and with 250 kW on the whole lap, the bound used before.
 | P2: the sectors cost at most half of 250 kW everywhere | **14 of 14, held** |
 | P3: the optimum deploys less inside the sectors and more outside | **14 of 14, held** |
 
-The real sectors cost 0.028-0.226 s per lap (Britain and Italy least, Spain most, where they
-cover 66% of the lap), against 0.27-0.57 s for 250 kW everywhere: summed over the 14 circuits, the
-old bound overstated the rule's cost 5.5 times. The rule applies "during any power limited period", defined in an FIA document
+The real sectors cost 0.007-0.229 s per lap (Italy least, Spain most, where they cover 66% of the
+lap), against 0.25-0.57 s for 250 kW everywhere: summed over the 14 circuits, the old bound
+overstated the rule's cost 5.7 times. The rule applies "during any power limited period", defined in an FIA document
 that is not public, so these numbers are the most the sectors can cost; the true cost lies
 between zero and them. Predictions were written before the run (research log, 2026-11-03). The
 first run, with the solver bug, recorded P1-P3 not held; its two impossible laps (an extra
-limit giving a faster lap) are what exposed the bug. These numbers use the corrected solver and
-harvest limit (results/sectors_h, 2026-11-13); the harvest correction changed P3 from 13 to 14
-of 14 and no other verdict.
-Reproduce: `scripts/kaggle_rerun_harvest.md`, or `python scripts/sectors_run.py --out results/sectors_h`,
+limit giving a faster lap) are what exposed the bug. These numbers are the certified re-run
+(results/sectors_c, 2026-11-14; every solve within 0.007 s of the best lap on the model); the
+harvest correction changed P3 from 13 to 14 of 14 and the certified re-run changed no verdict.
+Reproduce: `scripts/kaggle_rerun_certified.md`, or `python scripts/sectors_run.py --out results/sectors_c`,
 then the same with `--verdicts`.
+
+### 12. A dated forecast for 2027
+
+The 2027 power unit rules are ratified (FIA Section C Issue 04): engine power up about 20 kW, MGU-K
+deployment 300 kW without Overtake, harvesting 375 kW, a 4.5 MJ battery window. The speed curves
+that limit deployment (FIA-F1-DOC-111) are not public, so every circuit is solved for a family of
+four curves and two super-clipping limits, and a circuit gets a forecast only where all eight
+agree. The design, three predictions and the forecast rule were written before any 2027 solve
+(research log, 2026-11-13); every one of the 144 solves is within 0.0073 s of the best lap on the
+model.
+
+| Prediction, 18 circuits | Result |
+| --- | --- |
+| G1: the 2027 lap is faster (300 km/h curve, 375 kW) at ≥ 16 circuits | **Held**, 16 of 18 (up to 0.62 s; Monaco and Hungary slower) |
+| G2: less speed lost at full throttle on the longest straight at ≥ 80% of circuits, under every curve | **Not held**: 17 of 18 if the taper starts at 280 km/h, 6-8 of 18 otherwise |
+| G3: ≥ 95% of solves proven within 0.01 s | **Held**, 144 of 144 |
+
+So whether 2027 cars slow less on the straights depends mostly on the unpublished curve. Where the
+answer is the same under every curve, the forecast is: **less** full-throttle speed loss on the
+longest straight at Italy, Azerbaijan, Canada, the Netherlands, Barcelona and the United States,
+and **more** at Singapore; no direction at the other 11. Only directions and the ranking of
+circuits are forecast, because the hindcast (finding 8) showed the model ranks circuits well but
+misjudges how much real cars clip. It is to be checked against 2027 races with the same detector
+(predictions F-a, F-b in the research log). Table: [`results/forecast_2027.csv`](results/forecast_2027.csv).
+Reproduce: `scripts/kaggle_rerun_certified.md`, then `python scripts/forecast_2027.py --forecast --out
+results/forecast_2027_a results/forecast_2027_b --baseline results/fia_fix_calendar_c`.
 
 ### Performance: the solver on a free GPU
 
@@ -467,11 +496,12 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
   re-run with it (2026-11-13): no verdict changed except P3 (13 to 14 of 14). The prediction that
   no solve would get slower by more than 0.02 s failed once (Bahrain, +0.026 s), traced to the
   solver's coarse harvest-price search; ten bisection steps fix it (0.003 s gap, research log 2026-11-13).
-- Solver resolution: lap times are trusted to 0.05 s (the convergence rule). Since 2026-11-13 each
-  solve also carries a proven optimality gap (weak duality on the harvest price) on the DP's own
-  model and grid. Findings 8, 9 and 11 were solved with a coarser price search (gaps up to 0.056 s
-  at Bahrain) and are being re-run with the finer one; until then, differences under about 0.05 s
-  between two of their solves, such as Bahrain's 0.020 s in finding 9, are not findings.
+- Solver resolution: every DP solve carries a proven optimality gap (weak duality on the harvest
+  price) on the model's own grid; in findings 8, 9 and 11, 535 of 538 solves are within 0.01 s
+  (largest 0.015 s). The gap bounds lap time, not the strategy: two strategies within it can
+  differ in whether they clip or where they harvest, and four verdicts switched that way between
+  runs (research log, 2026-11-14). Grid and modelling error are covered only by the replay check
+  (0.05 s) and the comparison with real laps (hindcast, finding 8).
 - Solver correction, 2026-11-03: where braking alone could recover more than the per-lap recharge
   limit, the DP could return a lap that ended below its starting charge (the price on harvest
   could not reach braking harvest). Fixed: braking harvest now follows the DP's command, the price

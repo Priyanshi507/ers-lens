@@ -46,8 +46,8 @@ def table(runs_dir: Path, observed: Path) -> pd.DataFrame:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", default="results/fia_fix_calendar_h")
-    ap.add_argument("--observed", default="results/multi_rebased/R/race_summary.csv")
+    ap.add_argument("--runs", default="results/fia_fix_calendar_c")
+    ap.add_argument("--observed", default="results/multi_rebased_mid/R/race_summary.csv")
     args = ap.parse_args()
     t = table(Path(args.runs), Path(args.observed))
     print(t.round(2).to_string(index=False))

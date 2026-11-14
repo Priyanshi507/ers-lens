@@ -1,0 +1,412 @@
+Australia original 150 kW: lap 75.522 s, superclip 22.34 s (longest 3.37 s), 15 s
+Australia original 200 kW: lap 75.423 s, superclip 23.97 s (longest 3.14 s), 7 s
+Australia original 250 kW: lap 75.147 s, superclip 20.42 s (longest 2.22 s), 58 s
+Australia original 300 kW: lap 75.078 s, superclip 19.44 s (longest 2.11 s), 58 s
+Australia original 350 kW: lap 74.947 s, superclip 16.65 s (longest 1.70 s), 58 s
+Australia original 450 kW: lap 74.947 s, superclip 16.65 s (longest 1.70 s), 58 s
+Australia low 250 kW: lap 77.894 s, superclip 26.66 s (longest 4.49 s), 58 s
+Australia low 350 kW: lap 77.610 s, superclip 22.55 s (longest 3.68 s), 58 s
+Australia high 250 kW: lap 77.518 s, superclip 22.81 s (longest 2.76 s), 58 s
+Australia high 350 kW: lap 77.246 s, superclip 18.76 s (longest 2.04 s), 58 s
+China original 150 kW: lap 89.267 s, superclip 8.39 s (longest 0.99 s), 60 s
+China original 200 kW: lap 89.251 s, superclip 8.10 s (longest 0.88 s), 60 s
+China original 250 kW: lap 89.233 s, superclip 6.91 s (longest 0.59 s), 60 s
+China original 300 kW: lap 89.224 s, superclip 7.21 s (longest 0.59 s), 60 s
+China original 350 kW: lap 89.221 s, superclip 5.79 s (longest 0.49 s), 60 s
+China original 450 kW: lap 89.221 s, superclip 5.79 s (longest 0.49 s), 60 s
+China low 250 kW: lap 91.960 s, superclip 18.56 s (longest 1.79 s), 60 s
+China low 350 kW: lap 91.879 s, superclip 17.02 s (longest 1.30 s), 60 s
+China high 250 kW: lap 91.366 s, superclip 9.29 s (longest 0.94 s), 60 s
+China high 350 kW: lap 91.340 s, superclip 9.10 s (longest 0.69 s), 60 s
+Miami original 150 kW: lap 85.941 s, superclip 12.40 s (longest 1.86 s), 6 s
+Miami original 200 kW: lap 85.899 s, superclip 13.27 s (longest 1.63 s), 55 s
+Miami original 250 kW: lap 85.837 s, superclip 11.75 s (longest 0.95 s), 59 s
+Miami original 300 kW: lap 85.825 s, superclip 12.20 s (longest 1.00 s), 59 s
+Miami original 350 kW: lap 85.798 s, superclip 11.21 s (longest 0.93 s), 59 s
+Miami original 450 kW: lap 85.798 s, superclip 11.21 s (longest 0.93 s), 60 s
+Miami low 250 kW: lap 88.358 s, superclip 21.58 s (longest 2.54 s), 63 s
+Miami low 350 kW: lap 88.223 s, superclip 20.16 s (longest 2.00 s), 59 s
+Miami high 250 kW: lap 88.329 s, superclip 14.30 s (longest 1.47 s), 63 s
+Miami high 350 kW: lap 88.240 s, superclip 13.26 s (longest 1.16 s), 59 s
+Canada original 150 kW: lap 70.575 s, superclip 15.37 s (longest 2.92 s), 6 s
+Canada original 200 kW: lap 70.520 s, superclip 15.61 s (longest 2.75 s), 6 s
+Canada original 250 kW: lap 70.390 s, superclip 12.61 s (longest 1.97 s), 48 s
+Canada original 300 kW: lap 70.368 s, superclip 12.97 s (longest 1.80 s), 48 s
+Canada original 350 kW: lap 70.303 s, superclip 10.29 s (longest 1.35 s), 48 s
+Canada original 450 kW: lap 70.303 s, superclip 10.29 s (longest 1.35 s), 48 s
+Canada low 250 kW: lap 72.717 s, superclip 18.22 s (longest 2.93 s), 48 s
+Canada low 350 kW: lap 72.558 s, superclip 16.84 s (longest 2.51 s), 52 s
+Canada high 250 kW: lap 72.119 s, superclip 14.37 s (longest 2.43 s), 48 s
+Canada high 350 kW: lap 71.986 s, superclip 12.87 s (longest 1.67 s), 48 s
+All results in results/fia_fix_c/runs.csv
+Australia  nominal        nominal   lap 77.578 s clip 0.12 (58.5 s)
+China      nominal        nominal   lap 91.879 s clip 0.39 (59.7 s)
+Miami      nominal        nominal   lap 88.223 s clip 0.00 (59.2 s)
+Canada     nominal        nominal   lap 72.528 s clip 0.00 (48.1 s)
+Australia  no_taper       nominal   lap 77.522 s clip 0.00 (57.6 s)
+China      no_taper       nominal   lap 91.826 s clip 0.50 (59.6 s)
+Miami      no_taper       nominal   lap 88.146 s clip 0.00 (59.1 s)
+Canada     no_taper       nominal   lap 72.521 s clip 0.00 (48.0 s)
+Australia  m2             nominal   lap 79.564 s clip -1.55 (429.0 s)
+China      m2             nominal   lap 92.540 s clip 0.10 (444.2 s)
+Miami      m2             nominal   lap 90.387 s clip -1.32 (441.1 s)
+Canada     m2             nominal   lap 73.818 s clip -1.50 (357.4 s)
+Australia  sweep          i0d0m0    lap 77.097 s clip 0.00 (3.4 s)
+Australia  sweep          i0d0m1    lap 77.359 s clip 0.51 (18.0 s)
+Australia  sweep          i0d0m2    lap 77.617 s clip 0.32 (21.0 s)
+Australia  sweep          i0d1m0    lap 78.720 s clip 0.51 (3.4 s)
+Australia  sweep          i0d1m1    lap 78.950 s clip 0.61 (3.4 s)
+Australia  sweep          i0d1m2    lap 79.179 s clip 0.06 (18.1 s)
+Australia  sweep          i0d2m0    lap 80.483 s clip 0.00 (3.4 s)
+Australia  sweep          i0d2m1    lap 80.709 s clip 0.18 (3.5 s)
+Australia  sweep          i0d2m2    lap 80.872 s clip 0.24 (3.4 s)
+Australia  sweep          i1d0m0    lap 75.995 s clip 0.00 (18.1 s)
+Australia  sweep          i1d0m1    lap 76.276 s clip 0.10 (20.9 s)
+Australia  sweep          i1d0m2    lap 76.570 s clip 0.35 (21.2 s)
+Australia  sweep          i1d1m0    lap 77.346 s clip 0.19 (21.0 s)
+Australia  sweep          i1d1m1    lap 77.628 s clip 0.35 (21.0 s)
+Australia  sweep          i1d1m2    lap 77.898 s clip 0.33 (21.2 s)
+Australia  sweep          i1d2m0    lap 78.906 s clip 0.22 (18.0 s)
+Australia  sweep          i1d2m1    lap 79.145 s clip 0.01 (20.9 s)
+Australia  sweep          i1d2m2    lap 79.388 s clip 0.31 (20.9 s)
+Australia  sweep          i2d0m0    lap 75.116 s clip 0.45 (20.9 s)
+Australia  sweep          i2d0m1    lap 75.382 s clip 0.44 (21.0 s)
+Australia  sweep          i2d0m2    lap 75.658 s clip 0.19 (20.8 s)
+Australia  sweep          i2d1m0    lap 76.354 s clip 0.35 (20.9 s)
+Australia  sweep          i2d1m1    lap 76.620 s clip 0.26 (20.9 s)
+Australia  sweep          i2d1m2    lap 76.869 s clip 0.60 (20.9 s)
+Australia  sweep          i2d2m0    lap 77.668 s clip 0.20 (20.9 s)
+Australia  sweep          i2d2m1    lap 77.898 s clip 0.44 (20.9 s)
+Australia  sweep          i2d2m2    lap 78.141 s clip 0.49 (20.9 s)
+China      sweep          i0d0m0    lap 91.236 s clip 0.11 (21.6 s)
+China      sweep          i0d0m1    lap 91.668 s clip 0.00 (21.8 s)
+China      sweep          i0d0m2    lap 92.062 s clip 0.00 (21.8 s)
+China      sweep          i0d1m0    lap 92.672 s clip 0.09 (21.5 s)
+China      sweep          i0d1m1    lap 93.081 s clip 0.09 (21.6 s)
+China      sweep          i0d1m2    lap 93.436 s clip 0.35 (21.8 s)
+China      sweep          i0d2m0    lap 94.133 s clip 0.00 (21.6 s)
+China      sweep          i0d2m1    lap 94.514 s clip 0.25 (21.9 s)
+China      sweep          i0d2m2    lap 94.833 s clip 0.33 (21.6 s)
+China      sweep          i1d0m0    lap 90.196 s clip 0.12 (21.5 s)
+China      sweep          i1d0m1    lap 90.614 s clip 0.00 (21.6 s)
+China      sweep          i1d0m2    lap 91.013 s clip 0.00 (21.5 s)
+China      sweep          i1d1m0    lap 91.501 s clip 0.50 (21.6 s)
+China      sweep          i1d1m1    lap 91.897 s clip 0.00 (21.6 s)
+China      sweep          i1d1m2    lap 92.268 s clip 0.47 (21.7 s)
+China      sweep          i1d2m0    lap 92.869 s clip 0.09 (21.7 s)
+China      sweep          i1d2m1    lap 93.237 s clip 0.17 (21.7 s)
+China      sweep          i1d2m2    lap 93.571 s clip 0.00 (21.6 s)
+China      sweep          i2d0m0    lap 89.365 s clip 0.00 (21.7 s)
+China      sweep          i2d0m1    lap 89.759 s clip 0.00 (21.6 s)
+China      sweep          i2d0m2    lap 90.144 s clip 0.00 (21.7 s)
+China      sweep          i2d1m0    lap 90.531 s clip 0.54 (21.6 s)
+China      sweep          i2d1m1    lap 90.917 s clip 0.00 (21.6 s)
+China      sweep          i2d1m2    lap 91.280 s clip 0.41 (21.8 s)
+China      sweep          i2d2m0    lap 91.781 s clip 0.00 (21.6 s)
+China      sweep          i2d2m1    lap 92.149 s clip 0.18 (21.5 s)
+China      sweep          i2d2m2    lap 92.489 s clip 0.00 (21.8 s)
+Miami      sweep          i0d0m0    lap 87.460 s clip 0.00 (21.4 s)
+Miami      sweep          i0d0m1    lap 87.774 s clip 0.00 (21.4 s)
+Miami      sweep          i0d0m2    lap 88.065 s clip 0.00 (22.7 s)
+Miami      sweep          i0d1m0    lap 89.163 s clip 0.00 (22.6 s)
+Miami      sweep          i0d1m1    lap 89.463 s clip 0.42 (22.8 s)
+Miami      sweep          i0d1m2    lap 89.692 s clip 0.09 (21.4 s)
+Miami      sweep          i0d2m0    lap 90.984 s clip 0.41 (21.4 s)
+Miami      sweep          i0d2m1    lap 91.243 s clip 0.58 (21.4 s)
+Miami      sweep          i0d2m2    lap 91.453 s clip 0.50 (22.7 s)
+Miami      sweep          i1d0m0    lap 86.513 s clip 0.25 (21.4 s)
+Miami      sweep          i1d0m1    lap 86.803 s clip 0.00 (21.4 s)
+Miami      sweep          i1d0m2    lap 87.093 s clip 0.00 (21.4 s)
+Miami      sweep          i1d1m0    lap 87.995 s clip 0.20 (21.5 s)
+Miami      sweep          i1d1m1    lap 88.293 s clip 0.00 (21.4 s)
+Miami      sweep          i1d1m2    lap 88.539 s clip 0.10 (21.5 s)
+Miami      sweep          i1d2m0    lap 89.621 s clip 0.00 (22.7 s)
+Miami      sweep          i1d2m1    lap 89.896 s clip 0.44 (21.8 s)
+Miami      sweep          i1d2m2    lap 90.111 s clip 0.00 (21.6 s)
+Miami      sweep          i2d0m0    lap 85.794 s clip 0.28 (21.5 s)
+Miami      sweep          i2d0m1    lap 86.068 s clip 0.00 (21.4 s)
+Miami      sweep          i2d0m2    lap 86.339 s clip 0.00 (21.5 s)
+Miami      sweep          i2d1m0    lap 87.079 s clip 0.22 (22.2 s)
+Miami      sweep          i2d1m1    lap 87.369 s clip 0.00 (21.4 s)
+Miami      sweep          i2d1m2    lap 87.634 s clip 0.00 (21.9 s)
+Miami      sweep          i2d2m0    lap 88.539 s clip 0.48 (21.4 s)
+Miami      sweep          i2d2m1    lap 88.797 s clip 0.00 (21.9 s)
+Miami      sweep          i2d2m2    lap 89.048 s clip 0.64 (21.4 s)
+Canada     sweep          i0d0m0    lap 72.145 s clip 0.00 (3.5 s)
+Canada     sweep          i0d0m1    lap 72.529 s clip 0.13 (3.0 s)
+Canada     sweep          i0d0m2    lap 72.864 s clip 0.00 (17.2 s)
+Canada     sweep          i0d1m0    lap 73.271 s clip 0.29 (3.1 s)
+Canada     sweep          i0d1m1    lap 73.618 s clip 0.00 (3.6 s)
+Canada     sweep          i0d1m2    lap 73.943 s clip 0.00 (3.1 s)
+Canada     sweep          i0d2m0    lap 74.434 s clip 0.00 (3.6 s)
+Canada     sweep          i0d2m1    lap 74.753 s clip 0.01 (3.0 s)
+Canada     sweep          i0d2m2    lap 75.048 s clip 0.16 (3.6 s)
+Canada     sweep          i1d0m0    lap 71.215 s clip 0.00 (16.6 s)
+Canada     sweep          i1d0m1    lap 71.581 s clip 0.00 (18.4 s)
+Canada     sweep          i1d0m2    lap 71.924 s clip 0.00 (17.8 s)
+Canada     sweep          i1d1m0    lap 72.240 s clip 0.27 (16.9 s)
+Canada     sweep          i1d1m1    lap 72.585 s clip 0.00 (16.6 s)
+Canada     sweep          i1d1m2    lap 72.919 s clip 0.09 (17.7 s)
+Canada     sweep          i1d2m0    lap 73.308 s clip 0.48 (3.1 s)
+Canada     sweep          i1d2m1    lap 73.632 s clip 0.00 (16.7 s)
+Canada     sweep          i1d2m2    lap 73.941 s clip 0.36 (17.7 s)
+Canada     sweep          i2d0m0    lap 70.461 s clip 0.00 (17.7 s)
+Canada     sweep          i2d0m1    lap 70.803 s clip 0.04 (17.7 s)
+Canada     sweep          i2d0m2    lap 71.145 s clip 0.00 (18.0 s)
+Canada     sweep          i2d1m0    lap 71.388 s clip 0.40 (17.9 s)
+Canada     sweep          i2d1m1    lap 71.723 s clip 0.28 (17.8 s)
+Canada     sweep          i2d1m2    lap 72.055 s clip 0.00 (18.0 s)
+Canada     sweep          i2d2m0    lap 72.362 s clip 0.08 (17.9 s)
+Canada     sweep          i2d2m1    lap 72.680 s clip 0.00 (17.9 s)
+Canada     sweep          i2d2m2    lap 73.002 s clip 0.43 (17.8 s)
+Australia  soc0_0.3       nominal   lap 77.812 s clip 0.26 (3.4 s)
+Australia  soc0_0.7       nominal   lap 77.628 s clip 0.00 (21.0 s)
+China      soc0_0.3       nominal   lap 91.935 s clip 0.30 (21.8 s)
+China      soc0_0.7       nominal   lap 91.957 s clip 0.00 (21.9 s)
+Miami      soc0_0.3       nominal   lap 88.358 s clip 0.32 (22.5 s)
+Miami      soc0_0.7       nominal   lap 88.345 s clip 0.61 (21.9 s)
+Canada     soc0_0.3       nominal   lap 72.871 s clip 0.00 (3.3 s)
+Canada     soc0_0.7       nominal   lap 72.550 s clip 0.00 (18.4 s)
+All results in results/strategy_q_low_c/runs.csv
+Australia  rules          nominal   lap 77.894 s clip 0.58 (58.6 s)
+Australia  rules_no_taper nominal   lap 77.848 s clip 0.15 (58.0 s)
+Australia  rules_h8       nominal   lap 77.894 s clip 0.58 (57.7 s)
+China      rules          nominal   lap 91.960 s clip 0.00 (59.9 s)
+China      rules_no_taper nominal   lap 91.929 s clip 0.07 (59.8 s)
+China      rules_h8       nominal   lap 92.124 s clip 0.00 (59.9 s)
+Miami      rules          nominal   lap 88.223 s clip 0.00 (59.3 s)
+Miami      rules_no_taper nominal   lap 88.146 s clip 0.00 (59.3 s)
+Miami      rules_h8       nominal   lap 88.348 s clip 0.00 (59.4 s)
+Miami      rules_deploy250 nominal   lap 88.771 s clip 0.00 (59.2 s)
+Canada     rules          nominal   lap 72.558 s clip 0.00 (51.6 s)
+Canada     rules_no_taper nominal   lap 72.553 s clip 0.00 (51.7 s)
+Canada     rules_h8       nominal   lap 72.558 s clip 0.00 (51.4 s)
+Canada     rules_deploy250 nominal   lap 73.131 s clip 0.37 (5.6 s)
+All results in results/strategy_q_low_c/runs.csv
+5 results fail the convergence rule
+Australia  sweep          i0d0m0|refined dv=0.125 soc=321 lap 77.004 s clip 0.45 (7.2 s)
+Australia  sweep          i0d0m0|refined dv=0.125 soc=641 lap 76.976 s clip 0.26 (10.2 s)
+Australia  sweep          i0d0m1|refined dv=0.125 soc=321 lap 77.301 s clip 0.00 (6.1 s)
+Australia  sweep          i0d0m2|refined dv=0.125 soc=321 lap 77.559 s clip 0.00 (57.8 s)
+Australia  sweep          i0d2m0|refined dv=0.125 soc=321 lap 80.369 s clip 0.00 (6.1 s)
+Australia  sweep          i1d1m0|refined dv=0.125 soc=321 lap 77.298 s clip 0.00 (57.7 s)
+All results in results/strategy_q_low_c/runs.csv
+Australia  nominal        nominal   lap 77.176 s clip 0.17 (58.4 s)
+China      nominal        nominal   lap 91.340 s clip 0.38 (59.7 s)
+Miami      nominal        nominal   lap 88.240 s clip 0.00 (59.2 s)
+Canada     nominal        nominal   lap 71.924 s clip 0.00 (48.2 s)
+Australia  no_taper       nominal   lap 77.118 s clip 0.08 (57.5 s)
+China      no_taper       nominal   lap 91.325 s clip 0.00 (59.7 s)
+Miami      no_taper       nominal   lap 88.185 s clip 0.07 (59.0 s)
+Canada     no_taper       nominal   lap 71.918 s clip 0.00 (48.2 s)
+Australia  m2             nominal   lap 78.509 s clip -0.46 (427.0 s)
+China      m2             nominal   lap 92.743 s clip nan (444.9 s)
+Miami      m2             nominal   lap 88.755 s clip 0.55 (439.5 s)
+Canada     m2             nominal   lap 72.963 s clip -0.14 (355.5 s)
+Australia  sweep          i0d0m0    lap 76.358 s clip 0.68 (21.0 s)
+Australia  sweep          i0d0m1    lap 76.598 s clip 0.59 (21.0 s)
+Australia  sweep          i0d0m2    lap 76.860 s clip 0.56 (21.1 s)
+Australia  sweep          i0d1m0    lap 78.104 s clip 0.07 (22.1 s)
+Australia  sweep          i0d1m1    lap 78.319 s clip 0.52 (22.1 s)
+Australia  sweep          i0d1m2    lap 78.553 s clip 0.46 (21.1 s)
+Australia  sweep          i0d2m0    lap 80.012 s clip 0.00 (18.1 s)
+Australia  sweep          i0d2m1    lap 80.226 s clip 0.23 (21.0 s)
+Australia  sweep          i0d2m2    lap 80.378 s clip 0.00 (21.2 s)
+Australia  sweep          i1d0m0    lap 75.402 s clip 0.14 (20.9 s)
+Australia  sweep          i1d0m1    lap 75.638 s clip 0.29 (20.8 s)
+Australia  sweep          i1d0m2    lap 75.896 s clip 0.33 (21.1 s)
+Australia  sweep          i1d1m0    lap 76.965 s clip 0.10 (20.7 s)
+Australia  sweep          i1d1m1    lap 77.201 s clip 0.11 (20.8 s)
+Australia  sweep          i1d1m2    lap 77.419 s clip 0.47 (20.8 s)
+Australia  sweep          i1d2m0    lap 78.684 s clip 0.80 (20.8 s)
+Australia  sweep          i1d2m1    lap 78.848 s clip 0.55 (20.9 s)
+Australia  sweep          i1d2m2    lap 79.049 s clip 0.02 (22.2 s)
+Australia  sweep          i2d0m0    lap 74.630 s clip 0.00 (20.9 s)
+Australia  sweep          i2d0m1    lap 74.857 s clip 0.00 (20.9 s)
+Australia  sweep          i2d0m2    lap 75.093 s clip 0.00 (21.0 s)
+Australia  sweep          i2d1m0    lap 76.069 s clip 0.44 (20.7 s)
+Australia  sweep          i2d1m1    lap 76.285 s clip 0.63 (20.9 s)
+Australia  sweep          i2d1m2    lap 76.514 s clip 0.09 (20.9 s)
+Australia  sweep          i2d2m0    lap 77.573 s clip 0.26 (21.0 s)
+Australia  sweep          i2d2m1    lap 77.777 s clip 0.76 (20.8 s)
+Australia  sweep          i2d2m2    lap 77.975 s clip 0.66 (20.9 s)
+China      sweep          i0d0m0    lap 90.491 s clip 0.00 (21.7 s)
+China      sweep          i0d0m1    lap 90.861 s clip 0.52 (21.7 s)
+China      sweep          i0d0m2    lap 91.219 s clip 0.30 (21.9 s)
+China      sweep          i0d1m0    lap 92.143 s clip 0.00 (21.6 s)
+China      sweep          i0d1m1    lap 92.481 s clip 0.35 (21.5 s)
+China      sweep          i0d1m2    lap 92.812 s clip 0.34 (21.7 s)
+China      sweep          i0d2m0    lap 93.827 s clip 0.00 (21.6 s)
+China      sweep          i0d2m1    lap 94.134 s clip 0.00 (21.6 s)
+China      sweep          i0d2m2    lap 94.435 s clip 0.00 (21.8 s)
+China      sweep          i1d0m0    lap 89.542 s clip 0.00 (21.6 s)
+China      sweep          i1d0m1    lap 89.895 s clip 0.00 (21.8 s)
+China      sweep          i1d0m2    lap 90.253 s clip 0.00 (22.0 s)
+China      sweep          i1d1m0    lap 91.026 s clip 0.10 (21.6 s)
+China      sweep          i1d1m1    lap 91.355 s clip 0.00 (21.6 s)
+China      sweep          i1d1m2    lap 91.691 s clip 0.55 (21.6 s)
+China      sweep          i1d2m0    lap 92.608 s clip 0.33 (21.6 s)
+China      sweep          i1d2m1    lap 92.908 s clip 0.32 (21.8 s)
+China      sweep          i1d2m2    lap 93.219 s clip 0.40 (21.6 s)
+China      sweep          i2d0m0    lap 88.746 s clip 0.13 (21.8 s)
+China      sweep          i2d0m1    lap 89.092 s clip 0.00 (21.6 s)
+China      sweep          i2d0m2    lap 89.443 s clip 0.00 (21.7 s)
+China      sweep          i2d1m0    lap 90.104 s clip 0.10 (21.7 s)
+China      sweep          i2d1m1    lap 90.432 s clip 0.30 (21.5 s)
+China      sweep          i2d1m2    lap 90.759 s clip 0.00 (21.9 s)
+China      sweep          i2d2m0    lap 91.550 s clip 0.08 (21.7 s)
+China      sweep          i2d2m1    lap 91.856 s clip 0.17 (21.7 s)
+China      sweep          i2d2m2    lap 92.163 s clip 0.26 (21.7 s)
+Miami      sweep          i0d0m0    lap 87.158 s clip 0.11 (21.4 s)
+Miami      sweep          i0d0m1    lap 87.432 s clip 0.21 (21.4 s)
+Miami      sweep          i0d0m2    lap 87.706 s clip 0.21 (21.4 s)
+Miami      sweep          i0d1m0    lap 89.088 s clip 0.27 (21.5 s)
+Miami      sweep          i0d1m1    lap 89.325 s clip 0.36 (21.3 s)
+Miami      sweep          i0d1m2    lap 89.556 s clip 0.18 (21.5 s)
+Miami      sweep          i0d2m0    lap 91.138 s clip 0.08 (21.8 s)
+Miami      sweep          i0d2m1    lap 91.315 s clip 0.08 (22.0 s)
+Miami      sweep          i0d2m2    lap 91.521 s clip 0.24 (21.8 s)
+Miami      sweep          i1d0m0    lap 86.299 s clip 0.48 (21.6 s)
+Miami      sweep          i1d0m1    lap 86.559 s clip 0.00 (21.6 s)
+Miami      sweep          i1d0m2    lap 86.812 s clip 0.00 (21.4 s)
+Miami      sweep          i1d1m0    lap 88.018 s clip 0.20 (21.4 s)
+Miami      sweep          i1d1m1    lap 88.259 s clip 0.38 (21.5 s)
+Miami      sweep          i1d1m2    lap 88.498 s clip 0.00 (21.4 s)
+Miami      sweep          i1d2m0    lap 89.868 s clip 0.00 (21.6 s)
+Miami      sweep          i1d2m1    lap 90.093 s clip 0.00 (21.7 s)
+Miami      sweep          i1d2m2    lap 90.304 s clip 0.50 (21.6 s)
+Miami      sweep          i2d0m0    lap 85.606 s clip 0.00 (21.6 s)
+Miami      sweep          i2d0m1    lap 85.846 s clip 0.00 (21.6 s)
+Miami      sweep          i2d0m2    lap 86.085 s clip 0.00 (21.5 s)
+Miami      sweep          i2d1m0    lap 87.137 s clip 0.32 (22.0 s)
+Miami      sweep          i2d1m1    lap 87.378 s clip 0.00 (21.5 s)
+Miami      sweep          i2d1m2    lap 87.611 s clip 0.20 (21.9 s)
+Miami      sweep          i2d2m0    lap 88.831 s clip 0.00 (21.6 s)
+Miami      sweep          i2d2m1    lap 89.050 s clip 0.00 (22.1 s)
+Miami      sweep          i2d2m2    lap 89.250 s clip 0.00 (21.7 s)
+Canada     sweep          i0d0m0    lap 71.319 s clip 0.22 (18.6 s)
+Canada     sweep          i0d0m1    lap 71.648 s clip 0.02 (18.0 s)
+Canada     sweep          i0d0m2    lap 71.945 s clip 0.11 (18.6 s)
+Canada     sweep          i0d1m0    lap 72.607 s clip 0.31 (17.8 s)
+Canada     sweep          i0d1m1    lap 72.907 s clip 0.02 (18.5 s)
+Canada     sweep          i0d1m2    lap 73.182 s clip 0.41 (18.0 s)
+Canada     sweep          i0d2m0    lap 73.929 s clip 0.00 (18.6 s)
+Canada     sweep          i0d2m1    lap 74.203 s clip 0.24 (18.0 s)
+Canada     sweep          i0d2m2    lap 74.449 s clip 0.23 (18.3 s)
+Canada     sweep          i1d0m0    lap 70.507 s clip 0.00 (17.9 s)
+Canada     sweep          i1d0m1    lap 70.812 s clip 0.28 (18.5 s)
+Canada     sweep          i1d0m2    lap 71.121 s clip 0.43 (17.9 s)
+Canada     sweep          i1d1m0    lap 71.671 s clip 0.30 (18.0 s)
+Canada     sweep          i1d1m1    lap 71.961 s clip 0.00 (18.0 s)
+Canada     sweep          i1d1m2    lap 72.251 s clip 0.38 (17.8 s)
+Canada     sweep          i1d2m0    lap 72.882 s clip 0.00 (17.9 s)
+Canada     sweep          i1d2m1    lap 73.157 s clip 0.55 (17.8 s)
+Canada     sweep          i1d2m2    lap 73.422 s clip 0.27 (17.9 s)
+Canada     sweep          i2d0m0    lap 69.834 s clip 0.00 (17.8 s)
+Canada     sweep          i2d0m1    lap 70.137 s clip 0.00 (17.8 s)
+Canada     sweep          i2d0m2    lap 70.433 s clip 0.22 (17.8 s)
+Canada     sweep          i2d1m0    lap 70.894 s clip 0.28 (17.8 s)
+Canada     sweep          i2d1m1    lap 71.175 s clip 0.48 (17.8 s)
+Canada     sweep          i2d1m2    lap 71.469 s clip 0.17 (17.8 s)
+Canada     sweep          i2d2m0    lap 72.011 s clip 0.03 (18.0 s)
+Canada     sweep          i2d2m1    lap 72.285 s clip 0.43 (18.1 s)
+Canada     sweep          i2d2m2    lap 72.551 s clip 0.08 (18.0 s)
+Australia  soc0_0.3       nominal   lap 77.401 s clip 0.41 (21.5 s)
+Australia  soc0_0.7       nominal   lap 77.191 s clip 0.00 (21.5 s)
+China      soc0_0.3       nominal   lap 91.348 s clip 0.39 (22.0 s)
+China      soc0_0.7       nominal   lap 91.475 s clip 0.00 (21.8 s)
+Miami      soc0_0.3       nominal   lap 88.290 s clip 0.63 (22.3 s)
+Miami      soc0_0.7       nominal   lap 88.362 s clip 0.00 (21.5 s)
+Canada     soc0_0.3       nominal   lap 72.197 s clip 0.00 (16.8 s)
+Canada     soc0_0.7       nominal   lap 71.929 s clip 0.00 (18.4 s)
+All results in results/strategy_q_high_c/runs.csv
+Australia  rules          nominal   lap 77.518 s clip 0.70 (58.5 s)
+Australia  rules_no_taper nominal   lap 77.491 s clip 0.74 (57.4 s)
+Australia  rules_h8       nominal   lap 77.518 s clip 0.70 (57.4 s)
+China      rules          nominal   lap 91.366 s clip 0.47 (59.3 s)
+China      rules_no_taper nominal   lap 91.349 s clip 0.00 (59.2 s)
+China      rules_h8       nominal   lap 91.565 s clip 0.00 (59.1 s)
+Miami      rules          nominal   lap 88.240 s clip 0.00 (58.6 s)
+Miami      rules_no_taper nominal   lap 88.185 s clip 0.07 (58.5 s)
+Miami      rules_h8       nominal   lap 88.431 s clip 0.00 (58.5 s)
+Miami      rules_deploy250 nominal   lap 88.594 s clip 0.00 (58.6 s)
+Canada     rules          nominal   lap 71.986 s clip 0.00 (47.6 s)
+Canada     rules_no_taper nominal   lap 71.974 s clip 0.00 (47.6 s)
+Canada     rules_h8       nominal   lap 71.986 s clip 0.00 (47.5 s)
+Canada     rules_deploy250 nominal   lap 72.397 s clip 0.50 (47.6 s)
+All results in results/strategy_q_high_c/runs.csv
+0 results fail the convergence rule
+All results in results/strategy_q_high_c/runs.csv
+British Grand Prix t280 350 kW: lap 83.973 s, drop 53.2 km/h, gap 0.000 s, converged True
+British Grand Prix t280 375 kW: lap 83.954 s, drop 53.2 km/h, gap 0.000 s, converged True
+British Grand Prix t300 350 kW: lap 83.565 s, drop 62.1 km/h, gap 0.000 s, converged True
+British Grand Prix t300 375 kW: lap 83.541 s, drop 62.1 km/h, gap 0.001 s, converged True
+British Grand Prix t320 350 kW: lap 83.499 s, drop 62.1 km/h, gap 0.004 s, converged True
+British Grand Prix t320 375 kW: lap 83.469 s, drop 62.1 km/h, gap 0.000 s, converged True
+British Grand Prix none 350 kW: lap 83.488 s, drop 62.1 km/h, gap 0.001 s, converged True
+British Grand Prix none 375 kW: lap 83.460 s, drop 62.1 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t280 350 kW: lap 76.267 s, drop 1.1 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t280 375 kW: lap 76.266 s, drop 1.1 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t300 350 kW: lap 76.157 s, drop 3.5 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t300 375 kW: lap 76.156 s, drop 3.0 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t320 350 kW: lap 76.116 s, drop 8.7 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t320 375 kW: lap 76.115 s, drop 8.7 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix none 350 kW: lap 76.109 s, drop 9.0 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix none 375 kW: lap 76.108 s, drop 9.1 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t280 350 kW: lap 68.945 s, drop 14.7 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t280 375 kW: lap 68.943 s, drop 14.9 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t300 350 kW: lap 68.681 s, drop 24.1 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t300 375 kW: lap 68.672 s, drop 24.1 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t320 350 kW: lap 68.571 s, drop 25.6 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t320 375 kW: lap 68.560 s, drop 25.6 km/h, gap 0.000 s, converged True
+Dutch Grand Prix none 350 kW: lap 68.552 s, drop 25.7 km/h, gap 0.000 s, converged True
+Dutch Grand Prix none 375 kW: lap 68.542 s, drop 25.7 km/h, gap 0.000 s, converged True
+Italian Grand Prix t280 350 kW: lap 79.527 s, drop 25.7 km/h, gap 0.000 s, converged True
+Italian Grand Prix t280 375 kW: lap 79.459 s, drop 25.5 km/h, gap 0.001 s, converged True
+Italian Grand Prix t300 350 kW: lap 79.392 s, drop 34.1 km/h, gap 0.001 s, converged True
+Italian Grand Prix t300 375 kW: lap 79.330 s, drop 31.9 km/h, gap 0.001 s, converged True
+Italian Grand Prix t320 350 kW: lap 79.369 s, drop 35.9 km/h, gap 0.000 s, converged True
+Italian Grand Prix t320 375 kW: lap 79.312 s, drop 34.1 km/h, gap 0.007 s, converged True
+Italian Grand Prix none 350 kW: lap 79.367 s, drop 36.3 km/h, gap 0.000 s, converged True
+Italian Grand Prix none 375 kW: lap 79.307 s, drop 34.4 km/h, gap 0.003 s, converged True
+Spanish Grand Prix t280 350 kW: lap 88.949 s, drop 35.5 km/h, gap 0.000 s, converged True
+Spanish Grand Prix t280 375 kW: lap 88.949 s, drop 35.5 km/h, gap 0.001 s, converged True
+Spanish Grand Prix t300 350 kW: lap 88.791 s, drop 43.9 km/h, gap 0.001 s, converged True
+Spanish Grand Prix t300 375 kW: lap 88.790 s, drop 43.9 km/h, gap 0.000 s, converged True
+Spanish Grand Prix t320 350 kW: lap 88.738 s, drop 46.9 km/h, gap 0.000 s, converged True
+Spanish Grand Prix t320 375 kW: lap 88.739 s, drop 46.9 km/h, gap 0.003 s, converged True
+Spanish Grand Prix none 350 kW: lap 88.733 s, drop 47.0 km/h, gap 0.001 s, converged True
+Spanish Grand Prix none 375 kW: lap 88.732 s, drop 47.0 km/h, gap 0.002 s, converged True
+Azerbaijan Grand Prix t280 350 kW: lap 99.976 s, drop 22.8 km/h, gap 0.000 s, converged True
+Azerbaijan Grand Prix t280 375 kW: lap 99.977 s, drop 22.8 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix t300 350 kW: lap 99.668 s, drop 31.7 km/h, gap 0.004 s, converged True
+Azerbaijan Grand Prix t300 375 kW: lap 99.664 s, drop 31.7 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix t320 350 kW: lap 99.622 s, drop 31.7 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix t320 375 kW: lap 99.624 s, drop 31.7 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix none 350 kW: lap 99.618 s, drop 31.7 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix none 375 kW: lap 99.615 s, drop 31.7 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t280 350 kW: lap 92.434 s, drop 2.8 km/h, gap 0.004 s, converged True
+Bahrain Grand Prix t280 375 kW: lap 92.433 s, drop 2.8 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t300 350 kW: lap 92.347 s, drop 8.4 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t300 375 kW: lap 92.347 s, drop 8.4 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t320 350 kW: lap 92.330 s, drop 11.8 km/h, gap 0.007 s, converged True
+Bahrain Grand Prix t320 375 kW: lap 92.327 s, drop 11.8 km/h, gap 0.004 s, converged True
+Bahrain Grand Prix none 350 kW: lap 92.323 s, drop 13.3 km/h, gap 0.002 s, converged True
+Bahrain Grand Prix none 375 kW: lap 92.323 s, drop 13.3 km/h, gap 0.002 s, converged True
+Singapore Grand Prix t280 350 kW: lap 89.550 s, drop 7.9 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t280 375 kW: lap 89.550 s, drop 7.9 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t300 350 kW: lap 89.472 s, drop 12.8 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t300 375 kW: lap 89.472 s, drop 12.8 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t320 350 kW: lap 89.454 s, drop 16.4 km/h, gap 0.001 s, converged True
+Singapore Grand Prix t320 375 kW: lap 89.454 s, drop 16.4 km/h, gap 0.001 s, converged True
+Singapore Grand Prix none 350 kW: lap 89.456 s, drop 17.3 km/h, gap 0.003 s, converged True
+Singapore Grand Prix none 375 kW: lap 89.454 s, drop 17.2 km/h, gap 0.001 s, converged True
+United States Grand Prix t280 350 kW: lap 91.484 s, drop 1.9 km/h, gap 0.000 s, converged True
+United States Grand Prix t280 375 kW: lap 91.484 s, drop 1.9 km/h, gap 0.002 s, converged True
+United States Grand Prix t300 350 kW: lap 91.326 s, drop 7.5 km/h, gap 0.000 s, converged True
+United States Grand Prix t300 375 kW: lap 91.327 s, drop 7.5 km/h, gap 0.003 s, converged True
+United States Grand Prix t320 350 kW: lap 91.288 s, drop 9.5 km/h, gap 0.004 s, converged True
+United States Grand Prix t320 375 kW: lap 91.283 s, drop 9.5 km/h, gap 0.001 s, converged True
+United States Grand Prix none 350 kW: lap 91.282 s, drop 9.5 km/h, gap 0.003 s, converged True
+United States Grand Prix none 375 kW: lap 91.280 s, drop 9.5 km/h, gap 0.001 s, converged True
+All results in results/forecast_2027_b/runs.csv

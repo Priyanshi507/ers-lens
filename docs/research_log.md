@@ -2510,3 +2510,14 @@ Procedure, per race: (1) the track from its qualifying session only (export_trac
 model (no lift-and-coast) solved at 350 kW with the original car, ten bisection steps; (4) its
 full-throttle drop and clip verdict (drop >= 3 km/h) written here, with the commit, before (5) the
 race is measured (multi_race.py --rebase, OpenF1) and the verdict judged (clip_share >= 0.5).
+
+## 2026-11-15: O1 prediction for Mexico City, before its race is opened
+
+Kaggle, commit 6da54b6, current model (no lift-and-coast), original car, 350 kW, race limit 8.5 MJ,
+track from qualifying: lap 76.254 s, converged, proven gap 0.000 s; super-clipping 0.41 MJ over
+1.71 s (longest stretch 0.21 s); full-throttle drop on the longest straight 0.86 km/h.
+Prediction: no clipping, i.e. fewer than half of real clean race laps clip (clip_share < 0.5).
+Caveat, written now: the model's air density is sea level's, and Mexico City is about 2,240 m up,
+with thinner air for drag and for the engine alike; the model was not changed for it, so this race
+also tests the model where it is known to be least like the real car.
+Next: multi_race.py --rebase on Mexico City only, into results/oos_real, OpenF1.

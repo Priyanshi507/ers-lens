@@ -1,0 +1,2 @@
+event,car,cap_kw,lap_s,dp_pred_s,converged,harvest_mj,superclip_mj,superclip_s,superclip_m,longest_superclip_s,superclip_at_cap_share,peak_superclip_kw,clip_ratio,optimality_gap_s,seconds,coast_mj,coast_s
+Canada,original,350.0,70.30316837565346,70.30157005912176,True,7.995696636881682,3.2631566821171267,10.287562105521786,680.0,1.3548962850999815,0.7675385382720515,350.0,0.0,0.0005347262110859674,72.4,0.0,0.0

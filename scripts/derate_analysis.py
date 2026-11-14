@@ -166,7 +166,26 @@ def lap_quality(lap: pd.DataFrame, start_m: float, end_m: float) -> tuple[dict |
         "lift_before_brake_m": float(dist[brake_idx] - dist[last]),
         "lift_min_throttle": float(thr[last + 1:brake_idx].min(initial=100.0)),
         "drop_to_brake_kmh": float(speed[peak] - speed[brake_idx - 1]),
+        **coast_before_brake(win, last),
     }, "ok"
+
+
+def coast_before_brake(win: pd.DataFrame, last: int) -> dict:
+    """Distance and time from the throttle closing (below 20%, no brake) after the flat-out run to the
+    first brake sample: lift-and-coast. Zero if the brake comes on first; NaN if the window ends before
+    the brake (research log, 2026-11-14)."""
+    thr = win["throttle"].to_numpy()
+    brake = win["brake"].astype(bool).to_numpy()
+    after = np.arange(len(thr)) > last
+    on = np.flatnonzero(after & brake)
+    closed = np.flatnonzero(after & (thr < 20) & ~brake)
+    if len(on) == 0:
+        return {"coast_before_brake_m": np.nan, "coast_before_brake_s": np.nan}
+    if len(closed) == 0 or closed[0] > on[0]:
+        return {"coast_before_brake_m": 0.0, "coast_before_brake_s": 0.0}
+    dist, i, j = win["distance_m"].to_numpy(), closed[0], on[0]
+    secs = float(win["time_s"].iloc[j] - win["time_s"].iloc[i]) if "time_s" in win else np.nan
+    return {"coast_before_brake_m": float(dist[j] - dist[i]), "coast_before_brake_s": secs}
 
 
 def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:

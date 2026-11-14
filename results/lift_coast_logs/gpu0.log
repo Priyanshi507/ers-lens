@@ -1,0 +1,263 @@
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 373, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+Canada original 350 kW: lap 70.303 s, superclip 10.29 s (longest 1.35 s), 72 s
+All results in results/lc0_check/runs.csv
+LC0 lap difference 0.0
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 398, in initialize
+    triton.register_compilation_handler(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'jax._src.lib.triton' has no attribute 'register_compilation_handler'
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda12/__init__.py", line 372, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+Australia original 250 kW: lap 74.939 s, superclip 13.59 s (longest 1.36 s), 73 s
+Australia original 350 kW: lap 74.839 s, superclip 13.00 s (longest 0.89 s), 71 s
+China original 250 kW: lap 89.217 s, superclip 3.29 s (longest 0.28 s), 74 s
+China original 350 kW: lap 89.202 s, superclip 3.67 s (longest 0.28 s), 74 s
+Miami original 250 kW: lap 85.780 s, superclip 6.96 s (longest 0.58 s), 73 s
+Miami original 350 kW: lap 85.770 s, superclip 7.53 s (longest 1.27 s), 73 s
+Canada original 250 kW: lap 70.288 s, superclip 8.50 s (longest 1.34 s), 60 s
+Canada original 350 kW: lap 70.237 s, superclip 9.20 s (longest 1.30 s), 59 s
+Japan original 250 kW: lap 76.431 s, superclip 13.97 s (longest 2.77 s), 8 s
+Japan original 350 kW: lap 76.320 s, superclip 14.70 s (longest 2.18 s), 74 s
+Austria original 250 kW: lap 64.811 s, superclip 13.50 s (longest 1.35 s), 59 s
+Austria original 350 kW: lap 64.704 s, superclip 13.17 s (longest 0.90 s), 59 s
+Belgium original 250 kW: lap 99.548 s, superclip 13.57 s (longest 1.44 s), 95 s
+Belgium original 350 kW: lap 99.487 s, superclip 13.45 s (longest 1.10 s), 94 s
+Monaco Grand Prix original 250 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 6 s
+Monaco Grand Prix original 350 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 6 s
+Barcelona Grand Prix original 250 kW: lap 72.143 s, superclip 11.70 s (longest 0.78 s), 64 s
+Barcelona Grand Prix original 350 kW: lap 72.118 s, superclip 10.38 s (longest 0.95 s), 64 s
+British Grand Prix original 250 kW: lap 83.856 s, superclip 10.13 s (longest 0.89 s), 80 s
+British Grand Prix original 350 kW: lap 83.815 s, superclip 10.86 s (longest 0.56 s), 79 s
+Hungarian Grand Prix original 250 kW: lap 76.113 s, superclip 4.99 s (longest 0.30 s), 60 s
+Hungarian Grand Prix original 350 kW: lap 76.111 s, superclip 5.38 s (longest 0.27 s), 60 s
+Dutch Grand Prix original 250 kW: lap 68.657 s, superclip 9.36 s (longest 0.80 s), 56 s
+Dutch Grand Prix original 350 kW: lap 68.632 s, superclip 10.89 s (longest 0.80 s), 58 s
+Italian Grand Prix original 250 kW: lap 79.887 s, superclip 14.43 s (longest 2.10 s), 80 s
+Italian Grand Prix original 350 kW: lap 79.746 s, superclip 12.82 s (longest 1.58 s), 80 s
+Spanish Grand Prix original 250 kW: lap 88.906 s, superclip 5.86 s (longest 0.31 s), 74 s
+Spanish Grand Prix original 350 kW: lap 88.902 s, superclip 5.43 s (longest 0.36 s), 73 s
+Azerbaijan Grand Prix original 250 kW: lap 100.016 s, superclip 3.37 s (longest 0.63 s), 81 s
+Azerbaijan Grand Prix original 350 kW: lap 100.015 s, superclip 3.74 s (longest 0.63 s), 81 s
+Bahrain Grand Prix original 250 kW: lap 92.524 s, superclip 3.40 s (longest 0.29 s), 75 s
+Bahrain Grand Prix original 350 kW: lap 92.520 s, superclip 3.30 s (longest 0.29 s), 75 s
+Singapore Grand Prix original 250 kW: lap 89.540 s, superclip 2.38 s (longest 0.23 s), 67 s
+Singapore Grand Prix original 350 kW: lap 89.539 s, superclip 2.50 s (longest 0.23 s), 67 s
+United States Grand Prix original 250 kW: lap 91.490 s, superclip 3.38 s (longest 0.43 s), 74 s
+United States Grand Prix original 350 kW: lap 91.487 s, superclip 3.29 s (longest 0.35 s), 74 s
+All results in results/fia_fix_calendar_lc/runs.csv
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 398, in initialize
+    triton.register_compilation_handler(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'jax._src.lib.triton' has no attribute 'register_compilation_handler'
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda12/__init__.py", line 372, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+Australia t280 350 kW: lap 75.040 s, drop 8.1 km/h, gap 0.000 s, converged True
+Australia t280 375 kW: lap 75.025 s, drop 7.7 km/h, gap 0.000 s, converged True
+Australia t300 350 kW: lap 74.660 s, drop 14.3 km/h, gap 0.000 s, converged True
+Australia t300 375 kW: lap 74.649 s, drop 13.3 km/h, gap 0.001 s, converged True
+Australia t320 350 kW: lap 74.591 s, drop 16.6 km/h, gap 0.000 s, converged True
+Australia t320 375 kW: lap 74.573 s, drop 14.3 km/h, gap 0.001 s, converged True
+Australia none 350 kW: lap 74.580 s, drop 16.9 km/h, gap 0.000 s, converged True
+Australia none 375 kW: lap 74.566 s, drop 14.5 km/h, gap 0.001 s, converged True
+China t280 350 kW: lap 89.259 s, drop 2.1 km/h, gap 0.000 s, converged True
+China t280 375 kW: lap 89.249 s, drop 2.7 km/h, gap -0.000 s, converged True
+China t300 350 kW: lap 89.014 s, drop 7.8 km/h, gap 0.001 s, converged True
+China t300 375 kW: lap 89.004 s, drop 7.5 km/h, gap 0.001 s, converged True
+China t320 350 kW: lap 88.965 s, drop 8.8 km/h, gap 0.001 s, converged True
+China t320 375 kW: lap 88.963 s, drop 8.4 km/h, gap 0.000 s, converged True
+China none 350 kW: lap 88.959 s, drop 8.9 km/h, gap 0.001 s, converged True
+China none 375 kW: lap 88.958 s, drop 8.0 km/h, gap 0.001 s, converged True
+Miami t280 350 kW: lap 86.350 s, drop 0.0 km/h, gap 0.000 s, converged True
+Miami t280 375 kW: lap 86.350 s, drop 0.0 km/h, gap 0.000 s, converged True
+Miami t300 350 kW: lap 85.697 s, drop 5.3 km/h, gap 0.000 s, converged True
+Miami t300 375 kW: lap 85.694 s, drop 5.2 km/h, gap 0.000 s, converged True
+Miami t320 350 kW: lap 85.536 s, drop 7.3 km/h, gap 0.001 s, converged True
+Miami t320 375 kW: lap 85.532 s, drop 6.6 km/h, gap 0.001 s, converged True
+Miami none 350 kW: lap 85.515 s, drop 7.5 km/h, gap 0.001 s, converged True
+Miami none 375 kW: lap 85.512 s, drop 6.8 km/h, gap 0.000 s, converged True
+Canada t280 350 kW: lap 70.282 s, drop 10.9 km/h, gap 0.000 s, converged True
+Canada t280 375 kW: lap 70.275 s, drop 9.9 km/h, gap 0.000 s, converged True
+Canada t300 350 kW: lap 70.087 s, drop 15.2 km/h, gap 0.000 s, converged True
+Canada t300 375 kW: lap 70.081 s, drop 14.3 km/h, gap 0.002 s, converged True
+Canada t320 350 kW: lap 70.041 s, drop 16.1 km/h, gap 0.000 s, converged True
+Canada t320 375 kW: lap 70.034 s, drop 15.3 km/h, gap 0.002 s, converged True
+Canada none 350 kW: lap 70.044 s, drop 16.2 km/h, gap 0.006 s, converged True
+Canada none 375 kW: lap 70.027 s, drop 16.1 km/h, gap 0.001 s, converged True
+Japan t280 350 kW: lap 76.671 s, drop 4.8 km/h, gap 0.000 s, converged True
+Japan t280 375 kW: lap 76.669 s, drop 4.6 km/h, gap 0.000 s, converged True
+Japan t300 350 kW: lap 76.100 s, drop 9.6 km/h, gap 0.000 s, converged True
+Japan t300 375 kW: lap 76.086 s, drop 8.8 km/h, gap 0.000 s, converged True
+Japan t320 350 kW: lap 76.009 s, drop 10.9 km/h, gap 0.000 s, converged True
+Japan t320 375 kW: lap 75.989 s, drop 10.4 km/h, gap 0.000 s, converged True
+Japan none 350 kW: lap 75.998 s, drop 12.2 km/h, gap 0.000 s, converged True
+Japan none 375 kW: lap 75.977 s, drop 10.5 km/h, gap 0.000 s, converged True
+Austria t280 350 kW: lap 64.852 s, drop 9.2 km/h, gap 0.000 s, converged True
+Austria t280 375 kW: lap 64.837 s, drop 8.2 km/h, gap 0.000 s, converged True
+Austria t300 350 kW: lap 64.636 s, drop 15.6 km/h, gap 0.000 s, converged True
+Austria t300 375 kW: lap 64.614 s, drop 13.2 km/h, gap 0.000 s, converged True
+Austria t320 350 kW: lap 64.570 s, drop 18.8 km/h, gap 0.000 s, converged True
+Austria t320 375 kW: lap 64.549 s, drop 17.0 km/h, gap 0.001 s, converged True
+Austria none 350 kW: lap 64.563 s, drop 19.1 km/h, gap 0.001 s, converged True
+Austria none 375 kW: lap 64.540 s, drop 16.6 km/h, gap 0.000 s, converged True
+Belgium t280 350 kW: lap 99.484 s, drop 10.5 km/h, gap 0.000 s, converged True
+Belgium t280 375 kW: lap 99.475 s, drop 8.1 km/h, gap 0.000 s, converged True
+Belgium t300 350 kW: lap 98.976 s, drop 19.4 km/h, gap 0.003 s, converged True
+Belgium t300 375 kW: lap 98.973 s, drop 17.0 km/h, gap 0.003 s, converged True
+Belgium t320 350 kW: lap 98.894 s, drop 20.0 km/h, gap 0.001 s, converged True
+Belgium t320 375 kW: lap 98.884 s, drop 19.4 km/h, gap 0.000 s, converged True
+Belgium none 350 kW: lap 98.886 s, drop 19.9 km/h, gap 0.003 s, converged True
+Belgium none 375 kW: lap 98.879 s, drop 19.6 km/h, gap 0.007 s, converged True
+Monaco Grand Prix t280 350 kW: lap 70.674 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix t280 375 kW: lap 70.674 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix t300 350 kW: lap 70.600 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix t300 375 kW: lap 70.600 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix t320 350 kW: lap 70.576 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix t320 375 kW: lap 70.576 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix none 350 kW: lap 70.573 s, drop 0.0 km/h, gap 0.000 s, converged True
+Monaco Grand Prix none 375 kW: lap 70.573 s, drop 0.0 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix t280 350 kW: lap 72.325 s, drop 6.2 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix t280 375 kW: lap 72.319 s, drop 5.9 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix t300 350 kW: lap 72.042 s, drop 10.0 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix t300 375 kW: lap 72.039 s, drop 9.7 km/h, gap -0.000 s, converged True
+Barcelona Grand Prix t320 350 kW: lap 71.973 s, drop 10.9 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix t320 375 kW: lap 71.968 s, drop 10.5 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix none 350 kW: lap 71.966 s, drop 10.8 km/h, gap 0.000 s, converged True
+Barcelona Grand Prix none 375 kW: lap 71.961 s, drop 10.5 km/h, gap 0.000 s, converged True
+All results in results/forecast_2027_lc_a/runs.csv

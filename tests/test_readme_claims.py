@@ -38,3 +38,20 @@ def test_finding_2_validation():
     assert f"mean error **{s['mae_kw']:.1f} kW** on a {s['true_mean_kw']} kW mean" in text
     assert f"{s['measurable_clip_laps']} of clipping laps measurable" in text
     assert s["false_positive_laps"] == 0 and "no false detections" in text
+
+
+def test_lift_coast_claims():
+    import pandas as pd
+
+    r = pd.read_csv("results/fia_fix_calendar_lc/runs.csv")
+    p = r.pivot_table(index="event", columns="cap_kw", values=["coast_mj", "superclip_mj"])
+    used = p.coast_mj[250] >= 0.05
+    assert used.sum() == 17 and (p.coast_mj[350] < p.coast_mj[250])[used].all()
+    assert (p.superclip_mj[350] > p.superclip_mj[250]).sum() == 17
+    assert round(p.coast_mj[250].sum(), 1) == 14.5 and round(p.coast_mj[350].sum(), 1) == 9.8
+    assert round(p.superclip_mj[250].sum(), 1) == 31.9 and round(p.superclip_mj[350].sum(), 1) == 42.2
+    a, b = (pd.read_csv(f).set_index("event").direction for f in ("results/forecast_2027.csv", "results/forecast_2027_lc.csv"))
+    assert (a == b.reindex(a.index)).all()
+    q = (1 - p.coast_mj[350] / p.coast_mj[250])[used] * 100
+    assert (round(q.min()), round(q.median()), round(q.max())) == (12, 31, 49)
+    assert (round(p.coast_mj[250][used].min(), 2), round(p.coast_mj[250].max(), 2)) == (0.15, 1.71)

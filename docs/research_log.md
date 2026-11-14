@@ -2375,3 +2375,75 @@ speeds, lap time and harvest price are bit-identical with the option off. The GP
 check on Canada at 350 kW against results/fia_fix_calendar_c. A coarse demo smoke test (not a
 result) used lift-and-coast under 250 kW and much less of it under 350 kW. Runs:
 scripts/kaggle_lift_coast.md.
+
+## 2026-11-14 (night): Lift-and-coast results: LC0-LC3 held, LC4 not held
+
+Kaggle run of scripts/kaggle_lift_coast.md at 3b65844: results/fia_fix_calendar_lc (36 solves),
+results/forecast_2027_lc_a, _b (144), results/lc0_check, logs in results/lift_coast_logs. Every
+solve converged and all 180 are proven within 0.01 s (largest gap 0.0066 s).
+- LC0 held. With the option off, Canada at 350 kW on the GPU gives the same lap as
+  fia_fix_calendar_c to the last digit (difference 0.0). With it on, no lap is slower than without:
+  laps are 0.000-0.334 s faster (Italy under 250 kW the most).
+- LC1 held, 17 of 18: under 250 kW the optimum harvests 0.15-1.71 MJ per lap by lifting and coasting
+  everywhere except Monaco, above 1 MJ at Australia, Austria, Barcelona, Belgium, Britain, Canada,
+  the Netherlands, Italy and Japan.
+- LC2 held, 17 of 17: under 350 kW lift-and-coast energy is lower at every circuit that used it, by
+  12-49% (median 31%); summed over the 18 circuits it falls from 14.5 to 9.8 MJ while super-clipping
+  rises from 31.9 to 42.2 MJ. The change moved harvesting from coasting into super-clipping, as it
+  was argued for, but did not remove lift-and-coast: 0.08-1.26 MJ per lap remains.
+- LC3 held, 17 of 18 (C1 was 15 of 18 without the option; Monaco has neither).
+- LC4 not held. (a) Median ratio of model to real drop where real cars clip: 1.64 (1.9 without
+  the option; the bar was below 1.5). (b) Spearman 0.587 (0.58 without; the bar was 0.6). Y2-style
+  agreement 13 of 16, unchanged. The model still over-states the drop most at Barcelona, Austria,
+  the Netherlands and Italy, and now under-states Japan (20.6 against 46 km/h).
+- Model choice for 2027, as fixed before the run: LC4(a) failed, so the forecast to be frozen comes
+  from the current runs (results/forecast_2027.csv). As a check, rule R on the lift-and-coast runs
+  (results/forecast_2027_lc.csv, baseline fia_fix_calendar_lc) gives the same direction at all 18
+  circuits: the forecast does not depend on whether the model can lift and coast.
+Consequence: the same-circuit experiment's conclusion on super-clipping (C1, LC3) holds with the
+option; its sizes, and the lap gains of finding 9, are for a car that cannot lift and coast and are
+reported as such. The real-data side (does the change show in real cars' lifting?) is next: a
+detector and its predictions are written before it is run.
+
+## 2026-11-14 (night): Real lift-and-coast: detector and predictions, before looking
+
+The per-lap files of the 16 races (results/multi_rebased_mid/R/*_per_lap.csv) already hold, for
+the longest straight, lift_before_brake_m (from the end of full throttle to the first brake
+sample) and lift_min_throttle (lowest throttle in between). Until now they were used only as a
+filter (abstract_figure.py drops laps above 60 m; derate_analysis.py's partial-lift count on early
+Miami data); no lift-and-coast measure across races has been computed or looked at.
+
+Detector, fixed now: a clean race lap lifts and coasts on the longest straight if
+lift_before_brake_m >= 60 m and lift_min_throttle <= 20%. 60 m is the project's existing cut: at
+the ~4 Hz telemetry rate a car at 300 km/h covers about 22 m per sample, so shorter gaps can be
+sampling alone; 20% allows for throttle-sensor noise on a closed throttle. Per race: lift_share,
+the share of clean laps that lift and coast. scripts/lift_real.py.
+
+Predictions:
+RL1. Where: the model's lift-and-coast energy per lap (fia_fix_calendar_lc, each race under its own
+     cap: 250 kW for China and Japan, 350 kW from Miami) ranks the 16 races as real lift_share does,
+     Spearman >= 0.5.
+RL2. Mechanism, inside each race (no circuit confound): laps that lift and coast lose less speed at
+     full throttle than laps that do not (median flat_out_drop_kmh lower) at >= 70% of the races
+     with at least 10 laps of each kind.
+RL3. Not a test, reported only: lift_share at the two pre-Miami races against the post-Miami
+     median. Two races on different circuits cannot separate the rule from the circuit.
+Out of sample (Mexico City, Sao Paulo, Las Vegas, Qatar; nothing of their race telemetry opened):
+tracks from their qualifying laps, recharge limits from the FIA's documents, the current model (no
+lift-and-coast) for the drop and the lift-and-coast model for lifting, both at 350 kW.
+O1.  The model's clip verdict (drop >= 3 km/h) matches real cars' (clip_share >= 0.5) at >= 3 of 4.
+O2.  The lift-and-coast model's coasting energy ranks the four races as real lift_share does, with at
+     most one adjacent swap.
+
+Correction to the detector, the same night, after one run of it: every race came out with no
+lifting lap, which is impossible by construction. In lap_quality the "brake point" is the first
+sample with throttle below 20% or the brake on, so lift_before_brake_m ends where the throttle
+closes and lift_min_throttle is never below 20 (its minimum over 8036 laps is exactly 20.0): the
+columns measure a part-throttle lift, and cannot see a coast. Looked at: only that every lap failed
+the detector and the two columns' ranges; nothing about coasting, which these files do not hold.
+New measure: coast_before_brake_m (and _s), from the first sample after the flat-out run with the
+throttle below 20% and no brake, to the first brake sample; 0 if the brake comes first
+(derate_analysis.coast_before_brake; tests/test_lift_real.py). A lap lifts and coasts if it is
+60 m or more. RL1-RL3, O1 and O2 stand unchanged with this measure. It needs the raw telemetry,
+so the 17 races are re-run on the laptop (multi_race.py --rebase into results/multi_rebased_mid);
+every existing column must come out unchanged, which checks that the re-run is the same run.

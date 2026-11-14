@@ -312,6 +312,9 @@ results/fia_fix_c` (four circuits) and `--cars original --caps 250 350 --out
 results/fia_fix_calendar_c --events ...` (every circuit), then `python scripts/fia_fix_verdicts.py
 [--calendar] --runs <out>/runs.csv`.
 
+These solves cannot lift and coast. With that option added, super-clipping still rises under 350 kW
+at 17 of 18 circuits, and lift-and-coast falls at every circuit that uses it (finding 13).
+
 ### 10. Whole-race energy plans: carry a little more charge, spend it at the end
 
 Which charge should a car carry from lap to lap over a race? A lap table (fastest lap from every
@@ -392,6 +395,28 @@ ranking, is withdrawn). Table: [`results/forecast_2027.csv`](results/forecast_20
 Reproduce: `scripts/kaggle_rerun_certified.md`, then `python scripts/forecast_2027.py --forecast --out
 results/forecast_2027_a results/forecast_2027_b --baseline results/fia_fix_calendar_c`.
 
+### 13. What the Miami change traded: lift-and-coast for super-clipping
+
+The optimum above could harvest only by super-clipping at full throttle or on the braking curve.
+Real 2026 cars also lift and coast (throttle off, active aero closing, the MGU-K harvesting up to
+350 kW), and the Miami change was argued for as a way to replace that. With lift-and-coast added
+as a choice (`--lift-coast`; predictions LC0-LC4 written before the run, research log 2026-11-14),
+on the 18 circuits of 2026 with the original car and each race's recharge limit:
+
+| Prediction | Verdict |
+|---|---|
+| LC0: with the option off, identical to the earlier solver; with it on, never slower | **Held**: GPU lap difference 0.0; laps 0.000-0.334 s faster |
+| LC1: lift-and-coast under 250 kW at ≥ 6 circuits (≥ 0.05 MJ per lap) | **Held**, 17 of 18 (0.15-1.71 MJ) |
+| LC2: less of it under 350 kW at ≥ 80% of those | **Held**, 17 of 17 (12-49% less, median 31%) |
+| LC3: more super-clipping energy under 350 kW at ≥ 80% | **Held**, 17 of 18 |
+| LC4: closer to real cars (median size ratio < 1.5 and Spearman ≥ 0.6) | **Not held**: 1.64 and 0.59 |
+
+Summed over the 18 circuits, lift-and-coast falls from 14.5 to 9.8 MJ per lap and super-clipping
+rises from 31.9 to 42.2 MJ: the change moved harvesting from coasting into super-clipping, as
+intended, but on the model it did not remove lift-and-coast. The option does not bring the model
+much closer to real cars (LC4), and the 2027 forecast is the same at all 18 circuits with or without
+it (`results/forecast_2027_lc.csv`).
+
 ### Performance: the solver on a free GPU
 
 Every speed-up below gives the same lap times as before (bit-for-bit for the last two rows),
@@ -462,7 +487,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      182 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      185 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

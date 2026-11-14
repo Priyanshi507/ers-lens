@@ -1,0 +1,117 @@
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 373, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+British Grand Prix t280 350 kW: lap 83.899 s, drop 7.0 km/h, gap 0.000 s, converged True
+British Grand Prix t280 375 kW: lap 83.894 s, drop 6.6 km/h, gap 0.000 s, converged True
+British Grand Prix t300 350 kW: lap 83.474 s, drop 15.7 km/h, gap 0.001 s, converged True
+British Grand Prix t300 375 kW: lap 83.468 s, drop 14.5 km/h, gap 0.000 s, converged True
+British Grand Prix t320 350 kW: lap 83.398 s, drop 17.1 km/h, gap 0.000 s, converged True
+British Grand Prix t320 375 kW: lap 83.399 s, drop 16.1 km/h, gap 0.005 s, converged True
+British Grand Prix none 350 kW: lap 83.393 s, drop 17.3 km/h, gap 0.000 s, converged True
+British Grand Prix none 375 kW: lap 83.385 s, drop 16.0 km/h, gap 0.001 s, converged True
+Hungarian Grand Prix t280 350 kW: lap 76.265 s, drop 0.2 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t280 375 kW: lap 76.265 s, drop 0.7 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t300 350 kW: lap 76.154 s, drop 0.8 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t300 375 kW: lap 76.153 s, drop 0.8 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t320 350 kW: lap 76.112 s, drop 3.2 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix t320 375 kW: lap 76.112 s, drop 2.8 km/h, gap 0.000 s, converged True
+Hungarian Grand Prix none 350 kW: lap 76.106 s, drop 2.9 km/h, gap -0.000 s, converged True
+Hungarian Grand Prix none 375 kW: lap 76.105 s, drop 2.9 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t280 350 kW: lap 68.941 s, drop 11.4 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t280 375 kW: lap 68.940 s, drop 11.3 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t300 350 kW: lap 68.659 s, drop 15.3 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t300 375 kW: lap 68.657 s, drop 15.7 km/h, gap 0.000 s, converged True
+Dutch Grand Prix t320 350 kW: lap 68.538 s, drop 13.6 km/h, gap -0.000 s, converged True
+Dutch Grand Prix t320 375 kW: lap 68.534 s, drop 13.7 km/h, gap -0.000 s, converged True
+Dutch Grand Prix none 350 kW: lap 68.517 s, drop 12.3 km/h, gap -0.000 s, converged True
+Dutch Grand Prix none 375 kW: lap 68.513 s, drop 12.0 km/h, gap 0.000 s, converged True
+Italian Grand Prix t280 350 kW: lap 79.306 s, drop 19.4 km/h, gap 0.001 s, converged True
+Italian Grand Prix t280 375 kW: lap 79.257 s, drop 17.6 km/h, gap 0.001 s, converged True
+Italian Grand Prix t300 350 kW: lap 79.176 s, drop 27.3 km/h, gap 0.001 s, converged True
+Italian Grand Prix t300 375 kW: lap 79.141 s, drop 25.2 km/h, gap 0.001 s, converged True
+Italian Grand Prix t320 350 kW: lap 79.153 s, drop 29.4 km/h, gap 0.000 s, converged True
+Italian Grand Prix t320 375 kW: lap 79.116 s, drop 27.9 km/h, gap 0.000 s, converged True
+Italian Grand Prix none 350 kW: lap 79.150 s, drop 29.5 km/h, gap 0.001 s, converged True
+Italian Grand Prix none 375 kW: lap 79.120 s, drop 28.0 km/h, gap 0.002 s, converged True
+Spanish Grand Prix t280 350 kW: lap 88.948 s, drop 2.2 km/h, gap 0.000 s, converged True
+Spanish Grand Prix t280 375 kW: lap 88.947 s, drop 2.2 km/h, gap 0.000 s, converged True
+Spanish Grand Prix t300 350 kW: lap 88.790 s, drop 5.5 km/h, gap 0.001 s, converged True
+Spanish Grand Prix t300 375 kW: lap 88.791 s, drop 5.5 km/h, gap 0.003 s, converged True
+Spanish Grand Prix t320 350 kW: lap 88.736 s, drop 7.1 km/h, gap 0.001 s, converged True
+Spanish Grand Prix t320 375 kW: lap 88.739 s, drop 7.1 km/h, gap 0.002 s, converged True
+Spanish Grand Prix none 350 kW: lap 88.729 s, drop 7.1 km/h, gap 0.000 s, converged True
+Spanish Grand Prix none 375 kW: lap 88.731 s, drop 7.2 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix t280 350 kW: lap 99.977 s, drop 14.2 km/h, gap 0.003 s, converged True
+Azerbaijan Grand Prix t280 375 kW: lap 99.981 s, drop 14.2 km/h, gap 0.006 s, converged True
+Azerbaijan Grand Prix t300 350 kW: lap 99.668 s, drop 19.9 km/h, gap 0.005 s, converged True
+Azerbaijan Grand Prix t300 375 kW: lap 99.666 s, drop 20.0 km/h, gap 0.005 s, converged True
+Azerbaijan Grand Prix t320 350 kW: lap 99.624 s, drop 21.8 km/h, gap 0.002 s, converged True
+Azerbaijan Grand Prix t320 375 kW: lap 99.622 s, drop 21.8 km/h, gap 0.002 s, converged True
+Azerbaijan Grand Prix none 350 kW: lap 99.619 s, drop 21.8 km/h, gap 0.001 s, converged True
+Azerbaijan Grand Prix none 375 kW: lap 99.612 s, drop 21.8 km/h, gap -0.000 s, converged True
+Bahrain Grand Prix t280 350 kW: lap 92.433 s, drop 1.0 km/h, gap 0.004 s, converged True
+Bahrain Grand Prix t280 375 kW: lap 92.434 s, drop 1.0 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t300 350 kW: lap 92.347 s, drop 3.5 km/h, gap 0.002 s, converged True
+Bahrain Grand Prix t300 375 kW: lap 92.345 s, drop 3.5 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix t320 350 kW: lap 92.323 s, drop 5.6 km/h, gap 0.000 s, converged True
+Bahrain Grand Prix t320 375 kW: lap 92.327 s, drop 5.8 km/h, gap 0.005 s, converged True
+Bahrain Grand Prix none 350 kW: lap 92.322 s, drop 6.4 km/h, gap 0.001 s, converged True
+Bahrain Grand Prix none 375 kW: lap 92.325 s, drop 7.1 km/h, gap 0.004 s, converged True
+Singapore Grand Prix t280 350 kW: lap 89.549 s, drop 0.1 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t280 375 kW: lap 89.549 s, drop 0.1 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t300 350 kW: lap 89.472 s, drop 1.3 km/h, gap 0.002 s, converged True
+Singapore Grand Prix t300 375 kW: lap 89.472 s, drop 1.3 km/h, gap 0.001 s, converged True
+Singapore Grand Prix t320 350 kW: lap 89.452 s, drop 2.6 km/h, gap 0.000 s, converged True
+Singapore Grand Prix t320 375 kW: lap 89.452 s, drop 2.6 km/h, gap 0.000 s, converged True
+Singapore Grand Prix none 350 kW: lap 89.451 s, drop 2.8 km/h, gap 0.000 s, converged True
+Singapore Grand Prix none 375 kW: lap 89.454 s, drop 2.7 km/h, gap 0.003 s, converged True
+United States Grand Prix t280 350 kW: lap 91.483 s, drop 1.9 km/h, gap 0.000 s, converged True
+United States Grand Prix t280 375 kW: lap 91.483 s, drop 1.9 km/h, gap 0.000 s, converged True
+United States Grand Prix t300 350 kW: lap 91.326 s, drop 6.4 km/h, gap 0.002 s, converged True
+United States Grand Prix t300 375 kW: lap 91.326 s, drop 7.5 km/h, gap 0.001 s, converged True
+United States Grand Prix t320 350 kW: lap 91.286 s, drop 7.8 km/h, gap 0.001 s, converged True
+United States Grand Prix t320 375 kW: lap 91.285 s, drop 7.8 km/h, gap 0.001 s, converged True
+United States Grand Prix none 350 kW: lap 91.281 s, drop 7.8 km/h, gap 0.003 s, converged True
+United States Grand Prix none 375 kW: lap 91.282 s, drop 7.8 km/h, gap 0.002 s, converged True
+All results in results/forecast_2027_lc_b/runs.csv

@@ -417,6 +417,12 @@ intended, but on the model it did not remove lift-and-coast. The option does not
 much closer to real cars (LC4), and the 2027 forecast is the same at all 18 circuits with or without
 it (`results/forecast_2027_lc.csv`).
 
+Real cars barely do it. Measured over the whole lap in real race telemetry (throttle below 20% with
+no brake, into a braking zone, 60 m or more), a clean race lap lift-and-coasts on 9.3% of laps
+over 17 races (3-23% by race), for about a second when it does: 2026 race laps harvest by
+super-clipping. The model's coasting therefore does not match real cars (RL1, RL2 and RL4 not held;
+`scripts/lift_real.py`), and coasts shorter than about 0.7 s cannot be seen at the telemetry's ~4 Hz.
+
 ### Performance: the solver on a free GPU
 
 Every speed-up below gives the same lap times as before (bit-for-bit for the last two rows),
@@ -487,7 +493,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      186 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      187 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

@@ -2471,3 +2471,23 @@ distance summed over every brake application on the lap of throttle below 20% wi
 immediately before it, counting only stretches of 60 m or more. Per race, its median over clean
 laps. RL4: the model's lift-and-coast energy per lap ranks the 16 races as real median lap_coast_m
 does, Spearman >= 0.5. Same model runs and caps as RL1.
+
+## 2026-11-14 (night): Whole-lap real lift-and-coast: RL4 not held; O2 withdrawn
+
+Laptop re-run with lap_coast (patch 0064): race_summary byte-identical and every earlier per-lap
+column identical; lap_coast_m and lap_coast_events are new.
+- RL4 not held: the median of lap_coast_m is 0 m at all 16 races, so the real side has no ranking
+  and the Spearman is undefined.
+- Described, not tested: a clean race lap coasts 60 m or more into a braking zone on 9.3% of laps
+  over all 17 races (3-23% by race; Britain, 18 laps, 39%), and such a coast is short, 64-91 m
+  median by race (about a second). Real 2026 race laps harvest by super-clipping, not by
+  lift-and-coast; the model with the option would coast 0.1-1.7 MJ per lap, which real cars do not.
+  This agrees with LC4 (the option did not bring the model closer to real cars) and with the
+  model choice already fixed for 2027.
+- Limit: at about 4 Hz, coasts shorter than 60 m (under about 0.7 s at 300 km/h) cannot be told from
+  sampling, so short lifts are not counted; the statement is about coasts of a second or more.
+- Seen after the fact and not tested: the two pre-Miami races have the highest shares of coasting
+  laps among the 16 (China 23%, Japan 18%; Miami 16%; the other 13 races 3-13%). Two races on two
+  circuits cannot separate the rule from the circuit, so this is reported as an observation only.
+- O2 withdrawn before any out-of-sample data: with real coasting close to zero at every race, a
+  ranking of four races by it would be noise. O1 stands.

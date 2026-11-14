@@ -55,3 +55,16 @@ def test_lift_coast_claims():
     q = (1 - p.coast_mj[350] / p.coast_mj[250])[used] * 100
     assert (round(q.min()), round(q.median()), round(q.max())) == (12, 31, 49)
     assert (round(p.coast_mj[250][used].min(), 2), round(p.coast_mj[250].max(), 2)) == (0.15, 1.71)
+
+
+def test_real_coast_claims():
+    import glob
+
+    import pandas as pd
+
+    laps = [pd.read_csv(f) for f in sorted(glob.glob("results/multi_rebased_mid/R/*_per_lap.csv"))]
+    assert round(pd.concat(laps).lap_coast_events.gt(0).mean() * 100, 1) == 9.3
+    shares = {d.event.iloc[0]: d.lap_coast_events.gt(0).mean() for d in laps}
+    used = [s for e, s in shares.items() if e != "British Grand Prix"]
+    assert (round(min(used) * 100), round(max(used) * 100)) == (3, 23)
+    assert all(d.lap_coast_m.median() == 0 for d in laps)

@@ -18,7 +18,7 @@ import jax.numpy as jnp
 import numpy as np
 from jax.scipy.ndimage import map_coordinates
 
-from .jaxsim import V_MIN, _step, params_of, simulate_laps, static_track
+from .jaxsim import COAST_BASE, V_MIN, _step, params_of, simulate_laps, static_track
 from .params import CarParams
 from .track import Track
 from .physics import braking_envelope
@@ -43,9 +43,10 @@ class Grid:
 
 def default_grid(car: CarParams, n_soc: int = 81) -> Grid:
     deploy = np.arange(0.0, car.mguk_power_w + 1.0, 25e3)
-    harvest = -np.array([75e3, 150e3, 250e3, car.mguk_power_w])
+    harvest = np.array([75e3, 150e3, 250e3, car.mguk_power_w])
+    coast = COAST_BASE - harvest if car.lift_coast else np.array([])
     return Grid(np.arange(V_MIN, 101.0, 1.0), np.linspace(0.0, car.es_capacity_j, n_soc),
-                np.concatenate([harvest[::-1], deploy]))
+                np.concatenate([coast[::-1], -harvest[::-1], deploy]))
 
 
 @dataclass
@@ -106,7 +107,7 @@ def _transition(p, car, ds, mass, V, S, U, target, straight, deploy_cap=jnp.inf)
     neighbouring charges side by side, which read neighbouring value-table cells (1.4x faster on a
     T4 than command last, identical results; research log 2026-10-31)."""
     carry = (V[:, None, None], S[None, None, :], 0.0)
-    (v_next, s_next, e_in), (_, _, _, _, dt, _) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight, deploy_cap))
+    (v_next, s_next, e_in), (_, _, _, _, dt, _, _) = _step(p, car, ds, mass, carry, (U[None, :, None], target, straight, deploy_cap))
     return v_next, s_next, e_in, dt
 
 
@@ -146,7 +147,7 @@ class _Compiled:
             def fwd(state, x):
                 v, s = state
                 target, straight, cap, value_next = x
-                (v_n, s_n, e_in), (_, _, _, _, dt, _) = _step(p, unlimited, st.ds, mass, (v, s, 0.0),
+                (v_n, s_n, e_in), (_, _, _, _, dt, _, _) = _step(p, unlimited, st.ds, mass, (v, s, 0.0),
                                                             (U, target, straight, cap))
                 j = jnp.argmin(dt + price * e_in + _interp(value_next, grid, v_n, s_n))
                 return (v_n[j], s_n[j]), U[j]

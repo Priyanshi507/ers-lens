@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .jaxsim import V_MIN
+from .jaxsim import COAST_BASE, V_MIN
 from .physics import G
 
 KERNEL = r"""
@@ -37,6 +37,7 @@ extern "C" __global__ void dp_step(
     const double v = v_grid[iv], soc = s_grid[is];
     const double v_eff = fmax(v, vmin);
     const double resist = 0.5 * rho * cda * (v_eff * v_eff) + crr * mass * g;
+    const double resist_c = 0.5 * rho * k[5] * (v_eff * v_eff) + crr * mass * g;
     const double kmh = v_eff * 3.6;
     const double low = fmin(mguk, a1 - b1 * kmh);
     const double cap_k = fmax(kmh >= knee ? a2 - b2 * kmh : low, 0.0);
@@ -52,7 +53,8 @@ extern "C" __global__ void dp_step(
 
     double best = 1e300;  // larger than any lap time or miss penalty
     for (int u = 0; u < nu; ++u) {
-        const double c = cmd[u];
+        const bool coast = cmd[u] <= COAST_BASE;
+        const double c = coast ? cmd[u] - COAST_BASE : cmd[u];
         double deploy = fmin(fmin(fmax(c, 0.0), cap_k), deploy_max);
         deploy = fmin(deploy, soc_limit);
         double ice_h = c < 0.0 ? fmin(fmin(fmin(-c, cap_h), ice), room) : 0.0;
@@ -60,16 +62,24 @@ extern "C" __global__ void dp_step(
         const double f_drive = fmin(p_wheel * inv_veff, traction);
         const double a = (f_drive - resist) * inv_mass;
         const double v_acc = sqrt(fmax(v * v + 2.0 * a * ds, vmin * vmin));
-        const bool accel = v_acc <= target;
-        const bool partial = !accel && f_needed >= 0.0;
-        const bool braking = !accel && f_needed < 0.0;
-        const double v_next = accel ? v_acc : target;
+        double lift_h = 0.0, v_coast = 0.0;
+        bool lifting = false;
+        if (coast) {
+            lift_h = fmin(fmin(-c, cap_h), room);
+            v_coast = sqrt(fmax(v * v - 2.0 * (lift_h * inv_veff + resist_c) * inv_mass * ds, vmin * vmin));
+            lifting = v_coast <= target;
+            if (!lifting) lift_h = 0.0;
+        }
+        const bool accel = !lifting && v_acc <= target;
+        const bool partial = !accel && !lifting && f_needed >= 0.0;
+        const bool braking = !accel && !lifting && f_needed < 0.0;
+        const double v_next = accel ? v_acc : (lifting ? v_coast : target);
         if (!accel) deploy = 0.0;
         ice_h = accel ? fmin(ice_h, superclip) : (partial ? fmin(ice_h, fmax(0.0, ice - p_need)) : 0.0);
         double brake_h = braking ? fmin(fmin(-p_need, cap_h), room) : 0.0;
         if (regen_by_command) brake_h = fmin(brake_h, fmax(-c, 0.0));
         const double dt = 2.0 * ds / (v + v_next);
-        const double e_in = eh * (ice_h + brake_h) * dt;
+        const double e_in = eh * (ice_h + brake_h + lift_h) * dt;
         const double s_next = fmin(fmax(soc + e_in - deploy * inv_ed * dt, 0.0), cap_j);
 
         const double cv = (v_next - v0) * inv_dv, cs = s_next * inv_dsoc;
@@ -84,7 +94,7 @@ extern "C" __global__ void dp_step(
     }
     value_out[iv * ns + is] = best;
 }
-"""
+""".replace("COAST_BASE", repr(COAST_BASE))
 
 
 def constants(p: dict, car, ds: float, mass: float) -> np.ndarray:
@@ -113,6 +123,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     soc = np.asarray(s_grid, dtype=np.float64)[None, :]
     v_eff = np.maximum(v, vmin)
     resist = 0.5 * rho * cda * (v_eff * v_eff) + crr * mass * g
+    resist_c = 0.5 * rho * k[5] * (v_eff * v_eff) + crr * mass * g
     kmh = v_eff * 3.6
     cap_k = np.maximum(np.where(kmh >= knee, a2 - b2 * kmh, np.minimum(mguk, a1 - b1 * kmh)), 0.0)
     cap_h = cap_k if cap_h_abs < 0.0 else cap_h_abs
@@ -124,16 +135,25 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
     soc_limit, inv_dv, inv_dsoc = soc * ed / dt_guess, 1.0 / dv, 1.0 / ds_soc
     best = np.full((nv, ns), np.inf)
     for c in cmd:
+        coast = c <= COAST_BASE
+        c = c - COAST_BASE if coast else c
         deploy = np.minimum(np.minimum(np.maximum(c, 0.0), cap_k), deploy_max)
         deploy = np.minimum(deploy, soc_limit)
         ice_h = np.minimum(np.minimum(np.minimum(-c, cap_h), ice), room) if c < 0.0 else np.zeros_like(room)
         f_drive = np.minimum((ice + deploy - ice_h) * inv_veff, traction)
         a = (f_drive - resist) * inv_mass
         v_acc = np.sqrt(np.maximum(v * v + 2.0 * a * ds, vmin * vmin))
-        accel = v_acc <= target
-        partial = ~accel & (f_needed >= 0.0)
-        braking = ~accel & (f_needed < 0.0)
-        v_next = np.where(accel, v_acc, target)
+        lifting = np.zeros_like(v_acc, dtype=bool)
+        lift_h = v_coast = np.zeros_like(v_acc)
+        if coast:
+            lift_h = np.minimum(np.minimum(-c, cap_h), room)
+            v_coast = np.sqrt(np.maximum(v * v - 2.0 * (lift_h * inv_veff + resist_c) * inv_mass * ds, vmin * vmin))
+            lifting = v_coast <= target
+            lift_h = np.where(lifting, lift_h, 0.0)
+        accel = ~lifting & (v_acc <= target)
+        partial = ~accel & ~lifting & (f_needed >= 0.0)
+        braking = ~accel & ~lifting & (f_needed < 0.0)
+        v_next = np.where(accel, v_acc, np.where(lifting, v_coast, target))
         deploy = np.where(accel, deploy, 0.0)
         ice_h = np.where(accel, np.minimum(ice_h, superclip),
                          np.where(partial, np.minimum(ice_h, np.maximum(0.0, ice - p_need)), 0.0))
@@ -141,7 +161,7 @@ def reference_step(value_next, v_grid, s_grid, cmd, target, straight, price, k, 
         if regen_by_command:
             brake_h = np.minimum(brake_h, max(-c, 0.0))
         dt = 2.0 * ds / (v + v_next)
-        e_in = eh * (ice_h + brake_h) * dt
+        e_in = eh * (ice_h + brake_h + lift_h) * dt
         s_next = np.minimum(np.maximum(soc + e_in - deploy * inv_ed * dt, 0.0), cap_j)
         cv, cs = (v_next - v0) * inv_dv, s_next * inv_dsoc
         fv, fs = np.floor(cv), np.floor(cs)

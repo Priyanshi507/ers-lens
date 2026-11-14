@@ -2321,3 +2321,57 @@ use the corrected comparison and say so.
   stands. The forecast is still not frozen.
 Consequence for the paper: the model is used only for the direction in which a rule moves
 super-clipping, which is how Sections 6 and 8 already read it.
+
+## 2026-11-14 (later): Lift-and-coast as a choice: design and predictions, before any code
+
+Why: the solver has two ways to harvest, super-clipping at full throttle and harvesting on the
+braking curve. It has no lift-and-coast: at every point the car is either accelerating at full
+throttle or on its braking envelope. In 2026 lift-and-coast is the other main way to harvest
+(350 kW, throttle off, active aero closing), and the FIA's Miami change (super-clip limit 250 to
+350 kW) was argued for as a way to replace it (McLaren's Stella before the season; Russell, The Race,
+2026-04-20: "the minus-350kW super clip ... is going to avoid a lot of lift-and-coast"). Race reports
+describe cars super-clipping and then lifting before braking (Autosport). Without the option, the
+model cannot show the trade the rule was aimed at, and it may over-clip because super-clipping is
+its only full-straight harvest. Checked first: the two 2026 optimisation papers in the README do not
+model it (Nguyen and Pulsipher: modes clip, ICE, boost, regenerative braking, no coasting, no real
+telemetry); nothing in this repository mentions it.
+
+Design (jaxsim._step, the CUDA kernel and its NumPy twin, identically):
+- Four new commands, lift-and-coast with MGU-K harvest h of 75, 150, 250 kW and the car's MGU-K
+  power (350 kW in 2026), encoded below COAST_BASE so every existing command is unchanged.
+- Throttle off: no engine power, no deployment, corner-mode drag (active aero closes on lifting),
+  harvest min(h, the MGU-K harvest limit at that speed, the recharge room). Engine braking ignored.
+- If coasting would leave the car above its braking envelope, the command acts as braking does now.
+- Off by default (CarParams.lift_coast = False), so every existing result reproduces; on with
+  --lift-coast. A new output, coast_w, is the power harvested while coasting; the hindcast's full-
+  throttle condition excludes coasting points.
+Runs (Kaggle, ten bisection steps, gap recorded): the 18-circuit calendar under 250 and 350 kW,
+original car, race recharge limits (results/fia_fix_calendar_lc), and the 144 2027 solves
+(results/forecast_2027_lc_a, _b). Four-circuit three-car runs and the Strategy Lab are not re-run.
+
+Predictions:
+LC0. With lift_coast off, laps and profiles are identical to the current solver; with it on, no
+     lap is slower than without by more than the two solves' proven gaps added (more choices).
+LC1. Under 250 kW, the optimum harvests at least 0.05 MJ per lap by lift-and-coast at 6 or more of
+     the 18 circuits.
+LC2. Of the circuits where it does under 250 kW, lift-and-coast energy is lower under 350 kW at
+     80% or more (the effect the change was argued for).
+LC3. Super-clipping energy is still higher under 350 kW at 80% or more of circuits (C1 survives).
+LC4. Hindcast, same 16 races and the full-throttle measure: (a) the median ratio of model to real
+     drop at races where at least half of real laps clip falls below 1.5 (1.9 without the option),
+     and (b) Spearman between model and real drop is 0.6 or more.
+Model choice for the 2027 forecast, fixed now: if LC4(a) holds, the forecast to be frozen comes
+from the lift-and-coast runs by rule R unchanged; otherwise from the current runs.
+Out of sample: Mexico City and Sao Paulo (raced, their race telemetry not yet opened), Las Vegas
+(21 Nov) and Qatar (29 Nov). Their tracks come from qualifying laps and their recharge limits from
+the FIA's documents. A real-data lift-and-coast detector, the out-of-sample protocol and their
+predictions will be written here before either is run on any race.
+
+Implementation, before any real run: jaxsim._step, the CUDA kernel and its NumPy twin as designed;
+tests/test_lift_coast.py (physics of one coasting step, the MGU-K cap, fall-back to braking at the
+envelope, existing commands untouched) and tests/test_cuda_dp.py now run with and without the
+coast commands. LC0's first half checked on the demo circuit against the code at e432725: commands,
+speeds, lap time and harvest price are bit-identical with the option off. The GPU run repeats the
+check on Canada at 350 kW against results/fia_fix_calendar_c. A coarse demo smoke test (not a
+result) used lift-and-coast under 250 kW and much less of it under 350 kW. Runs:
+scripts/kaggle_lift_coast.md.

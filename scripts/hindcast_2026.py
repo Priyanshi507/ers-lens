@@ -28,10 +28,11 @@ def model_drop_kmh(profiles: Path, event: str, cap: int) -> float:
 
 def full_throttle(z, car: CarParams) -> np.ndarray:
     """True where the solver's car accelerates below its braking envelope, as jaxsim._step's accel;
-    elsewhere it brakes or holds the envelope at part throttle."""
+    elsewhere it brakes, holds the envelope at part throttle, or lifts and coasts."""
     v_limit = z["v_limit"]
     env = braking_envelope(Track("", z["distance_m"], v_limit, np.zeros(len(v_limit), bool)), car)
-    return np.roll(z["v"], -1) < np.roll(env, -1) - 1e-6
+    lifting = z["coast"] > 0.0 if "coast" in z.files else np.zeros(len(v_limit), bool)
+    return (np.roll(z["v"], -1) < np.roll(env, -1) - 1e-6) & ~lifting
 
 
 def drop_from_profile(path: Path, car: CarParams | None = None) -> float:

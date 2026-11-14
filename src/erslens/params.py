@@ -41,6 +41,8 @@ class CarParams:
     # The speed taper (C5.2.8) limits only power used to propel the car; harvesting is limited by the
     # absolute MGU-K power (C5.2.7). True restores the model before 2026-11-04, which tapered both.
     harvest_taper: bool = False
+    # Lift-and-coast commands in the DP's grid (research log, 2026-11-14); off reproduces earlier runs.
+    lift_coast: bool = False
 
     def with_(self, **changes) -> "CarParams":
         return replace(self, **changes)

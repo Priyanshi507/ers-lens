@@ -29,7 +29,7 @@ SWEEP_W = (150e3, 200e3, 250e3, 300e3, 350e3, 450e3)
 ACTIVE_W = 1e3
 FIELDS = ["event", "car", "cap_kw", "lap_s", "dp_pred_s", "converged", "harvest_mj", "superclip_mj",
           "superclip_s", "superclip_m", "longest_superclip_s", "superclip_at_cap_share",
-          "peak_superclip_kw", "clip_ratio", "optimality_gap_s", "seconds"]
+          "peak_superclip_kw", "clip_ratio", "optimality_gap_s", "seconds", "coast_mj", "coast_s"]
 
 
 def superclip_metrics(out: dict, ds: float, cap_w: float) -> dict:
@@ -43,7 +43,14 @@ def superclip_metrics(out: dict, ds: float, cap_w: float) -> dict:
     return {"superclip_mj": float((sc * dt).sum() / 1e6), "superclip_s": t_on,
             "superclip_m": float(on.sum() * ds), "longest_superclip_s": float(longest),
             "superclip_at_cap_share": float(dt[on & (sc >= 0.99 * cap_w)].sum() / t_on) if t_on > 0 else 0.0,
-            "peak_superclip_kw": float(sc.max() / 1e3)}
+            "peak_superclip_kw": float(sc.max() / 1e3), **coast_metrics(out)}
+
+
+def coast_metrics(out: dict) -> dict:
+    """Energy harvested and time spent lifting and coasting (zero unless the run used --lift-coast)."""
+    c, dt = np.asarray(out.get("coast", np.zeros(1))), np.asarray(out["dt"])
+    c = np.broadcast_to(c, dt.shape)
+    return {"coast_mj": float((c * dt).sum() / 1e6), "coast_s": float(dt[c > ACTIVE_W].sum())}
 
 
 def plan(cars: dict, events, quick: bool, caps=None):
@@ -64,6 +71,7 @@ def main():
     ap.add_argument("--assume-recharge-mj", type=float,
                     help="race recharge limit for events with no sourced rules in configs/rules_2026_races.yaml; "
                          "each use is listed in <out>/assumptions.csv")
+    ap.add_argument("--lift-coast", action="store_true", help="let the optimum lift and coast (research log, 2026-11-14)")
     ap.add_argument("--refine", action="store_true",
                     help="re-solve every solve that failed the convergence rule on the finer grids of "
                          "REFINE_LADDER, into refined.csv; runs.csv and the verdicts are not changed")
@@ -98,7 +106,7 @@ def main():
     def solve_row(e, name, cap, grid_kw):
         base = load_car_params(CARS[name] if e != "demo" else CARS["original"])
         track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
-        car = rules_for(e, base).with_(superclip_max_w=cap)
+        car = rules_for(e, base).with_(superclip_max_w=cap, lift_coast=args.lift_coast)
         t = time.perf_counter()
         sol = solve_refined(track, car, **grid_kw)
         seconds = time.perf_counter() - t
@@ -133,8 +141,9 @@ def main():
         with open(path) as f:
             done = {(r["event"], r["car"], float(r["cap_kw"])) for r in csv.DictReader(f)}
     new = not path.exists() or path.stat().st_size == 0
+    fields = FIELDS if new else next(csv.reader(open(path)))  # a folder begun before a column was added keeps its own
     with open(path, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS)
+        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         if new:
             writer.writeheader()
         caps = [c * 1e3 for c in args.caps] if args.caps else None
@@ -149,7 +158,7 @@ def main():
             f.flush()
             np.savez_compressed(out_dir / "profiles" / f"{e}_{name}_{int(cap / 1e3)}.npz",
                                 distance_m=sol.track.distance_m, v_limit=sol.track.v_limit_ms, cmd_w=sol.cmd_w,
-                                **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt")})
+                                **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt", "coast")})
             print(f"{e} {name} {cap / 1e3:.0f} kW: lap {r['lap_s']:.3f} s, superclip {r['superclip_s']:.2f} s "
                   f"(longest {r['longest_superclip_s']:.2f} s), {seconds:.0f} s", flush=True)
     if assumed:

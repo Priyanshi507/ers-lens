@@ -9,9 +9,9 @@ from erslens.params import load_car_params
 from erslens.track import demo_circuit
 
 
-@pytest.fixture(scope="module")
-def setup():
-    rc = dp_car(load_car_params("configs/car_2026_q_low.yaml")).with_(superclip_max_w=250e3)
+@pytest.fixture(scope="module", params=[False, True], ids=["no-coast", "lift-coast"])
+def setup(request):
+    rc = dp_car(load_car_params("configs/car_2026_q_low.yaml")).with_(superclip_max_w=250e3, lift_coast=request.param)
     tr = start_at_slowest_point(demo_circuit(), rc)
     g = grid_with(rc, 0.5, 41)
     st = static_track(tr, rc)

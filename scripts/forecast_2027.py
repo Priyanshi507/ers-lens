@@ -31,7 +31,7 @@ EVENTS = ("Australia", "China", "Miami", "Canada", "Japan", "Austria", "Belgium"
           "Italian Grand Prix", "Spanish Grand Prix", "Azerbaijan Grand Prix", "Bahrain Grand Prix",
           "Singapore Grand Prix", "United States Grand Prix")
 FIELDS = ["event", "curve", "superclip_kw", "lap_s", "dp_pred_s", "converged", "optimality_gap_s",
-          "harvest_mj", "superclip_mj", "model_drop_kmh", "clip_ratio", "seconds"]
+          "harvest_mj", "superclip_mj", "model_drop_kmh", "clip_ratio", "seconds", "coast_mj"]
 
 
 def car_2027(event: str, curve: str, superclip_w: float):
@@ -47,7 +47,7 @@ def car_2027(event: str, curve: str, superclip_w: float):
     return car.with_(taper_a1_w=a1)
 
 
-def solve_all(out: Path, events, grid: dict | None = None):
+def solve_all(out: Path, events, grid: dict | None = None, lift_coast: bool = False):
     from erslens.ingest import load_track
     from erslens.optimal import solve_refined
     from erslens.strategy import clip_metrics, solution_ok
@@ -58,8 +58,9 @@ def solve_all(out: Path, events, grid: dict | None = None):
     if path.exists() and path.stat().st_size:
         done = {(r["event"], r["curve"], float(r["superclip_kw"])) for r in csv.DictReader(open(path))}
     new = not path.exists() or path.stat().st_size == 0
+    fields = FIELDS if new else next(csv.reader(open(path)))  # a folder begun before a column was added keeps its own
     with open(path, "a", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         if new:
             w.writeheader()
         for e in events:
@@ -69,17 +70,17 @@ def solve_all(out: Path, events, grid: dict | None = None):
                     if (e, curve, sc / 1e3) in done:
                         continue
                     t = time.perf_counter()
-                    sol = solve_refined(track, car_2027(e, curve, sc), **(grid or {}))
+                    sol = solve_refined(track, car_2027(e, curve, sc).with_(lift_coast=lift_coast), **(grid or {}))
                     o = {k: np.asarray(v) for k, v in sol.out.items()}
                     name = f"{e}_{curve}_{int(sc / 1e3)}.npz"
                     np.savez_compressed(out / "profiles" / name, distance_m=sol.track.distance_m,
                                         v_limit=sol.track.v_limit_ms, cmd_w=sol.cmd_w,
-                                        **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt")})
+                                        **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt", "coast")})
                     sm = superclip_metrics(o, sol.track.ds, sc)
                     r = {"event": e, "curve": curve, "superclip_kw": sc / 1e3, "lap_s": sol.lap_time_sim_s,
                          "dp_pred_s": sol.lap_time_dp_s, "converged": solution_ok(sol),
                          "optimality_gap_s": sol.gap_or_nan, "harvest_mj": sol.harvested_j / 1e6,
-                         "superclip_mj": sm["superclip_mj"],
+                         "superclip_mj": sm["superclip_mj"], "coast_mj": sm["coast_mj"],
                          "model_drop_kmh": drop_from_profile(out / "profiles" / name),
                          "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"],
                          "seconds": round(time.perf_counter() - t, 1)}
@@ -138,14 +139,16 @@ def main():
     ap.add_argument("--forecast", action="store_true", help="apply the forecast rule to finished runs")
     ap.add_argument("--baseline", default="results/fia_fix_calendar_c")
     ap.add_argument("--quick", action="store_true", help="coarse grid, for a smoke test only")
+    ap.add_argument("--lift-coast", action="store_true", help="let the optimum lift and coast (research log, 2026-11-14)")
+    ap.add_argument("--table", default="results/forecast_2027.csv", help="where --forecast writes its table")
     args = ap.parse_args()
     outs = [Path(o) for o in args.out]
     if args.forecast:
         t = forecast(outs, Path(args.baseline))
-        t.to_csv(outs[0].parent / "forecast_2027.csv")
+        t.to_csv(args.table)
         print(t.round(2).to_string())
         return
-    solve_all(outs[0], args.events, {"dv": 1.0, "n_soc": 41} if args.quick else None)
+    solve_all(outs[0], args.events, {"dv": 1.0, "n_soc": 41} if args.quick else None, args.lift_coast)
 
 
 if __name__ == "__main__":

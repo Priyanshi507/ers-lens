@@ -13,7 +13,7 @@ def superclip_at(kmh, car):
     v = kmh / 3.6
     carry = (jnp.asarray(v), jnp.asarray(2e6), jnp.asarray(0.0))
     x = (jnp.asarray(-350e3), jnp.asarray(200.0), jnp.asarray(True))
-    _, (_, _, _, harvest, _, superclip) = _step(params_of(car), car, 5.0, car.mass_kg, carry, x)
+    _, (_, _, _, harvest, _, superclip, _) = _step(params_of(car), car, 5.0, car.mass_kg, carry, x)
     return float(superclip)
 
 

@@ -16,6 +16,9 @@ from .track import Track
 jax.config.update("jax_enable_x64", True)
 
 V_MIN = 5.0
+# Commands at or below COAST_BASE mean lift-and-coast harvesting COAST_BASE - cmd watts; every other
+# command keeps its meaning (deploy if positive, harvest at full throttle if negative).
+COAST_BASE = -1e9
 DIFF_PARAMS = ("cda_straight", "cda_corner", "ice_power_w", "eta_harvest", "eta_deploy")
 
 
@@ -46,6 +49,8 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     battery; only optimizers use it, and they must penalize leaving the window themselves."""
     v, soc, harvested = carry
     cmd, target, straight = x[:3]
+    coast = cmd <= COAST_BASE
+    cmd = jnp.where(coast, cmd - COAST_BASE, cmd)  # off the envelope it acts as a harvest command
     deploy_cap = x[3] if len(x) > 3 else jnp.inf
     cda = jnp.where(straight, p["cda_straight"], p["cda_corner"])
     v_eff = jnp.maximum(v, V_MIN)
@@ -69,11 +74,18 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
     a = (f_drive - resist) / mass
     v_acc = jnp.sqrt(jnp.maximum(v * v + 2.0 * a * ds, V_MIN ** 2))
 
-    accel = v_acc <= target
+    # Lift-and-coast: no engine or deployment, active aero closed, the MGU-K harvesting.
+    lift_h = jnp.minimum(jnp.minimum(-cmd, cap_h), jnp.minimum(budget, space) / (eh * dt_guess))
+    resist_c = 0.5 * car.rho * p["cda_corner"] * v_eff ** 2 + car.crr * mass * G
+    v_coast = jnp.sqrt(jnp.maximum(v * v - 2.0 * (lift_h / v_eff + resist_c) / mass * ds, V_MIN ** 2))
+    lifting = coast & (v_coast <= target)
+    lift_h = jnp.where(lifting, lift_h, 0.0)
+
+    accel = (~lifting) & (v_acc <= target)
     f_needed = mass * (target ** 2 - v ** 2) / (2.0 * ds) + resist
-    partial = (~accel) & (f_needed >= 0.0)
-    braking = (~accel) & (f_needed < 0.0)
-    v_next = jnp.where(accel, v_acc, target)
+    partial = (~accel) & (~lifting) & (f_needed >= 0.0)
+    braking = (~accel) & (~lifting) & (f_needed < 0.0)
+    v_next = jnp.where(accel, v_acc, jnp.where(lifting, v_coast, target))
     p_need = f_needed * v_eff
     deploy = jnp.where(accel, deploy, 0.0)
     ice_h = jnp.where(accel, jnp.minimum(ice_h, car.superclip_max_w),
@@ -86,19 +98,20 @@ def _step(p: dict, car: CarParams, ds: float, mass, carry, x, hard_soc: bool = T
         brake_h = jnp.minimum(brake_h, jnp.maximum(-cmd, 0.0))
 
     dt = 2.0 * ds / (v + v_next)
-    e_in = eh * (ice_h + brake_h) * dt
+    e_in = eh * (ice_h + brake_h + lift_h) * dt
     soc_next = soc + e_in - deploy / ed * dt
     if hard_soc:
         soc_next = jnp.clip(soc_next, 0.0, car.es_capacity_j)
     superclip = jnp.where(accel, ice_h, 0.0)
-    out = (v, soc, deploy, ice_h + brake_h, dt, superclip)
+    out = (v, soc, deploy, ice_h + brake_h + lift_h, dt, superclip, lift_h)
     return (v_next, soc_next, harvested + e_in), out
 
 
 def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_laps: int,
                   soc0_frac: float = 0.5, v0: float | None = None, hard_soc: bool = True):
     """Returns per-lap outputs stacked as (n_laps, n_points): v, soc, deploy, harvest, dt, and
-    superclip, the part of harvest taken while accelerating at full throttle."""
+    superclip, the part of harvest taken while accelerating at full throttle, and coast, the part
+    taken while lifting and coasting."""
     v0 = jnp.minimum(st.env[-1], 80.0) if v0 is None else v0
 
     def lap(carry, lap_idx):
@@ -110,8 +123,9 @@ def simulate_laps(p: dict, cmd: jnp.ndarray, st: StaticTrack, car: CarParams, n_
 
     _, outs = jax.lax.scan(lap, (jnp.asarray(v0, jnp.float64), soc0_frac * car.es_capacity_j),
                            jnp.arange(n_laps, dtype=jnp.float64))
-    v, soc, deploy, harvest, dt, superclip = outs
-    return {"v": v, "soc": soc, "deploy": deploy, "harvest": harvest, "dt": dt, "superclip": superclip}
+    v, soc, deploy, harvest, dt, superclip, coast = outs
+    return {"v": v, "soc": soc, "deploy": deploy, "harvest": harvest, "dt": dt, "superclip": superclip,
+            "coast": coast}
 
 
 def lap_times(out: dict) -> jnp.ndarray:

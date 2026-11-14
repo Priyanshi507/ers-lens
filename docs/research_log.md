@@ -2285,3 +2285,39 @@ circuits: less full-throttle speed loss on the longest straight at Italy, Azerba
 Netherlands, Barcelona and the United States; more at Singapore. The other 11 get no direction. The
 ranking by median 2027 drop starts Japan, Britain, Australia, China, Spain and ends Bahrain, the
 United States, Hungary. Not yet frozen or registered outside GitHub.
+
+## 2026-11-14 (later): The hindcast's model measure included braking; Y1, Y2, G2 and the forecast re-judged
+
+Found while looking for the model's weakest point: at Monaco the optimum "lost 30 km/h" on its
+longest corner-free run while super-clipping no energy at all. The model quantity written for Y1-Y2
+(2026-11-13) was the speed lost from the run's peak to the run's end, and the run, defined by the
+corner speed limits, ends at the corner itself, so the drop included braking for it. The observed
+quantity (drop_kmh_median) stops at the end of full throttle. The two sides measured different
+things at 7 of 16 races (China, Japan, Miami, Monaco, Belgium, Spain, Singapore); the straights are
+the same on both sides (lengths equal at every race).
+
+Fix: hindcast_2026.drop_from_profile now stops where the solver's car stops accelerating below its
+braking envelope (jaxsim._step's accel), rebuilt from the saved profile; every car has the same
+brake parameters. No threshold: a 1 g deceleration cut gives the same numbers, 0.8-2.5 g gives
+Spearman 0.58-0.64. Test: tests/test_hindcast.py (Monaco's run ends under braking and its drop is 0).
+The 2027 forecast reads its drops through the same function (forecast_2027.remeasured), from the
+saved profiles, so no solve is repeated.
+
+This changes a definition written before the comparison, after its result was seen. Both are kept:
+the verdicts as first defined were Y1 held (0.79) and Y2 not held (11 of 16); the README and paper
+use the corrected comparison and say so.
+- Y1 not held: Spearman 0.58 over 16 races.
+- Y2 held: 13 of 16. The model clips at Barcelona, Bahrain and Hungary, where fewer than half of
+  real laps clip. Where real cars clip, the model's drop is 0.6-1.4 times theirs at China, Japan,
+  Miami, Spain and the United States, and 1.9-7 times at Canada, Azerbaijan, Belgium, Italy, Austria
+  and the Netherlands (median 1.9).
+- G2 not held: lower in 2027 at 14-17 of 18 circuits; only no-curve with 350 kW is below 15 (14).
+- Rule R applied unchanged to the corrected drops: less full-throttle speed loss at 14 circuits
+  (Australia, China, Japan, Miami, Canada, Barcelona, Spain, Hungary, Britain, Belgium, the
+  Netherlands, Italy, Azerbaijan, the United States), no direction at Austria, Bahrain, Singapore
+  and Monaco, more nowhere.
+- The Y1 entry's own consequence applies: with Y1 failed, no forecast of clipping by circuit is
+  made. The ranking is removed from forecast_2027.csv and F-b is withdrawn before any 2027 data; F-a
+  stands. The forecast is still not frozen.
+Consequence for the paper: the model is used only for the direction in which a rule moves
+super-clipping, which is how Sections 6 and 8 already read it.

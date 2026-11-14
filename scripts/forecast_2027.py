@@ -103,9 +103,19 @@ def baseline_drops(baseline: Path) -> pd.Series:
     return pd.Series(out, name="drop_2026_kmh")
 
 
+def remeasured(out: Path) -> pd.DataFrame:
+    """runs.csv with each drop recomputed from its saved profile by the current drop_from_profile
+    (the runs' own column predates the braking fix of 2026-11-14)."""
+    runs = pd.read_csv(out / "runs.csv")
+    paths = [out / "profiles" / f"{r.event}_{r.curve}_{int(r.superclip_kw)}.npz" for r in runs.itertuples()]
+    if all(p.exists() for p in paths):
+        runs["model_drop_kmh"] = [drop_from_profile(p) for p in paths]
+    return runs
+
+
 def forecast(outs: list[Path], baseline: Path) -> pd.DataFrame:
     """The forecast rule written before the runs (research log, 2026-11-13, rule R)."""
-    runs = pd.concat([pd.read_csv(o / "runs.csv") for o in outs], ignore_index=True)
+    runs = pd.concat([remeasured(o) for o in outs], ignore_index=True)
     ok = runs.groupby("event").apply(lambda g: bool(g.converged.astype(bool).all()), include_groups=False)
     d = runs.pivot_table(index="event", columns=["curve", "superclip_kw"], values="model_drop_kmh")
     base = baseline_drops(baseline).reindex(d.index)
@@ -116,8 +126,8 @@ def forecast(outs: list[Path], baseline: Path) -> pd.DataFrame:
     t["direction"] = np.where(~t.all_converged, "no forecast",
                               np.where(t.change_max_kmh < 0, "less",
                                        np.where(t.change_min_kmh > 0, "more", "no forecast")))
-    t["rank_2027"] = t.drop_2027_median_kmh.rank(ascending=False)
-    return t.sort_values("rank_2027")
+    # No ranking: Y1 failed on the corrected measure, and the rule written with it then allows directions only.
+    return t.sort_values("change_max_kmh")
 
 
 def main():

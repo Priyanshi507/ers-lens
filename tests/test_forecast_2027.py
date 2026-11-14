@@ -45,4 +45,4 @@ def test_forecast_rule_gives_a_direction_only_when_every_curve_agrees(tmp_path):
     t = forecast([tmp_path / "a", tmp_path / "b"], Path("results/fia_fix_calendar_h"))
     assert t.loc[EVENTS[0], "direction"] == "less" and t.loc[EVENTS[1], "direction"] == "more"
     assert (t.loc[list(EVENTS[2:]), "direction"] == "no forecast").all()
-    assert sorted(t.rank_2027) == list(range(1, len(EVENTS) + 1))
+    assert "rank_2027" not in t and len(t) == len(EVENTS)

@@ -1,6 +1,6 @@
 """Does the lap-time optimum rank circuits as real 2026 cars clipped? Y1-Y2 (research log, 2026-11-13).
 
-    python scripts/hindcast_2026.py [--runs results/fia_fix_calendar_h]
+    python scripts/hindcast_2026.py [--runs results/fia_fix_calendar_c]
 """
 import argparse
 from pathlib import Path
@@ -9,7 +9,12 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
+from erslens.params import CarParams, load_car_params
+from erslens.physics import braking_envelope
+from erslens.track import Track
 from fia_fix_figures import longest_free_run
+
+BRAKES = load_car_params(Path(__file__).parents[1] / "configs/car_2026.yaml")  # every car brakes alike
 
 FIRST_350 = pd.Timestamp("2026-05-03")  # Miami, first race with the 350 kW super-clip limit
 NAMES = {"Australian Grand Prix": "Australia", "Chinese Grand Prix": "China", "Japanese Grand Prix": "Japan",
@@ -21,12 +26,24 @@ def model_drop_kmh(profiles: Path, event: str, cap: int) -> float:
     return drop_from_profile(profiles / f"{event}_original_{cap}.npz")
 
 
-def drop_from_profile(path: Path) -> float:
-    """Speed lost between the peak and the end of the lap's longest full-throttle run, km/h."""
+def full_throttle(z, car: CarParams) -> np.ndarray:
+    """True where the solver's car accelerates below its braking envelope, as jaxsim._step's accel;
+    elsewhere it brakes or holds the envelope at part throttle."""
+    v_limit = z["v_limit"]
+    env = braking_envelope(Track("", z["distance_m"], v_limit, np.zeros(len(v_limit), bool)), car)
+    return np.roll(z["v"], -1) < np.roll(env, -1) - 1e-6
+
+
+def drop_from_profile(path: Path, car: CarParams | None = None) -> float:
+    """Speed lost between the peak of the lap's longest corner-free run and the end of full throttle,
+    km/h, as the real laps are measured (drop_kmh_median). Braking is not counted (research log,
+    2026-11-14: the first version ran to the end of the corner-free run and so included braking)."""
     z = np.load(path)
     i, j = longest_free_run(z["v_limit"])
     v = z["v"][i:j] * 3.6
-    return float(v.max() - v[-1])
+    k = int(v.argmax())
+    off = np.nonzero(~full_throttle(z, car or BRAKES)[i:j][k:])[0]
+    return float(v[k] - v[k + off[0] if len(off) else -1])
 
 
 def table(runs_dir: Path, observed: Path) -> pd.DataFrame:

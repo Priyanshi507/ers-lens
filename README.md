@@ -248,12 +248,16 @@ inside the middle half of real laps at two of four circuits (exploratory: the ba
 observable). The car calibration failed its own acceptance test, so modelled lap
 times carry about ±0.7 s per lap of between-circuit uncertainty, and the pole laps are assumed
 to be close to energy-optimal.
-Against real 2026 races (predictions Y1-Y2, written before the comparison): across 16 circuits the
-optimum's speed loss at full throttle on the longest straight ranks circuits as real cars' does
-(Spearman 0.79, Y1 held), but its size is wrong: it loses 1.6-3 times as much speed where real cars
-clip, and it clips at five circuits where they barely do (Y2 not held, 11 of 16;
-`scripts/hindcast_2026.py`; unchanged on the certified runs). So the model is used for how circuits
-compare, not for how much a real car clips.
+Against real 2026 races (predictions Y1-Y2, written before the comparison), with the optimum's
+speed loss measured as the real laps' is, from the peak of the longest straight to the end of full
+throttle: the model clips where real cars clip at 13 of 16 races (Y2 held; it clips at Barcelona,
+Bahrain and Hungary, where fewer than half of real laps do), but it does not rank circuits as real
+cars do (Spearman 0.58, Y1 not held). Its size matches real cars at China, Japan, Miami, Spain and
+the United States (0.6-1.4 times) and is 1.9-7 times too large at Canada, Azerbaijan, Belgium,
+Italy, Austria and the Netherlands (`scripts/hindcast_2026.py`). A first version of this comparison
+measured the model to the end of the straight, braking included, and reported Spearman 0.79 and 11 of
+16; the correction is in the research log (2026-11-14). So the model is used for the direction in
+which a rule moves super-clipping, not for how much a real car clips or how circuits rank.
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
 Reproduce: `scripts/kaggle_rerun_certified.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
@@ -373,16 +377,18 @@ model.
 | Prediction, 18 circuits | Result |
 | --- | --- |
 | G1: the 2027 lap is faster (300 km/h curve, 375 kW) at ≥ 16 circuits | **Held**, 16 of 18 (up to 0.62 s; Monaco and Hungary slower) |
-| G2: less speed lost at full throttle on the longest straight at ≥ 80% of circuits, under every curve | **Not held**: 17 of 18 if the taper starts at 280 km/h, 6-8 of 18 otherwise |
+| G2: less speed lost at full throttle on the longest straight at ≥ 80% of circuits, under every curve | **Not held**: 14-17 of 18; 14 with no speed curve and 350 kW |
 | G3: ≥ 95% of solves proven within 0.01 s | **Held**, 144 of 144 |
 
-So whether 2027 cars slow less on the straights depends mostly on the unpublished curve. Where the
-answer is the same under every curve, the forecast is: **less** full-throttle speed loss on the
-longest straight at Italy, Azerbaijan, Canada, the Netherlands, Barcelona and the United States,
-and **more** at Singapore; no direction at the other 11. Only directions and the ranking of
-circuits are forecast, because the hindcast (finding 8) showed the model ranks circuits well but
-misjudges how much real cars clip. It is to be checked against 2027 races with the same detector
-(predictions F-a, F-b in the research log). Table: [`results/forecast_2027.csv`](results/forecast_2027.csv).
+Where the answer is the same under all eight solves, the forecast is **less** full-throttle speed
+loss on the longest straight in 2027 than in 2026 at 14 circuits: Australia, China, Japan, Miami,
+Canada, Barcelona, Spain, Hungary, Britain, Belgium, the Netherlands, Italy, Azerbaijan and the
+United States. No direction is forecast at Austria, Bahrain, Singapore and Monaco, and no circuit is
+forecast to lose more. The ranking of circuits is not forecast: the rule written with the hindcast
+allows directions only once Y1 fails. A first version of this forecast measured speed loss with
+braking included (6 less, 1 more); the correction was made before the forecast was frozen. It is to
+be checked against 2027 races with the same detector (prediction F-a in the research log; F-b, on the
+ranking, is withdrawn). Table: [`results/forecast_2027.csv`](results/forecast_2027.csv).
 Reproduce: `scripts/kaggle_rerun_certified.md`, then `python scripts/forecast_2027.py --forecast --out
 results/forecast_2027_a results/forecast_2027_b --baseline results/fia_fix_calendar_c`.
 
@@ -456,7 +462,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      169 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      170 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

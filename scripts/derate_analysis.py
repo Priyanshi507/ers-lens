@@ -188,6 +188,22 @@ def coast_before_brake(win: pd.DataFrame, last: int) -> dict:
     return {"coast_before_brake_m": float(dist[j] - dist[i]), "coast_before_brake_s": secs}
 
 
+def lap_coast(lap: pd.DataFrame, min_m: float = 60.0) -> dict:
+    """Lift-and-coast over the whole lap: before each brake application, the stretch with the throttle
+    below 20% and no brake; stretches of min_m or more are summed (research log, 2026-11-14, RL4)."""
+    thr = lap["throttle"].to_numpy(dtype=float)
+    brake = lap["brake"].astype(bool).to_numpy()
+    dist = lap["distance_m"].to_numpy(dtype=float)
+    total, events = 0.0, 0
+    for k in np.flatnonzero(brake[1:] & ~brake[:-1]) + 1:
+        i = k
+        while i > 0 and thr[i - 1] < 20 and not brake[i - 1]:
+            i -= 1
+        if dist[k] - dist[i] >= min_m:
+            total, events = total + dist[k] - dist[i], events + 1
+    return {"lap_coast_m": float(total), "lap_coast_events": events}
+
+
 def lap_metrics(lap: pd.DataFrame, start_m: float, end_m: float) -> dict | None:
     return lap_quality(lap, start_m, end_m)[0]
 
@@ -206,7 +222,7 @@ def analyse_driver(race: pd.DataFrame, start_m: float, end_m: float,
             continue
         m, reason = lap_quality(lap.reset_index(drop=True), start_m, end_m)
         if m:
-            rows.append({"lap": lap_no, "lap_time_s": float(durations[lap_no]), **m})
+            rows.append({"lap": lap_no, "lap_time_s": float(durations[lap_no]), **m, **lap_coast(lap)})
         else:
             reasons[reason] = reasons.get(reason, 0) + 1
     out = pd.DataFrame(rows)

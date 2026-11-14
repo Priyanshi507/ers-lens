@@ -35,6 +35,7 @@ def per_race(per_lap: Path, runs: Path) -> pd.DataFrame:
         m = model[(model.event == name) & (model.car == "original") & (model.cap_kw == cap)]
         a, b = laps.loc[lift, "flat_out_drop_kmh"], laps.loc[~lift, "flat_out_drop_kmh"]
         rows.append({"event": r.event, "cap_kw": cap, "laps": len(laps), "lift_share": float(lift.mean()),
+                     "lap_coast_m": float(laps["lap_coast_m"].median()) if "lap_coast_m" in laps else np.nan,
                      "unmeasured": int(laps.coast_before_brake_m.isna().sum()),
                      "coast_m_median": float(laps.coast_before_brake_m.median()),
                      "model_coast_mj": float(m.coast_mj.iloc[0]),
@@ -56,6 +57,9 @@ def main():
     print(f"\nRL1 Spearman(model coasting, real lift share) = {rho:.2f}: {'held' if rho >= 0.5 else 'not held'}")
     print(f"RL2 lifting laps lose less at full throttle in {less} of {len(both)} races: "
           f"{'held' if len(both) and less >= 0.7 * len(both) else 'not held'}")
+    if t.lap_coast_m.notna().all():
+        rho4 = spearmanr(t.model_coast_mj, t.lap_coast_m)[0]
+        print(f"RL4 Spearman(model coasting, real whole-lap coast) = {rho4:.2f}: {'held' if rho4 >= 0.5 else 'not held'}")
     pre = t[t.cap_kw == 250]
     print(f"RL3 (reported only) lift share before Miami {pre.lift_share.round(2).tolist()} "
           f"against {t[t.cap_kw == 350].lift_share.median():.2f} after (median)")

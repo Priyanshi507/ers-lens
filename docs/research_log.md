@@ -2447,3 +2447,27 @@ throttle below 20% and no brake, to the first brake sample; 0 if the brake comes
 60 m or more. RL1-RL3, O1 and O2 stand unchanged with this measure. It needs the raw telemetry,
 so the 17 races are re-run on the laptop (multi_race.py --rebase into results/multi_rebased_mid);
 every existing column must come out unchanged, which checks that the re-run is the same run.
+
+## 2026-11-14 (night): Real lift-and-coast on the longest straight: RL1, RL2 not held; RL4 written
+
+The 17 races re-run from OpenF1 on the laptop (multi_race.py --rebase, ERSLENS_SOURCE=openf1):
+race_summary.csv byte-identical to the committed one and every earlier per-lap column identical in
+all 17 files; only coast_before_brake_m and _s are new. (A first attempt with the default FastF1
+source was discarded unused: F1's archive needs a subscription since October, 8 races failed and
+the cached 10 differed from the OpenF1 run.)
+- Real cars almost never lift and coast before the brake at the end of the longest straight:
+  1-10% of clean laps at every race (median coast 0 m at all 16), before Miami (China 6%,
+  Japan 3%) and after (median 4%). RL3, reported only: no visible difference.
+- RL1 not held: Spearman -0.01 between the model's lift-and-coast energy per lap and real
+  lift_share. RL2 not held: lifting laps lose less at full throttle in 7 of the 11 races with 10 or
+  more laps of each kind (64%; bar 70%).
+- Found after the verdicts, from the model's own profiles: the model barely coasts on the longest
+  straight either. Its share of lift-and-coast energy there is 0% at 14 of 16 races (Azerbaijan 14%,
+  Japan 1%); it coasts into the braking zones of other straights. So RL1 as written compared the
+  model's whole lap with real cars' longest straight. On that straight the model and real cars
+  agree: neither lifts and coasts; both super-clip. The verdict stands as written.
+RL4, written before any whole-lap real measure exists: per clean race lap, lap_coast_m is the
+distance summed over every brake application on the lap of throttle below 20% with no brake
+immediately before it, counting only stretches of 60 m or more. Per race, its median over clean
+laps. RL4: the model's lift-and-coast energy per lap ranks the 16 races as real median lap_coast_m
+does, Spearman >= 0.5. Same model runs and caps as RL1.

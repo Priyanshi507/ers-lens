@@ -46,3 +46,10 @@ def test_forecast_rule_gives_a_direction_only_when_every_curve_agrees(tmp_path):
     assert t.loc[EVENTS[0], "direction"] == "less" and t.loc[EVENTS[1], "direction"] == "more"
     assert (t.loc[list(EVENTS[2:]), "direction"] == "no forecast").all()
     assert "rank_2027" not in t and len(t) == len(EVENTS)
+
+
+def test_frozen_forecast_is_unchanged():
+    import hashlib
+
+    digest = hashlib.sha256(open("results/forecast_2027.csv", "rb").read()).hexdigest()
+    assert digest == "73961e978a2a3e79e6903a5a1f8e2e500639a987573defde0bcfe699520f310f"

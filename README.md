@@ -14,6 +14,17 @@ and measures it across the 2026 season.
 > Status: active research. Every hypothesis is recorded in
 > [`docs/research_log.md`](docs/research_log.md), including the ones that failed.
 
+**In short.** Battery state cannot be read from public telemetry (finding 1), but the speed a car
+loses at full throttle can, and in 2026 races it is lost mostly on long straights (finding 3). From
+Miami the FIA raised the super-clipping limit from 250 to 350 kW, a change argued for as a way to
+replace lift-and-coast. Solving each circuit under both rules with a lap-time-optimal solver whose
+every solve carries a proven optimality gap, the change moves harvesting from lift-and-coast into
+super-clipping at 17 of 17 circuits that use it (finding 13). Real 2026 race laps, measured the same
+way, barely lift and coast at all (9.3% of laps, for about a second): on long straights they lose
+speed at full throttle instead, which is what super-clipping looks like from outside, though public
+data cannot separate it from deployment fading. Every prediction was written before its test; those that failed are reported with
+those that held, and a forecast for 2027 is dated before any 2027 race (finding 12).
+
 ## Key findings
 
 ### 1. A car's battery state cannot be recovered from speed telemetry
@@ -258,6 +269,10 @@ Italy, Austria and the Netherlands (`scripts/hindcast_2026.py`). A first version
 measured the model to the end of the straight, braking included, and reported Spearman 0.79 and 11 of
 16; the correction is in the research log (2026-11-14). So the model is used for the direction in
 which a rule moves super-clipping, not for how much a real car clips or how circuits rank.
+Out of sample (protocol and race limits fixed before any data, research log 2026-11-14): at Mexico
+City the model, solved from the qualifying track before the race was opened, said no clipping
+(0.86 km/h); real cars clipped on 18% of 625 clean laps, median 1.0 km/h. Las Vegas and Qatar are
+next (prediction O1: correct at 2 or more of the 3).
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
 Reproduce: `scripts/kaggle_rerun_certified.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
@@ -398,8 +413,8 @@ results/forecast_2027_a results/forecast_2027_b --baseline results/fia_fix_calen
 ### 13. What the Miami change traded: lift-and-coast for super-clipping
 
 The optimum above could harvest only by super-clipping at full throttle or on the braking curve.
-Real 2026 cars also lift and coast (throttle off, active aero closing, the MGU-K harvesting up to
-350 kW), and the Miami change was argued for as a way to replace that. With lift-and-coast added
+Real 2026 cars can also lift and coast (throttle off, active aero closing, the MGU-K harvesting up
+to 350 kW), and the Miami change was argued for as a way to replace that. With lift-and-coast added
 as a choice (`--lift-coast`; predictions LC0-LC4 written before the run, research log 2026-11-14),
 on the 18 circuits of 2026 with the original car and each race's recharge limit:
 
@@ -419,8 +434,9 @@ it (`results/forecast_2027_lc.csv`).
 
 Real cars barely do it. Measured over the whole lap in real race telemetry (throttle below 20% with
 no brake, into a braking zone, 60 m or more), a clean race lap lift-and-coasts on 9.3% of laps
-over 17 races (3-23% by race), for about a second when it does: 2026 race laps harvest by
-super-clipping. The model's coasting therefore does not match real cars (RL1, RL2 and RL4 not held;
+over 17 races (3-23% by race), for about a second when it does. On long straights real cars slow
+at full throttle instead (finding 3), which is what super-clipping looks like from outside; public
+data cannot tell it from deployment fading. The model's coasting therefore does not match real cars (RL1, RL2 and RL4 not held;
 `scripts/lift_real.py`), and coasts shorter than about 0.7 s cannot be seen at the telemetry's ~4 Hz.
 
 ### Performance: the solver on a free GPU
@@ -485,6 +501,9 @@ scripts/
     fia_fix_verdicts.py     finding 9: verdicts F1-F4 and C1-C3
     fia_fix_figures.py      finding 9 figures
     rebase_compare.py       finding 3: straights measured whole across the start/finish line
+    hindcast_2026.py        finding 8: the optimum against real races, full-throttle speed loss
+    forecast_2027.py        finding 12: 2027 solves and the forecast rule
+    lift_real.py            finding 13: real lift-and-coast against the model
     race_plan.py            finding 10: lap tables (GPU) and race plans
     sectors_run.py          finding 11: the 250 kW sectors against none and everywhere (P1-P3)
     gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
@@ -493,7 +512,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      187 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      188 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs
@@ -516,7 +535,19 @@ python scripts/multi_race.py --session R --events Australia China Japan Miami Ca
 python scripts/energy_real.py --events Australia China Japan Miami Canada Austria Belgium
 python scripts/straight_real.py --events Australia China Japan Miami Canada Austria Belgium
 python scripts/laptime_real.py --events Australia China Japan Miami Canada Austria Belgium
+
+# whole straights, every 2026 race so far (findings 3, 8, 13), from OpenF1
+ERSLENS_SOURCE=openf1 python scripts/multi_race.py --rebase --session R --out results/multi_rebased_mid \
+  --events "Australian Grand Prix" "Chinese Grand Prix" "Japanese Grand Prix" "Miami Grand Prix" \
+  "Canadian Grand Prix" "Monaco Grand Prix" "Barcelona Grand Prix" "Austrian Grand Prix" \
+  "British Grand Prix" "Belgian Grand Prix" "Hungarian Grand Prix" "Dutch Grand Prix" \
+  "Italian Grand Prix" "Spanish Grand Prix" "Azerbaijan Grand Prix" "Bahrain Grand Prix" \
+  "Singapore Grand Prix" "United States Grand Prix"
+python scripts/hindcast_2026.py
+python scripts/lift_real.py
 ```
+GPU runs (free Kaggle T4 x2): `scripts/kaggle_rerun_certified.md` (findings 8-12) and
+`scripts/kaggle_lift_coast.md` (finding 13).
 
 Raw telemetry is Formula 1 timing data downloaded through [FastF1](https://github.com/theOehrly/Fast-F1)
 and is not redistributed here. Since mid-October 2026 F1's timing archive requires an F1 TV
@@ -558,9 +589,13 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 - Car mass is assumed (768 kg plus a nominal fuel load); a 5% error shifts power drops by ~5%.
 - Slipstream and Override Mode are not yet separated from clipping.
 - From Miami, C5.2.8 iii limits deployment during power-limited periods to 250 kW below 310 km/h
-  (then the usual taper) in race sectors that each race's FIA document names (Section B, Issue 09,
-  B7.2.1 b xii). The model uses one taper everywhere, with 250 kW everywhere as an extreme-case
-  bound; modelling the named sectors is the next step.
+  in race sectors that each race's FIA document names (Section B, Issue 09, B7.2.1 b xii).
+  Finding 11 models them; findings 8, 9, 12 and 13 do not, and finding 11 bounds what they cost.
+- The model's air density is sea level's (1.20 kg/m³) at every circuit; Mexico City is about
+  2,240 m up. Engine power is not reduced for altitude either.
+- Findings 8-12 use a car that cannot lift and coast; finding 13 adds the option and reports what
+  changes. Real lift-and-coast is seen only when it lasts 60 m or more (about 0.7 s at 300 km/h):
+  the telemetry samples at about 4 Hz.
 - Time lost assumes pre-clip deployment is a fixed fraction of the regulation limit; when it
   is not, the estimate is biased high by up to about 0.06 s per lap. It needs about 4 s of
   full-throttle running before the speed peak, so short straights cannot be measured.

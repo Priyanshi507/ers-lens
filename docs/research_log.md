@@ -2529,3 +2529,22 @@ close. Same straight on both sides: 1245 m in the solver's frame (the track file
 start line, which splits it; the solver's profile re-cuts at the slowest corner). O1 so far: 1 of 1.
 Also recorded: 36% of Mexico's clean laps coast 60 m or more into a braking zone, more than any of
 the 16 earlier races; not a test (O2 was withdrawn).
+
+## 2026-11-15: Audit of README, site and log against the results
+
+Corrections, none changing a verdict:
+- README Limitations still called the FIA's 250 kW sectors "the next step"; finding 11 models them.
+  Added: sea-level air density at every circuit (Mexico City is about 2,240 m up), the car of
+  findings 8-12 cannot lift and coast, and real coasts under about 0.7 s are invisible at ~4 Hz.
+- Over-claim withdrawn: the entry above says "Real 2026 race laps harvest by super-clipping". The
+  real-data detectors see speed lost at full throttle and coasting; they cannot separate
+  super-clipping from deployment fading. What was measured: real race laps rarely lift and coast,
+  and on long straights they slow at full throttle. README worded accordingly.
+- The FIA-fix page said real laps had not been tested; it now points to findings 8 and 13. Site
+  footers name OpenF1 as well as FastF1.
+- README: a short summary at the top; the Mexico City out-of-sample result in finding 8; the
+  17-race OpenF1 command, hindcast_2026.py, forecast_2027.py and lift_real.py in Reproduce and
+  Repository.
+The 2027 forecast to be frozen: results/forecast_2027.csv, SHA-256
+73961e978a2a3e79e6903a5a1f8e2e500639a987573defde0bcfe699520f310f, tagged forecast-2027-v1 on GitHub
+(and registered on OSF) before the first 2027 race. tests/test_forecast_2027.py checks the hash.

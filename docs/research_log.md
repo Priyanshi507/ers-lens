@@ -2223,3 +2223,16 @@ first 2027 race. Judged on 2027 races with the same detector and settings
 F-a. The observed change in median full-throttle drop has the forecast sign at 70% or more of the
      circuits with a direction forecast.
 F-b. Spearman between the forecast 2027 ranking and the observed 2027 median drop is 0.6 or more.
+
+## 2026-11-14: Related work found this year, added to the README
+
+A search for 2026 work on F1 energy management found two papers not yet cited, read before
+adding them: Saxena (SSRN 7045379, 26 June 2026), joint optimisation of active aerodynamics and
+deployment for a 2026 qualifying lap by direct collocation (CasADi, IPOPT); and Nguyen and
+Pulsipher (arXiv 2608.27707, University of Waterloo), a generalized disjunctive programming method
+paper whose case study is a 2026-rules minimum-lap-time problem at Suzuka with four powertrain
+modes, solved as a nonconvex MIQCP with Gurobi (best laps 92.24 and 93.85 s at 2.2% and 3.7% MIP
+gaps). As far as Saxena's abstract and Nguyen and Pulsipher's case study say, neither uses per-event race
+recharge limits, real telemetry or a comparison with real laps (Saxena's full text was not
+reachable); Kleisarchaki (arXiv 2603.01290), already cited, remains the closest. Their numbers are on
+their own models and are not comparable with ERS-Lens lap times.

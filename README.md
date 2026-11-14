@@ -507,8 +507,15 @@ framework for inferring rival ERS state from telemetry, evaluated on synthetic r
 Optimal ERS control for known cars goes back to Limebeer, Perantoni and Rao (2014,
 *International Journal of Control*); minimum-lap-time and race-level energy allocation for the
 2014-2025 power unit were developed at ETH Zurich (Duhr, Buccheri, Balerna, Cerofolini and
-Onder, *IEEE Transactions on Vehicular Technology* 72(6), 2023, and earlier papers). ERS-Lens is the empirical, observation-side complement:
-what an outsider can verify from public data.
+Onder, *IEEE Transactions on Vehicular Technology* 72(6), 2023, and earlier papers). Two 2026 papers
+optimise the 2026 car itself: [Saxena (2026, SSRN)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7045379)
+schedules active aerodynamics together with deployment and harvest for one qualifying lap (direct
+collocation, CasADi and IPOPT), and [Nguyen and Pulsipher (2026)](https://arxiv.org/abs/2608.27707)
+use a minimum-lap-time problem at Suzuka under the 2026 rules as a test case for generalized
+disjunctive programming, where their best solves stop at 2.2-3.7% optimality gaps on their model.
+ERS-Lens is the empirical, observation-side complement: what an outsider can verify from public
+data, with race recharge limits from the FIA's per-race documents, a proven optimality gap for
+every solve on its own model, and predictions checked against real 2026 laps.
 
 ## Licence
 

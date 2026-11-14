@@ -1,0 +1,2 @@
+event,date,straight_m,boundary_m,skipped_straight_m,candidate_laps,clean_laps,drivers,clip_share,clip_s_mean,clip_s_lo,clip_s_hi,clip_frac_mean,drop_kmh_median,period,used
+Mexico City Grand Prix,2026-11-01,1245,3775,0,1056,625,20,0.1776,0.49469398864151753,0.40733723676558925,0.5901940053386688,0.03808163534136545,1.0,after,True

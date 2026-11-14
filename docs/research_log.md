@@ -2521,3 +2521,11 @@ Caveat, written now: the model's air density is sea level's, and Mexico City is 
 with thinner air for drag and for the engine alike; the model was not changed for it, so this race
 also tests the model where it is known to be least like the real car.
 Next: multi_race.py --rebase on Mexico City only, into results/oos_real, OpenF1.
+
+Mexico City result (race measured after commit cc0cb97 held the prediction; results/oos_real):
+625 clean laps from 20 drivers; 18% of them clip (clip_share 0.18), median full-throttle drop
+1.0 km/h. The model predicted no clipping with a drop of 0.86 km/h: verdict correct, and the size
+close. Same straight on both sides: 1245 m in the solver's frame (the track file is cut at the
+start line, which splits it; the solver's profile re-cuts at the slowest corner). O1 so far: 1 of 1.
+Also recorded: 36% of Mexico's clean laps coast 60 m or more into a braking zone, more than any of
+the 16 earlier races; not a test (O2 was withdrawn).

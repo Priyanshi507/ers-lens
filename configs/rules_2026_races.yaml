@@ -26,6 +26,8 @@
 #      active), Qualifying, Free Practice, Out laps. PDFs read 2026-11-03 for every circuit from
 #      Miami on (Barcelona V2, Spain V2); Japan from the document's text via web search only.
 #      Every press value above agrees with [7].
+#  [8] Mexico City: race 8.5 MJ (9 with Overtake), qualifying 8.5 MJ, as reported from the FIA
+#      Power Unit Information document (SomersF1 document cache; Scuderiafans), 2026-11-14.
 # Overtake mode (+0.5 MJ while active) is not modelled; the race values are without it.
 # Super-clip cap: 250 kW for the three events before Miami, 350 kW from Miami [5].
 
@@ -84,6 +86,9 @@ events:
   United States Grand Prix:
     harvest_per_lap_j: 8.5e6     # [7]
     superclip_max_w: 350000.0
+  Mexico City Grand Prix:
+    harvest_per_lap_j: 8.5e6     # [8]
+    superclip_max_w: 350000.0
 
 # Qualifying recharge limit per lap; every other rule as in the race entry above.
 qualifying:
@@ -105,6 +110,7 @@ qualifying:
   Bahrain Grand Prix: 7.5e6
   Singapore Grand Prix: 9.0e6
   United States Grand Prix: 8.5e6
+  Mexico City Grand Prix: 8.5e6     # [8]
 
 sensitivity:
   harvest_low_j: 8.0e6           # kept from 2026-10-07 so earlier runs stay comparable

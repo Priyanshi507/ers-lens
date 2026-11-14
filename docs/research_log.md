@@ -2491,3 +2491,22 @@ column identical; lap_coast_m and lap_coast_events are new.
   circuits cannot separate the rule from the circuit, so this is reported as an observation only.
 - O2 withdrawn before any out-of-sample data: with real coasting close to zero at every race, a
   ranking of four races by it would be noise. O1 stands.
+
+## 2026-11-14 (night): Out-of-sample protocol, fixed before any data of these races is opened
+
+Race recharge limits (without Overtake), from the FIA's Power Unit Information documents as
+reported: Mexico City 8.5 MJ (9 with Overtake; SomersF1 document cache, Scuderiafans); Sao Paulo
+8 MJ (8.5 with Overtake; Scuderiafans). Las Vegas and Qatar: taken from their documents when
+published, before their races.
+
+Sao Paulo is dropped from O1 before any of its data is opened: its qualifying was wet (race
+reports), and the model's track is built from the fastest qualifying lap, so its corner speeds would
+not be a dry car's; its race also started wet (Overtake enabled only from lap 23). O1 now covers
+Mexico City, Las Vegas and Qatar and is held if the model's clip verdict matches real cars' at 2 or
+more of the 3 (the bar was 3 of 4; with three races the nearest bar is 2 of 3).
+
+Procedure, per race: (1) the track from its qualifying session only (export_tracks.py, OpenF1);
+(2) the race recharge limit added to configs/rules_2026_races.yaml with its source; (3) the current
+model (no lift-and-coast) solved at 350 kW with the original car, ten bisection steps; (4) its
+full-throttle drop and clip verdict (drop >= 3 km/h) written here, with the commit, before (5) the
+race is measured (multi_race.py --rebase, OpenF1) and the verdict judged (clip_share >= 0.5).

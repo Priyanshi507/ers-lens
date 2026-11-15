@@ -1,5 +1,7 @@
 # ERS-Lens
 
+[![DOI](https://zenodo.org/badge/1398479036.svg)](https://doi.org/10.5281/zenodo.24238737)
+
 **Live site: [priyanshi507.github.io/ers-lens](https://priyanshi507.github.io/ers-lens/)**, how much lap time each 2026 F1 car lost to clipping, race by race and lap by lap.
 
 **What public telemetry can and cannot reveal about 2026 Formula 1 energy management.**
@@ -407,6 +409,10 @@ allows directions only once Y1 fails. A first version of this forecast measured 
 braking included (6 less, 1 more); the correction was made before the forecast was frozen. It is to
 be checked against 2027 races with the same detector (prediction F-a in the research log; F-b, on the
 ranking, is withdrawn). Table: [`results/forecast_2027.csv`](results/forecast_2027.csv).
+Frozen on 15 November 2026 in three independent places: git tag `forecast-2027-v1`, archived by
+Zenodo as [10.5281/zenodo.24238738](https://doi.org/10.5281/zenodo.24238738), and a public OSF
+registration, [osf.io/fh6mx](https://osf.io/fh6mx), which records the file's SHA-256
+(`73961e97…310f`; `tests/test_forecast_2027.py` fails if the file changes).
 Reproduce: `scripts/kaggle_rerun_certified.md`, then `python scripts/forecast_2027.py --forecast --out
 results/forecast_2027_a results/forecast_2027_b --baseline results/fia_fix_calendar_c`.
 

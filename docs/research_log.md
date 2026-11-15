@@ -2548,3 +2548,11 @@ Corrections, none changing a verdict:
 The 2027 forecast to be frozen: results/forecast_2027.csv, SHA-256
 73961e978a2a3e79e6903a5a1f8e2e500639a987573defde0bcfe699520f310f, tagged forecast-2027-v1 on GitHub
 (and registered on OSF) before the first 2027 race. tests/test_forecast_2027.py checks the hash.
+
+## 2026-11-15: 2027 forecast frozen in three places
+
+Git tag forecast-2027-v1 (commit 201ef36, 01:00 IST); GitHub release archived by Zenodo,
+DOI 10.5281/zenodo.24238738 (all versions: 10.5281/zenodo.24238737); public OSF registration
+https://osf.io/fh6mx (Open-Ended, registered 10:19 IST, project https://osf.io/wm8p7), whose
+description and summary give the SHA-256 of results/forecast_2027.csv and the test, F-a. OSF was
+still archiving the project's files into the registration when this was written.

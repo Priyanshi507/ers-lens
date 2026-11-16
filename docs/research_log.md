@@ -2626,3 +2626,14 @@ is not explained by the session and stays unexplained. What the test adds: the d
 difference between a qualifying lap and a race lap is right (QL4), which is the same kind of
 statement the project already rests on, a direction and not a size. Candidates not tested: the
 car's calibration at high speed, a battery not full at the line, deployment held back by teams.
+
+## 2026-11-16 (night): Rule checker page
+
+site/rules.html: any two of 14 solved rules compared at the 18 circuits (2026 race lap under 250
+and 350 kW, with and without lift-and-coast; qualifying push lap under both; 2027 under four speed
+curves and two limits), on speed lost at full throttle, super-clipping energy, lift-and-coast energy
+and lap time, with real laps beside a rule only where real cars ran that session under that limit.
+Built from committed results only (scripts/export_rules.py, 30 kB, every solve proven within
+0.01 s); tests/test_export_rules.py checks it against LC2 and C1 and that the published file is
+current. No new result: the page's trust note states that the model gets directions right and
+sizes wrong. Checked in a browser at desktop and phone widths; no script errors.

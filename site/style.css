@@ -217,3 +217,8 @@ select { min-width: 11rem; }
 
 .chart-calendar { height: 30rem; }
 @media (max-width: 40rem) { .chart-calendar { height: 34rem; } }
+
+.rule-pick { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; }
+.rule-pick label { display: grid; gap: 0.25rem; font: 600 0.85rem var(--display); color: var(--ink-soft); }
+.rule-pick select { max-width: min(30rem, 88vw); padding: 0.4rem 0.5rem; font: 400 0.95rem var(--body); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--grid); border-radius: 3px; }

@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/1398479036.svg)](https://doi.org/10.5281/zenodo.24238737)
 
-**Live site: [priyanshi507.github.io/ers-lens](https://priyanshi507.github.io/ers-lens/)**, how much lap time each 2026 F1 car lost to clipping, race by race and lap by lap.
+**Live site: [priyanshi507.github.io/ers-lens](https://priyanshi507.github.io/ers-lens/)**, how much lap time each 2026 F1 car lost to clipping, race by race and lap by lap. **[Rule checker](https://priyanshi507.github.io/ers-lens/rules.html)**: pick any two energy rules (2026 race or qualifying lap under either super-clipping limit, lift-and-coast, the 2027 rules) and see what changes at each circuit, beside what real cars did.
 
 **What public telemetry can and cannot reveal about 2026 Formula 1 energy management.**
 
@@ -519,6 +519,8 @@ scripts/
     hindcast_2026.py        finding 8: the optimum against real races, full-throttle speed loss
     forecast_2027.py        finding 12: 2027 solves and the forecast rule
     lift_real.py            finding 13: real lift-and-coast against the model
+    quali_test.py           finding 8: a qualifying push lap against real qualifying laps
+    export_rules.py         the site's rule checker (site/rules.html) from committed results
     race_plan.py            finding 10: lap tables (GPU) and race plans
     sectors_run.py          finding 11: the 250 kW sectors against none and everywhere (P1-P3)
     gpu_benchmark.py        the solver on CPU and GPU, results checked for equality
@@ -527,7 +529,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      191 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      195 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

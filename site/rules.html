@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERS-Lens: rule checker for F1 energy rules</title>
+<meta name="description" content="Compare any two Formula 1 energy rules circuit by circuit: 2026 race and qualifying laps under the 250 and 350 kW super-clipping limits, lift-and-coast, and the 2027 rules, each a proven lap-time optimum, beside what real cars did.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body class="lab">
+<header class="masthead">
+  <p class="wordmark"><a href="https://github.com/Priyanshi507/ers-lens">ERS-Lens</a></p>
+  <nav class="pages" aria-label="Pages"><a href="index.html">Clipping explorer</a><a href="strategy.html">Strategy Lab</a><a href="fia.html">The FIA's fix</a><a href="rules.html" aria-current="page">Rule checker</a></nav>
+  <h1>What does an energy rule change, circuit by circuit?</h1>
+  <p class="lede">Pick two rules. Each circuit has been solved for the fastest possible lap under both, with everything else equal, so the difference is the rule's. Where real cars raced under a rule, what they did is shown beside it.</p>
+</header>
+
+<main>
+  <section class="panel panel-main">
+    <div class="controls rule-pick">
+      <label>Rule A <select id="rule-a"></select></label>
+      <label>Rule B <select id="rule-b"></select></label>
+    </div>
+  </section>
+
+  <section class="answer" aria-live="polite">
+    <p id="answer-main" class="answer-main">Loading…</p>
+    <p id="answer-detail" class="answer-detail"></p>
+  </section>
+
+  <section class="panel" id="compare">
+    <h2>Every circuit under both rules</h2>
+    <div class="controls"><div class="seg" role="group" aria-label="Quantity" id="pick-metric"></div></div>
+    <p class="note" id="metric-note"></p>
+    <div class="chart chart-calendar"><canvas id="rule-chart" role="img" aria-label="The chosen quantity per circuit under rule A and rule B"></canvas></div>
+  </section>
+
+  <section class="panel">
+    <h2>The numbers</h2>
+    <div class="table-wrap"><table class="small-table" id="rule-table"></table></div>
+  </section>
+
+  <section class="panel limits">
+    <h2>How far to trust this</h2>
+    <p>Every lap here is a lap-time optimum of a simplified car, proven within 0.01 s of the best lap on the model. Tested against real 2026 laps, the model gets directions right and sizes wrong: it clips where real cars clip at 13 of 16 races, and where real qualifying and race laps differ it moves the same way at 6 of 7, but its speed loss is about twice the real one and it does not rank circuits as real cars do. Read the change between two rules, not the size under one. The 2027 speed curve is not published, so four possible curves are offered.</p>
+    <p><a href="https://github.com/Priyanshi507/ers-lens/blob/main/docs/research_log.md">Every prediction, check and failure is in the research log</a></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Built by <a href="https://github.com/Priyanshi507">Priyanshi Sharma</a> from the ERS-Lens Strategy Lab and public F1 timing data (FastF1 and OpenF1). Not affiliated with Formula 1, the FIA or any team. Data generated <span id="generated">—</span>.</p>
+</footer>
+
+<script src="vendor/chart-4.4.1.umd.min.js"></script>
+<script type="module" src="rules.js"></script>
+</body>
+</html>

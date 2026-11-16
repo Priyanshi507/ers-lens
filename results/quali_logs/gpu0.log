@@ -1,0 +1,81 @@
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 373, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+Australia original 250 kW: lap 74.481 s, superclip 9.94 s (longest 1.14 s), 18 s
+Australia original 350 kW: lap 74.412 s, superclip 9.26 s (longest 0.91 s), 6 s
+China original 250 kW: lap 88.569 s, superclip 4.59 s (longest 0.41 s), 7 s
+China original 350 kW: lap 88.563 s, superclip 4.55 s (longest 0.49 s), 7 s
+Miami original 250 kW: lap 85.626 s, superclip 0.93 s (longest 0.23 s), 7 s
+Miami original 350 kW: lap 85.626 s, superclip 1.02 s (longest 0.23 s), 6 s
+Canada original 250 kW: lap 69.774 s, superclip 5.55 s (longest 0.81 s), 45 s
+Canada original 350 kW: lap 69.754 s, superclip 5.69 s (longest 0.65 s), 45 s
+Japan original 250 kW: lap 75.983 s, superclip 7.95 s (longest 0.93 s), 7 s
+Japan original 350 kW: lap 75.963 s, superclip 9.16 s (longest 0.71 s), 6 s
+Austria original 250 kW: lap 64.423 s, superclip 8.90 s (longest 1.33 s), 6 s
+Austria original 350 kW: lap 64.378 s, superclip 8.25 s (longest 1.28 s), 6 s
+Belgium original 250 kW: lap 98.763 s, superclip 16.09 s (longest 2.01 s), 78 s
+Belgium original 350 kW: lap 98.638 s, superclip 13.64 s (longest 1.05 s), 77 s
+Monaco Grand Prix original 250 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 5 s
+Monaco Grand Prix original 350 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 5 s
+Barcelona Grand Prix original 250 kW: lap 71.838 s, superclip 7.80 s (longest 0.57 s), 6 s
+Barcelona Grand Prix original 350 kW: lap 71.825 s, superclip 7.71 s (longest 0.95 s), 6 s
+British Grand Prix original 250 kW: lap 83.337 s, superclip 12.26 s (longest 1.61 s), 61 s
+British Grand Prix original 350 kW: lap 83.238 s, superclip 11.51 s (longest 1.21 s), 60 s
+Hungarian Grand Prix original 250 kW: lap 75.984 s, superclip 0.00 s (longest 0.00 s), 6 s
+Hungarian Grand Prix original 350 kW: lap 75.984 s, superclip 0.00 s (longest 0.00 s), 6 s
+Dutch Grand Prix original 250 kW: lap 68.520 s, superclip 1.31 s (longest 0.39 s), 6 s
+Dutch Grand Prix original 350 kW: lap 68.520 s, superclip 1.87 s (longest 0.29 s), 6 s
+Italian Grand Prix original 250 kW: lap 78.837 s, superclip 13.68 s (longest 2.76 s), 66 s
+Italian Grand Prix original 350 kW: lap 78.683 s, superclip 10.81 s (longest 2.04 s), 66 s
+Spanish Grand Prix original 250 kW: lap 88.432 s, superclip 8.75 s (longest 0.64 s), 60 s
+Spanish Grand Prix original 350 kW: lap 88.422 s, superclip 6.67 s (longest 0.48 s), 60 s
+Azerbaijan Grand Prix original 250 kW: lap 99.415 s, superclip 7.51 s (longest 1.89 s), 7 s
+Azerbaijan Grand Prix original 350 kW: lap 99.350 s, superclip 7.64 s (longest 1.78 s), 7 s
+Bahrain Grand Prix original 250 kW: lap 91.788 s, superclip 9.13 s (longest 0.72 s), 62 s
+Bahrain Grand Prix original 350 kW: lap 91.770 s, superclip 7.70 s (longest 0.56 s), 61 s
+Singapore Grand Prix original 250 kW: lap 89.102 s, superclip 4.18 s (longest 0.39 s), 7 s
+Singapore Grand Prix original 350 kW: lap 89.095 s, superclip 3.96 s (longest 0.33 s), 51 s
+United States Grand Prix original 250 kW: lap 90.823 s, superclip 6.22 s (longest 0.54 s), 7 s
+United States Grand Prix original 350 kW: lap 90.816 s, superclip 5.78 s (longest 0.53 s), 56 s
+All results in results/quali_push/runs.csv

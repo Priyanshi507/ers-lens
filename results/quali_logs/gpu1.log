@@ -1,0 +1,90 @@
+/usr/local/lib/python3.13/dist-packages/jaxlib/plugin_support.py:99: RuntimeWarning: JAX plugin jax_cuda13_plugin version 0.11.1 is installed, but it is not compatible with the installed jaxlib version 0.11.2, so it will not be used.
+  warnings.warn(
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda13.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda13/__init__.py", line 398, in initialize
+    triton.register_compilation_handler(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'jax._src.lib.triton' has no attribute 'register_compilation_handler'
+Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 496, in discover_pjrt_plugins
+    plugin_module.initialize()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/jax_plugins/xla_cuda12/__init__.py", line 372, in initialize
+    c_api = xb.register_plugin(
+        'cuda', priority=500, library_path=str(path), options=options
+    )
+  File "/usr/local/lib/python3.13/dist-packages/jax/_src/xla_bridge.py", line 638, in register_plugin
+    c_api = xla_client.load_pjrt_plugin_dynamically(plugin_name, library_path)
+  File "/usr/local/lib/python3.13/dist-packages/jaxlib/xla_client.py", line 115, in load_pjrt_plugin_dynamically
+    return _xla.load_pjrt_plugin(plugin_name, library_path, c_api=None)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: ALREADY_EXISTS: PJRT_Api already exists for device type cuda
+/usr/local/lib/python3.13/dist-packages/cupy/_environment.py:677: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+Australia original 250 kW: lap 75.264 s, superclip 15.52 s (longest 1.52 s), 70 s
+Australia original 350 kW: lap 75.151 s, superclip 12.30 s (longest 1.15 s), 58 s
+China original 250 kW: lap 89.102 s, superclip 9.79 s (longest 0.77 s), 60 s
+China original 350 kW: lap 89.080 s, superclip 9.06 s (longest 0.57 s), 61 s
+Miami original 250 kW: lap 85.906 s, superclip 9.02 s (longest 0.70 s), 60 s
+Miami original 350 kW: lap 85.889 s, superclip 8.14 s (longest 0.70 s), 60 s
+Canada original 250 kW: lap 70.905 s, superclip 1.80 s (longest 0.24 s), 49 s
+Canada original 350 kW: lap 70.918 s, superclip 1.50 s (longest 0.22 s), 49 s
+Japan original 250 kW: lap 76.724 s, superclip 16.78 s (longest 3.71 s), 8 s
+Japan original 350 kW: lap 76.553 s, superclip 15.93 s (longest 2.86 s), 60 s
+Austria original 250 kW: lap 65.331 s, superclip 10.41 s (longest 1.33 s), 49 s
+Austria original 350 kW: lap 65.278 s, superclip 8.50 s (longest 1.28 s), 49 s
+Belgium original 250 kW: lap 100.308 s, superclip 10.88 s (longest 0.80 s), 78 s
+Belgium original 350 kW: lap 100.237 s, superclip 9.35 s (longest 0.63 s), 77 s
+Monaco Grand Prix original 250 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 5 s
+Monaco Grand Prix original 350 kW: lap 70.491 s, superclip 0.00 s (longest 0.00 s), 5 s
+Barcelona Grand Prix original 250 kW: lap 72.450 s, superclip 11.75 s (longest 0.78 s), 52 s
+Barcelona Grand Prix original 350 kW: lap 72.429 s, superclip 9.88 s (longest 0.95 s), 52 s
+British Grand Prix original 250 kW: lap 84.498 s, superclip 8.54 s (longest 0.64 s), 65 s
+British Grand Prix original 350 kW: lap 84.473 s, superclip 7.22 s (longest 0.73 s), 65 s
+Hungarian Grand Prix original 250 kW: lap 76.117 s, superclip 11.59 s (longest 0.77 s), 45 s
+Hungarian Grand Prix original 350 kW: lap 76.094 s, superclip 10.37 s (longest 0.49 s), 48 s
+Dutch Grand Prix original 250 kW: lap 68.760 s, superclip 10.11 s (longest 0.80 s), 48 s
+Dutch Grand Prix original 350 kW: lap 68.732 s, superclip 9.09 s (longest 0.91 s), 47 s
+Italian Grand Prix original 250 kW: lap 80.865 s, superclip 9.87 s (longest 1.29 s), 65 s
+Italian Grand Prix original 350 kW: lap 80.818 s, superclip 7.97 s (longest 0.88 s), 65 s
+Spanish Grand Prix original 250 kW: lap 89.210 s, superclip 1.29 s (longest 0.15 s), 60 s
+Spanish Grand Prix original 350 kW: lap 89.203 s, superclip 1.36 s (longest 0.15 s), 59 s
+Azerbaijan Grand Prix original 250 kW: lap 100.035 s, superclip 6.47 s (longest 0.63 s), 66 s
+Azerbaijan Grand Prix original 350 kW: lap 100.025 s, superclip 5.64 s (longest 0.63 s), 66 s
+Bahrain Grand Prix original 250 kW: lap 92.926 s, superclip 0.00 s (longest 0.00 s), 61 s
+Bahrain Grand Prix original 350 kW: lap 92.926 s, superclip 0.00 s (longest 0.00 s), 61 s
+Singapore Grand Prix original 250 kW: lap 89.446 s, superclip 6.55 s (longest 0.56 s), 55 s
+Singapore Grand Prix original 350 kW: lap 89.436 s, superclip 5.42 s (longest 0.40 s), 54 s
+United States Grand Prix original 250 kW: lap 91.498 s, superclip 5.77 s (longest 0.64 s), 60 s
+United States Grand Prix original 350 kW: lap 91.499 s, superclip 5.03 s (longest 0.44 s), 60 s
+All results in results/quali_neutral/runs.csv

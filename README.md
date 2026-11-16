@@ -275,6 +275,15 @@ Out of sample (protocol and race limits fixed before any data, research log 2026
 City the model, solved from the qualifying track before the race was opened, said no clipping
 (0.86 km/h); real cars clipped on 18% of 625 clean laps, median 1.0 km/h. Las Vegas and Qatar are
 next (prediction O1: correct at 2 or more of the 3).
+
+Is the size error a race effect? The model's track and car are a qualifying lap's, but its lap must
+end at the charge it started with, as in a race. A qualifying push lap solved as driven (qualifying
+recharge limit, full battery at the start, free at the end; `fia_fix.py --push-lap`) was compared
+with real qualifying laps at the 11 races with enough of them (predictions QL1-QL4, written first):
+it does not rank circuits better (Spearman 0.45; a charge-neutral control 0.60) and is still 1.9
+times too large where real laps clip, so the size error is not the session's and stays unexplained.
+The direction is right: where real qualifying and race laps differ, the model moves the same way at
+6 of 7 races (QL4 held; `scripts/quali_test.py`).
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
 Full record: [`docs/research_log.md`](docs/research_log.md), entries from 2026-10-05.
 Reproduce: `scripts/kaggle_rerun_certified.md` (free Kaggle T4 x2), or `python scripts/strategy_run.py --tracks
@@ -518,7 +527,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      190 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      191 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

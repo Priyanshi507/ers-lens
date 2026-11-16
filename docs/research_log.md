@@ -2599,3 +2599,30 @@ Implementation, before any real run: solve_refined(terminal=False) and fia_fix.p
 bars above; tests/test_push_lap.py. Demo smoke test (coarse, not a result): the push lap starts at
 4.0 MJ, ends at 0.87 MJ, is 0.33 s faster than the charge-neutral lap and super-clips less.
 Runs: scripts/kaggle_quali.md (model) and multi_race.py --session Q on the laptop (real).
+
+## 2026-11-16 (evening): Qualifying test: QL1-QL3 not held, QL4 held
+
+Runs at 3a03e22: results/quali_push and results/quali_neutral (36 solves each, all converged;
+push laps all proven within 0.001 s, the control 34 of 36 within 0.01 s, largest 0.039 s), logs in
+results/quali_logs; real qualifying in results/quali_real (17 races from OpenF1). Qualifying has
+few clean laps in the OpenF1 tables: 11 races reach the 10-lap bar written beforehand (Canada,
+Monaco, Barcelona, Austria, Belgium, Hungary, the Netherlands, Italy, Azerbaijan, Bahrain, the
+United States); China, Japan, Miami, Spain and Singapore have 2-6 and Australia and Britain none.
+- QL1 not held: push-lap model against real qualifying, Spearman 0.45 over 11 races.
+- QL2 not held: median ratio of model to real drop 1.94 where half or more of qualifying laps clip
+  (4 races); the race comparison gave 1.9. The size error is not the session's.
+- QL3 not held: the charge-neutral control ranks qualifying better (0.60) than the push lap (0.45).
+- QL4 held, 6 of 7: where real qualifying and race drops differ by 2 km/h or more, the model moves
+  the same way. Real qualifying laps lose less speed than race laps at Canada, Austria, Belgium,
+  Italy and Bahrain and so does the push lap against the race lap; at Azerbaijan both lose more.
+  The miss is the United States (real qualifying 15 against 8 km/h in the race; model 9.1 and 11.1).
+Reported, not tests: the push lap loses less than the race lap at 9 of 11 circuits and real
+qualifying less than the race at 7 of 11 (2 equal). Its clip verdict (drop >= 3 km/h) matches real
+qualifying (half or more of laps clipping) at 7 of 11 (control 6). It is 0.00-2.13 s faster than
+the control (median 0.68 s). On the 7 races the detector's own filter marks usable: Spearman
+0.67, ratio 2.57, control 0.73, QL4 4 of 4; the verdicts above are by the bar as written.
+Conclusion, as fixed beforehand: QL1 and QL2 failed, so the gap between the optimum and real cars
+is not explained by the session and stays unexplained. What the test adds: the direction of the
+difference between a qualifying lap and a race lap is right (QL4), which is the same kind of
+statement the project already rests on, a direction and not a size. Candidates not tested: the
+car's calibration at high speed, a battery not full at the line, deployment held back by teams.

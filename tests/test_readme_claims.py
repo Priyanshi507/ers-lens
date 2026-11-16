@@ -68,3 +68,18 @@ def test_real_coast_claims():
     used = [s for e, s in shares.items() if e != "British Grand Prix"]
     assert (round(min(used) * 100), round(max(used) * 100)) == (3, 23)
     assert all(d.lap_coast_m.median() == 0 for d in laps)
+
+
+def test_qualifying_claims():
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, "scripts")
+    from quali_test import table, verdicts
+
+    t = table(Path("results/quali_push"), Path("results/quali_neutral"), Path("results/fia_fix_calendar_c"),
+              Path("results/quali_real/Q/race_summary.csv"), Path("results/multi_rebased_mid/R/race_summary.csv"))
+    v = verdicts(t)
+    assert len(t) == 11 and [v[k][0] for k in ("QL1", "QL2", "QL3", "QL4")] == [False, False, False, True]
+    assert v["QL1"][1].startswith("Spearman 0.45") and v["QL2"][1].startswith("median ratio 1.94")
+    assert v["QL3"][1] == "push 0.45 against control 0.60" and v["QL4"][1] == "sign right at 6 of 7 races"

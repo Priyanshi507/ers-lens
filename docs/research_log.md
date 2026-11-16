@@ -2556,3 +2556,46 @@ DOI 10.5281/zenodo.24238738 (all versions: 10.5281/zenodo.24238737); public OSF 
 https://osf.io/fh6mx (Open-Ended, registered 10:19 IST, project https://osf.io/wm8p7), whose
 description and summary give the SHA-256 of results/forecast_2027.csv and the test, F-a. OSF was
 still archiving the project's files into the registration when this was written.
+
+## 2026-11-16: Why does the optimum lose more speed than real race cars? Qualifying test, before any run
+
+The open weakness: against race laps the model clips where real cars clip at 13 of 16 races but
+does not rank circuits (Spearman 0.58), and at six circuits its drop is 1.9-7 times too large.
+Two things in the model are a qualifying lap's, not a race lap's: its track (corner speeds from the
+fastest qualifying lap) and its car (calibrated on pole laps, qualifying fuel). One thing is a race
+lap's: the lap must end at the charge it started with. A real qualifying push lap starts on a
+battery filled on the out-lap and may finish empty. So the model is neither session's lap. Idea:
+solve each session as it is driven, and compare each with its own real laps.
+- Race lap (exists): race recharge limit, charge-neutral. results/fia_fix_calendar_c.
+- Push lap (new): qualifying recharge limit, battery full at the start, free at the end
+  (solve_refined(terminal=False, soc0_frac=1.0); fia_fix.py --push-lap). Assumptions stated: a full
+  battery at the line, and the lap treated as periodic (it starts at the slowest corner at that
+  corner's speed, not at the line).
+- Control: qualifying limit but charge-neutral (fia_fix.py --quali-rules), to separate the limit's
+  effect from the battery's.
+Real side: multi_race.py --rebase --session Q on the 17 races from OpenF1 (results/quali_real):
+laps within 107% of the session's fastest, the same detector and the same straight as the race.
+Checked first: no qualifying comparison with the model exists. Disclosure: in October the older
+detector (straights cut at the line) was run on qualifying for seven early races, five usable
+(China, Miami, Canada, Austria, Belgium: 94-100% of laps clipping); those shares were seen, their
+speed drops were not compared with anything, and the other twelve races were never opened.
+
+Predictions (model drop = full-throttle speed loss on the longest straight, as in the hindcast;
+each race under its own cap; a race counts if its qualifying has 10 or more clean laps):
+QL1. Push-lap model against real qualifying: Spearman >= 0.6 between model and real median drop.
+QL2. Its size: where half or more of real qualifying laps clip, the median ratio of model to real
+     drop is between 0.67 and 1.5 (the race comparison gave 1.9).
+QL3. The battery matters, not just the limit: the push-lap model's Spearman with real qualifying is
+     higher than the charge-neutral control's.
+QL4. Session contrast, the sharpest test: at races where real qualifying and race median drops
+     differ by 2 km/h or more, the sign of (push-lap model - race-lap model) matches the sign of
+     (real qualifying - real race) at 70% or more.
+If QL1 and QL2 hold, the README says the model is a qualifying-lap model and reports the race gap
+as the difference between sessions. If they fail, the gap is not the session and is reported as
+unexplained. Either way finding 8 gains the result.
+
+Implementation, before any real run: solve_refined(terminal=False) and fia_fix.py --push-lap /
+--quali-rules; profiles now save the charge trace; scripts/quali_test.py prints QL1-QL4 by the
+bars above; tests/test_push_lap.py. Demo smoke test (coarse, not a result): the push lap starts at
+4.0 MJ, ends at 0.87 MJ, is 0.33 s faster than the charge-neutral lap and super-clips less.
+Runs: scripts/kaggle_quali.md (model) and multi_race.py --session Q on the laptop (real).

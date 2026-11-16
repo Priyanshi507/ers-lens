@@ -252,19 +252,20 @@ def grid_with(car: CarParams, dv: float, n_soc: int) -> Grid:
 
 
 def solve_refined(track: Track, car: CarParams, dv: float = 0.125, n_soc: int = 321,
-                  soc0_frac: float = 0.5, fine_bisect: int = 10) -> Solution:
+                  soc0_frac: float = 0.5, fine_bisect: int = 10, terminal: bool = True) -> Solution:
     """solve() on a fine grid, with the harvest price found on the coarse grid first.
 
     The coarse price brackets the fine one, so only a few fine-grid solves are needed. Grid
     convergence on the demo circuit: dv 0.125 m/s with 321 charge levels changes the lap time by
     0.016 s from dv 0.25, and the DP prediction matches the replay to within 0.02 s. Ten fine
     bisection steps (four until 2026-11-13): at Bahrain four left an optimality gap of 0.056 s,
-    ten 0.003 s (research log, 2026-11-13).
+    ten 0.003 s (research log, 2026-11-13). terminal=False frees the charge at the end of the lap
+    (a qualifying push lap with soc0_frac=1.0; research log, 2026-11-16).
     """
-    coarse = solve(track, car, soc0_fracs=(soc0_frac,), max_bisect=10)
+    coarse = solve(track, car, soc0_fracs=(soc0_frac,), max_bisect=10, terminal=terminal)
     rc = dp_car(car)
     tr = start_at_slowest_point(track, rc)
-    c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), True)
+    c = _Compiled(tr, rc, grid_with(rc, dv, n_soc), terminal)
     budget = rc.harvest_per_lap_j
     attempt = _Bounded(lambda price: _attempt(c, rc, tr, soc0_frac * rc.es_capacity_j, price), budget)
     price = coarse.harvest_price_s_per_j

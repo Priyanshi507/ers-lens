@@ -72,6 +72,10 @@ def main():
                     help="race recharge limit for events with no sourced rules in configs/rules_2026_races.yaml; "
                          "each use is listed in <out>/assumptions.csv")
     ap.add_argument("--lift-coast", action="store_true", help="let the optimum lift and coast (research log, 2026-11-14)")
+    ap.add_argument("--quali-rules", action="store_true", help="each event's qualifying recharge limit")
+    ap.add_argument("--push-lap", action="store_true",
+                    help="qualifying push lap: qualifying limit, full battery at the start, free at the end "
+                         "(research log, 2026-11-16)")
     ap.add_argument("--refine", action="store_true",
                     help="re-solve every solve that failed the convergence rule on the finer grids of "
                          "REFINE_LADDER, into refined.csv; runs.csv and the verdicts are not changed")
@@ -80,7 +84,7 @@ def main():
     from erslens.ingest import load_track
     from erslens.optimal import solve_refined
     from erslens.params import load_car_params
-    from erslens.strategy import REFINE_LADDER, clip_metrics, race_rules, solution_ok
+    from erslens.strategy import CONVERGED_S, REFINE_LADDER, clip_metrics, quali_rules, race_rules, solution_ok
     from erslens.track import demo_circuit
 
     events = ["demo"] if args.demo else args.events
@@ -96,7 +100,7 @@ def main():
         if e == "demo":
             return base
         try:
-            return race_rules(base, e)
+            return (quali_rules if args.quali_rules or args.push_lap else race_rules)(base, e)
         except KeyError:
             if args.assume_recharge_mj is None:
                 raise
@@ -108,12 +112,13 @@ def main():
         track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
         car = rules_for(e, base).with_(superclip_max_w=cap, lift_coast=args.lift_coast)
         t = time.perf_counter()
-        sol = solve_refined(track, car, **grid_kw)
+        sol = solve_refined(track, car, **grid_kw, **({"soc0_frac": 1.0, "terminal": False} if args.push_lap else {}))
         seconds = time.perf_counter() - t
         o = {k: np.asarray(v) for k, v in sol.out.items()}
         r = {"event": e, "car": name, "cap_kw": cap / 1e3, "lap_s": sol.lap_time_sim_s,
              "dp_pred_s": sol.lap_time_dp_s,
-             "converged": solution_ok(sol),
+             # a push lap may end empty, so only the DP-against-replay half of the rule applies
+             "converged": abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S if args.push_lap else solution_ok(sol),
              "harvest_mj": sol.harvested_j / 1e6, **superclip_metrics(o, sol.track.ds, cap),
              "clip_ratio": clip_metrics(sol.track, o)["clip_ratio"], "optimality_gap_s": sol.gap_or_nan,
              "seconds": round(seconds, 1)}
@@ -158,7 +163,7 @@ def main():
             f.flush()
             np.savez_compressed(out_dir / "profiles" / f"{e}_{name}_{int(cap / 1e3)}.npz",
                                 distance_m=sol.track.distance_m, v_limit=sol.track.v_limit_ms, cmd_w=sol.cmd_w,
-                                **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt", "coast")})
+                                **{k: o[k] for k in ("v", "deploy", "harvest", "superclip", "dt", "coast", "soc")})
             print(f"{e} {name} {cap / 1e3:.0f} kW: lap {r['lap_s']:.3f} s, superclip {r['superclip_s']:.2f} s "
                   f"(longest {r['longest_superclip_s']:.2f} s), {seconds:.0f} s", flush=True)
     if assumed:

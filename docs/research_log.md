@@ -2637,3 +2637,14 @@ Built from committed results only (scripts/export_rules.py, 30 kB, every solve p
 0.01 s); tests/test_export_rules.py checks it against LC2 and C1 and that the published file is
 current. No new result: the page's trust note states that the model gets directions right and
 sizes wrong. Checked in a browser at desktop and phone widths; no script errors.
+
+## 2026-11-17: Uncertainty on the main counts, added after the runs
+
+Not a new test and no verdict changes: the pass marks above were fixed before each run, and these
+figures were computed afterwards as description (scripts/paper_numbers.py, from committed results,
+no GPU). Two-sided sign tests against an even chance, with exact 95% intervals on the share:
+C1 15 of 18, p = 0.008 (0.59-0.96); LC2 17 of 17, p < 0.001 (0.80-1.00); Y2 13 of 16, p = 0.02
+(0.54-0.96); QL4 6 of 7, p = 0.13 (0.42-1.00), so seven races cannot be told from chance.
+Bootstrap 95% intervals over races (10,000 resamples, seed 0): Y1 Spearman 0.58 (0.10 to 0.86),
+QL1 0.45 (-0.20 to 0.88); both intervals are wide and include the 0.6 pass mark. Circuits share
+one car model, so they are not fully independent and the sign tests are generous.

@@ -1,0 +1,2 @@
+event,car,cap_kw,lap_s,dp_pred_s,converged,harvest_mj,superclip_mj,superclip_s,superclip_m,longest_superclip_s,superclip_at_cap_share,peak_superclip_kw,clip_ratio,optimality_gap_s,seconds,coast_mj,coast_s
+Mexico City Grand Prix,original,350.0,75.83801056148809,75.83831106109214,True,7.019785651935516,0.0,0.0,0.0,0.0,0.0,0.0,-1.273310340970881,0.0,19.8,0.0,0.0

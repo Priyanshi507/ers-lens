@@ -2685,3 +2685,16 @@ hindcast circuit solved, judged with hindcast_2026.py --altitude against results
   The guide is corrected; D4 stands as written and is judged when that solve is run.
 Largest moves: Belgium 31.1 -> 26.2 km/h, Italy 37.8 -> 34.7, Spain 10.7 -> 7.2. Real cars: 12, 8, 12.
 Spain moves away from the real value; Belgium and Italy toward it, by little.
+
+## 2026-11-18 (evening): D4 judged, air density by circuit finished
+
+Mexico City, density 0.80 of sea level, 350 kW, original car, Kaggle commit c2a2db7: lap 75.838 s,
+converged, proven gap 0.000 s; super-clipping 0.00 MJ over 0.00 s; full-throttle drop on the
+longest straight 0.0 km/h (measured by hindcast_2026.drop_from_profile with the altitude car; the
+profile file itself was not kept, only the printed value and the runs row, results/fia_fix_calendar_alt_mex/runs.csv).
+- D4 held: super-clipping under 1 MJ and drop under 1.5 km/h. Real cars: 18% of laps clip, drop 1.0
+  km/h. The model's 0.0 is below the real 1.0 where the sea-level run gave 0.86 (0.41 MJ): the size
+  is not closer, the verdict the same.
+Conclusion: D1-D4 all held; Y1 unchanged in verdict (0.596, bar 0.6). Air density by circuit is kept
+as an option (--altitude), not made the default, since no verdict changed and the older runs
+and the frozen 2027 forecast were made without it.

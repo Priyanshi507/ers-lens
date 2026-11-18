@@ -2671,3 +2671,17 @@ little. What would be informative is that it does not rescue Y1.
 - D4: Mexico City, now with density 0.80 of sea level: still no clipping, defined as super-clipping
   under 1 MJ a lap and a full-throttle drop under 1.5 km/h (real cars: 1.0 km/h, model before: 0.86).
 Any miss is reported. Not a result: runs not started.
+
+## 2026-11-18 (later): Air density by circuit, D1-D3 judged, D4 not yet run
+
+Kaggle, commit c2a2db7, original car, 18 solves (9 circuits at 250 and 350 kW) on each GPU; every
+hindcast circuit solved, judged with hindcast_2026.py --altitude against results/fia_fix_calendar_c.
+- D1 held: Austria full-throttle drop 29.1 -> 27.8 km/h, Spain 10.7 -> 7.2; neither larger.
+- D2 held: Y1 Spearman 0.579 -> 0.596, a change of 0.016 (limit 0.05). Still under the 0.6 bar, so
+  Y1 stays not held. Density does not explain the ranking failure.
+- D3 held: Y2 still 13 of 16, the same three misses (Barcelona, Bahrain, Hungary).
+- D4 not run: the Mexico City solve failed before starting because the guide's command wrapped the
+  circuit name in a second pair of quotes (a fault in scripts/kaggle_altitude.md, not in the model).
+  The guide is corrected; D4 stands as written and is judged when that solve is run.
+Largest moves: Belgium 31.1 -> 26.2 km/h, Italy 37.8 -> 34.7, Spain 10.7 -> 7.2. Real cars: 12, 8, 12.
+Spain moves away from the real value; Belgium and Italy toward it, by little.

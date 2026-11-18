@@ -27,7 +27,7 @@ B='"British Grand Prix" "Hungarian Grand Prix" "Dutch Grand Prix" "Italian Grand
 ) >> /kaggle/working/gpu0.log 2>&1 &
 ( export CUDA_VISIBLE_DEVICES=1
   eval python scripts/fia_fix.py --cars original --caps 250 350 --altitude --out results/fia_fix_calendar_alt_b --events $B
-  python scripts/fia_fix.py --cars original --caps 350 --altitude --out results/fia_fix_calendar_alt_b --events '"Mexico City Grand Prix"'
+  python scripts/fia_fix.py --cars original --caps 350 --altitude --out results/fia_fix_calendar_alt_b --events "Mexico City Grand Prix"
 ) >> /kaggle/working/gpu1.log 2>&1 &
 wait
 tail -n 2 /kaggle/working/gpu0.log; tail -n 2 /kaggle/working/gpu1.log

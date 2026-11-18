@@ -22,3 +22,9 @@ def test_model_drop_stops_where_full_throttle_ends():
     i, j = longest_free_run(z["v_limit"])
     assert not full_throttle(z, BRAKES)[i:j][-1]          # the run ends under braking
     assert z["superclip"][i:j].max() == 0.0 and drop_from_profile(path) == 0.0
+
+
+def test_car_name_selects_the_profile_files():
+    observed = Path("results/multi_rebased_mid/R/race_summary.csv")
+    assert table(Path("results/fia_fix_calendar_c"), observed, car_name="low").empty
+    assert len(table(Path("results/fia_fix_calendar_c"), observed, car_name="original")) == 16

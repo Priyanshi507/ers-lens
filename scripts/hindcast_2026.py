@@ -22,13 +22,13 @@ NAMES = {"Australian Grand Prix": "Australia", "Chinese Grand Prix": "China", "J
          "Belgian Grand Prix": "Belgium"}
 
 
-def model_drop_kmh(profiles: Path, event: str, cap: int, altitude: bool = False) -> float:
+def model_drop_kmh(profiles: Path, event: str, cap: int, altitude: bool = False, car_name: str = "original") -> float:
     car = None
     if altitude:
         from erslens.ingest import load_track
         from erslens.strategy import at_altitude
         car = at_altitude(BRAKES, load_track(Path(__file__).parents[1] / f"results/tracks/{event}.npz"))
-    return drop_from_profile(profiles / f"{event}_original_{cap}.npz", car)
+    return drop_from_profile(profiles / f"{event}_{car_name}_{cap}.npz", car)
 
 
 def full_throttle(z, car: CarParams) -> np.ndarray:
@@ -52,17 +52,17 @@ def drop_from_profile(path: Path, car: CarParams | None = None) -> float:
     return float(v[k] - v[k + off[0] if len(off) else -1])
 
 
-def table(runs_dir: Path, observed: Path, altitude: bool = False) -> pd.DataFrame:
+def table(runs_dir: Path, observed: Path, altitude: bool = False, car_name: str = "original") -> pd.DataFrame:
     obs = pd.read_csv(observed)
     obs = obs[obs.used.astype(bool)]
     rows = []
     for r in obs.itertuples():
         event = NAMES.get(r.event, r.event)
         cap = 350 if pd.Timestamp(r.date) >= FIRST_350 else 250
-        path = runs_dir / "profiles" / f"{event}_original_{cap}.npz"
+        path = runs_dir / "profiles" / f"{event}_{car_name}_{cap}.npz"
         if not path.exists():
             continue
-        rows.append({"event": event, "cap_kw": cap, "model_drop_kmh": model_drop_kmh(runs_dir / "profiles", event, cap, altitude),
+        rows.append({"event": event, "cap_kw": cap, "model_drop_kmh": model_drop_kmh(runs_dir / "profiles", event, cap, altitude, car_name),
                      "observed_drop_kmh": r.drop_kmh_median, "clip_share": r.clip_share})
     return pd.DataFrame(rows)
 
@@ -72,12 +72,16 @@ def main():
     ap.add_argument("--runs", default="results/fia_fix_calendar_c")
     ap.add_argument("--observed", default="results/multi_rebased_mid/R/race_summary.csv")
     ap.add_argument("--altitude", action="store_true", help="the runs used air density by circuit (log 2026-11-18)")
+    ap.add_argument("--car", default="original", help="car name in the profile files (original, low, high)")
     args = ap.parse_args()
-    t = table(Path(args.runs), Path(args.observed), args.altitude)
+    t = table(Path(args.runs), Path(args.observed), args.altitude, args.car)
     print(t.round(2).to_string(index=False))
     rho = spearmanr(t.model_drop_kmh, t.observed_drop_kmh).statistic
     agree = ((t.model_drop_kmh >= 3) == (t.clip_share >= 0.5))
     print(f"Y1: Spearman {rho:.2f} over {len(t)} races -> {'held' if rho >= 0.6 else 'NOT held'}")
+    clip = t[(t.clip_share >= 0.5) & (t.observed_drop_kmh > 0)]
+    print(f"size: median model/real drop {(clip.model_drop_kmh / clip.observed_drop_kmh).median():.2f} "
+          f"over {len(clip)} races where half or more of real laps clip")
     print(f"Y2: model clips where real laps clip at {int(agree.sum())} of {len(t)} -> "
           f"{'held' if agree.mean() >= 0.8 else 'NOT held'}")
 

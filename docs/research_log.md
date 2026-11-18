@@ -2698,3 +2698,26 @@ profile file itself was not kept, only the printed value and the runs row, resul
 Conclusion: D1-D4 all held; Y1 unchanged in verdict (0.596, bar 0.6). Air density by circuit is kept
 as an option (--altitude), not made the default, since no verdict changed and the older runs
 and the frozen 2027 forecast were made without it.
+
+## 2026-11-18 (night): Is the size error the car? Predictions before any run
+
+What is known: at the six circuits where the model's full-throttle speed drop is 1.9-7 times the
+real one, the cause is unexplained. Tested and not the cause: the session (QL2, 1.94), lift-and-coast
+(LC4(a), 1.64, not under 1.5), air density (D1-D3, 2026-11-18), the speed-grid ceiling and the
+MGU-K taper (S3, taper is in the FIA text). Untested: the car itself. The hindcast uses the original
+car (drag 0.95, combustion power 400 kW, both estimates). The pole-lap fit fixes only a combination
+of drag and power, so two calibrated cars sit at the ends of that ridge (configs/car_2026_q_low.yaml:
+drag 1.00, 310 kW; configs/car_2026_q_high.yaml: drag 1.35, 400 kW) but were never put through the
+16-race hindcast.
+Run: fia_fix.py --cars low high --caps 250 350 on the 16 hindcast circuits, race rules, no
+lift-and-coast, no altitude (same conditions as results/fia_fix_calendar_c); judged with
+hindcast_2026.py --car low|high. Ratio = median over races where at least half of real laps clip of
+model drop / real drop (original car: 1.9).
+Expectation, stated honestly: I do not know the direction; the ridge was fitted to lap times only.
+More likely than not these fail, which would close the car as an explanation inside this family.
+- S1: low car, ratio at most 1.5.
+- S2: high car, ratio at most 1.5.
+- S3: Spearman between model and real drop 0.6 or more for at least one of the two cars.
+- S4: no regression: Y2 (model clips where real laps clip, bar 80%) stays at 13 of 16 or better for
+  each car; a car that fails this is not a candidate however S1-S3 come out.
+Any miss is reported. Not a result: runs not started.

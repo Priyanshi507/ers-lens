@@ -1,6 +1,6 @@
-"""Two figures for the SSAC paper, from committed results only.
+"""Figures for the SSAC paper, from committed results only.
 
-    python scripts/paper_figures.py      # docs/paper_trade.png, docs/paper_model_vs_real.png
+    python scripts/paper_figures.py      # docs/paper_*.png
 """
 import sys
 from pathlib import Path
@@ -9,10 +9,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from fia_fix_figures import GRID, INK, MUTED, SURFACE  # noqa: E402
+from fia_fix_figures import longest_free_run  # noqa: E402
 from hindcast_2026 import table  # noqa: E402
 
 OLD, NEW, REAL = "#8a94a3", "#2a6fdb", "#c8372d"
@@ -79,7 +81,57 @@ def model_vs_real(out: Path):
     plt.close(fig)
 
 
+def straight(out: Path, event: str = "Belgium"):
+    """The model's optimum on the circuit's longest corner-free run under each limit."""
+    fig, (top, bot) = plt.subplots(2, 1, figsize=(6.3, 4.0), facecolor=SURFACE, sharex=True,
+                                   gridspec_kw={"height_ratios": [2.2, 1]})
+    for ax in (top, bot):
+        style(ax)
+        ax.grid(color=GRID, linewidth=0.6)
+    for cap, color, label in ((250, OLD, "250 kW limit (before Miami)"), (350, NEW, "350 kW limit (from Miami)")):
+        z = np.load(f"results/fia_fix_calendar_c/profiles/{event}_original_{cap}.npz")
+        i, j = longest_free_run(z["v_limit"])
+        d = (z["distance_m"][i:j] - z["distance_m"][i]) / 1000
+        top.plot(d, z["v"][i:j] * 3.6, color=color, linewidth=1.8, label=label)
+        bot.plot(d, z["superclip"][i:j] / 1e3, color=color, linewidth=1.8)
+    end = d[-1]
+    top.set_xlim(end - 0.8, end + 0.02)
+    top.set_ylim(295, 345)
+    top.set_ylabel("Speed (km/h)", fontsize=9, color=MUTED)
+    bot.set_ylabel("Super-clip\npower (kW)", fontsize=9, color=MUTED)
+    bot.set_xlabel(f"Distance along the longest flat-out run at {event}: last 0.8 km (km)", fontsize=9, color=MUTED)
+    top.legend(fontsize=8, frameon=False, loc="lower left", labelcolor=INK)
+    fig.tight_layout()
+    fig.savefig(out, dpi=200, facecolor=SURFACE)
+    plt.close(fig)
+
+
+def forecast(out: Path):
+    f = pd.read_csv("results/forecast_2027.csv").sort_values("drop_2026_kmh")
+    fig, ax = plt.subplots(figsize=(6.3, 4.6), facecolor=SURFACE)
+    style(ax)
+    y = np.arange(len(f))
+    for k, r in enumerate(f.itertuples()):
+        color = NEW if r.direction == "less" else OLD
+        lo, hi = r.drop_2026_kmh + r.change_min_kmh, r.drop_2026_kmh + r.change_max_kmh
+        ax.hlines(k, lo, hi, color=color, linewidth=5, alpha=0.35, zorder=1)
+        ax.scatter([r.drop_2026_kmh], [k], color=MUTED, s=26, zorder=3)
+        ax.scatter([r.drop_2027_median_kmh], [k], color=color, s=30, zorder=4)
+    ax.set_yticks(y, [PLACE.get(e, e.replace(" Grand Prix", "")) for e in f.event], fontsize=8, color=INK)
+    ax.set_xlabel("Model: speed lost at full throttle on the longest straight (km/h)", fontsize=9, color=MUTED)
+    ax.grid(axis="x", color=GRID, linewidth=0.6)
+    ax.scatter([], [], color=MUTED, s=26, label="2026 rules")
+    ax.scatter([], [], color=NEW, s=30, label="2027, median of 8 rule variants (bar: range); direction forecast")
+    ax.scatter([], [], color=OLD, s=30, label="2027, no forecast: the variants disagree")
+    ax.legend(fontsize=8, frameon=False, loc="lower right", labelcolor=INK)
+    fig.tight_layout()
+    fig.savefig(out, dpi=200, facecolor=SURFACE)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     trade(Path("docs/paper_trade.png"))
     model_vs_real(Path("docs/paper_model_vs_real.png"))
-    print("wrote docs/paper_trade.png, docs/paper_model_vs_real.png")
+    straight(Path("docs/paper_straight.png"))
+    forecast(Path("docs/paper_forecast.png"))
+    print("wrote docs/paper_trade.png, paper_model_vs_real.png, paper_straight.png, paper_forecast.png")

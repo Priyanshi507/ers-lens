@@ -47,6 +47,8 @@ Test suite: about 200 tests (12 minutes); every patch ran it first.
 | 11-18 | Is the size error air density? | D1 held, D2 held (Y1 0.579 to 0.596, still under 0.6), D3 held, D4 held (Mexico: 0.00 MJ, 0.0 km/h) | `kaggle_altitude.md`, `results/fia_fix_calendar_alt*` (patches 0077-0079) |
 | 11-18 | Is the size error the car? | S1 not held (3.30), S2 not held (2.97), S3 held (0.66, 0.76), S4 not held (Y2 11 and 12 of 16); neither calibrated car is a candidate | `kaggle_cars.md`, `results/fia_fix_calendar_low/high` (patches 0080-0081) |
 
+- 2026-11-18: paper draft 8 (answer first, plain-language section, figures 1 and 5 from committed results via `scripts/paper_figures.py`, tests D and S in Appendix Table A1, 201 tests).
+
 ## 3. What the project now says
 
 - Direction is right: raising the super-clip limit raises super-clipping (C1, LC3), moves energy out of lift-and-coast (LC2), and qualifying and race move the same way (QL4).

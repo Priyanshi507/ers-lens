@@ -2721,3 +2721,27 @@ More likely than not these fail, which would close the car as an explanation ins
 - S4: no regression: Y2 (model clips where real laps clip, bar 80%) stays at 13 of 16 or better for
   each car; a car that fails this is not a candidate however S1-S3 come out.
 Any miss is reported. Not a result: runs not started.
+
+## 2026-11-18 (night, later): Is the size error the car? S1-S4 judged
+
+Kaggle, commit eb657b3, 16 hindcast circuits at 250 and 350 kW per car, all 32 solves per car pass
+the convergence rule (results/fia_fix_calendar_low, results/fia_fix_calendar_high).
+| | low car (1.00, 310 kW) | high car (1.35, 400 kW) | original car |
+|---|---|---|---|
+| Spearman, model vs real drop | 0.66 | 0.76 | 0.58 |
+| median model/real drop, races where half or more of real laps clip | 3.30 | 2.97 | 1.90 |
+| Y2, model clips where real laps clip | 11 of 16 | 12 of 16 | 13 of 16 |
+- S1 not held: low car 3.30 (bar 1.5).
+- S2 not held: high car 2.97 (bar 1.5).
+- S3 held: 0.66 and 0.76 (bar 0.6).
+- S4 not held: Y2 11 and 12 of 16, below 13; both cars fail the no-regression condition, so neither
+  is a candidate, as fixed beforehand.
+Conclusion: calibrating the car along the pole-lap ridge makes the size error worse (about 3 times,
+from 1.9) and costs Y2. Its ranking is better, but under S4 as written that does not make either car
+a replacement. Descriptive only, not a test: the largest speed drops of the calibrated cars are 58 and 47 km/h
+(the original car's 38), so their ranking gain may come from a larger spread across circuits and is
+not read as the model getting circuits right; this was
+not predicted and is reported as an observation. Several rankings have now been tried (QL1, LC4(b), D2, S3), so a single
+Spearman above 0.6 is not read as evidence.
+The size error is not the car's drag and combustion power along the pole-lap ridge. Remaining
+untested candidates: a battery not full at the line, deployment held back by teams, slipstream.

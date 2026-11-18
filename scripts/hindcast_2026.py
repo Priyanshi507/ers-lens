@@ -22,8 +22,13 @@ NAMES = {"Australian Grand Prix": "Australia", "Chinese Grand Prix": "China", "J
          "Belgian Grand Prix": "Belgium"}
 
 
-def model_drop_kmh(profiles: Path, event: str, cap: int) -> float:
-    return drop_from_profile(profiles / f"{event}_original_{cap}.npz")
+def model_drop_kmh(profiles: Path, event: str, cap: int, altitude: bool = False) -> float:
+    car = None
+    if altitude:
+        from erslens.ingest import load_track
+        from erslens.strategy import at_altitude
+        car = at_altitude(BRAKES, load_track(Path(__file__).parents[1] / f"results/tracks/{event}.npz"))
+    return drop_from_profile(profiles / f"{event}_original_{cap}.npz", car)
 
 
 def full_throttle(z, car: CarParams) -> np.ndarray:
@@ -47,7 +52,7 @@ def drop_from_profile(path: Path, car: CarParams | None = None) -> float:
     return float(v[k] - v[k + off[0] if len(off) else -1])
 
 
-def table(runs_dir: Path, observed: Path) -> pd.DataFrame:
+def table(runs_dir: Path, observed: Path, altitude: bool = False) -> pd.DataFrame:
     obs = pd.read_csv(observed)
     obs = obs[obs.used.astype(bool)]
     rows = []
@@ -57,7 +62,7 @@ def table(runs_dir: Path, observed: Path) -> pd.DataFrame:
         path = runs_dir / "profiles" / f"{event}_original_{cap}.npz"
         if not path.exists():
             continue
-        rows.append({"event": event, "cap_kw": cap, "model_drop_kmh": model_drop_kmh(runs_dir / "profiles", event, cap),
+        rows.append({"event": event, "cap_kw": cap, "model_drop_kmh": model_drop_kmh(runs_dir / "profiles", event, cap, altitude),
                      "observed_drop_kmh": r.drop_kmh_median, "clip_share": r.clip_share})
     return pd.DataFrame(rows)
 
@@ -66,8 +71,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default="results/fia_fix_calendar_c")
     ap.add_argument("--observed", default="results/multi_rebased_mid/R/race_summary.csv")
+    ap.add_argument("--altitude", action="store_true", help="the runs used air density by circuit (log 2026-11-18)")
     args = ap.parse_args()
-    t = table(Path(args.runs), Path(args.observed))
+    t = table(Path(args.runs), Path(args.observed), args.altitude)
     print(t.round(2).to_string(index=False))
     rho = spearmanr(t.model_drop_kmh, t.observed_drop_kmh).statistic
     agree = ((t.model_drop_kmh >= 3) == (t.clip_share >= 0.5))

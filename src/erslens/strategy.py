@@ -89,6 +89,18 @@ CONVERGED_S = 0.05
 END_SHORT_J = 5e3   # a lap may end at most this far below its start charge (research log, 2026-11-03)
 
 
+def altitude_density_ratio(height_m: float) -> float:
+    """Air density at a height over its sea-level value, standard atmosphere (troposphere)."""
+    return (1.0 - 2.25577e-5 * height_m) ** 4.25588
+
+
+def at_altitude(car: CarParams, track: Track) -> CarParams:
+    """The car with air density scaled to the circuit's mean height; engine power is not changed."""
+    if track.elevation_m is None:
+        return car
+    return car.with_(rho=car.rho * altitude_density_ratio(float(np.mean(track.elevation_m))))
+
+
 def solution_ok(sol) -> bool:
     """The convergence rule: the DP's prediction matches the replay, and the lap keeps its charge."""
     return abs(sol.lap_time_dp_s - sol.lap_time_sim_s) <= CONVERGED_S and sol.soc_end_j >= sol.soc0_j - END_SHORT_J

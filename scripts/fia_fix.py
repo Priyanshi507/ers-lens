@@ -72,6 +72,8 @@ def main():
                     help="race recharge limit for events with no sourced rules in configs/rules_2026_races.yaml; "
                          "each use is listed in <out>/assumptions.csv")
     ap.add_argument("--lift-coast", action="store_true", help="let the optimum lift and coast (research log, 2026-11-14)")
+    ap.add_argument("--altitude", action="store_true",
+                    help="air density at each circuit's mean height (research log, 2026-11-18)")
     ap.add_argument("--quali-rules", action="store_true", help="each event's qualifying recharge limit")
     ap.add_argument("--push-lap", action="store_true",
                     help="qualifying push lap: qualifying limit, full battery at the start, free at the end "
@@ -84,7 +86,7 @@ def main():
     from erslens.ingest import load_track
     from erslens.optimal import solve_refined
     from erslens.params import load_car_params
-    from erslens.strategy import CONVERGED_S, REFINE_LADDER, clip_metrics, quali_rules, race_rules, solution_ok
+    from erslens.strategy import CONVERGED_S, at_altitude, REFINE_LADDER, clip_metrics, quali_rules, race_rules, solution_ok
     from erslens.track import demo_circuit
 
     events = ["demo"] if args.demo else args.events
@@ -111,6 +113,8 @@ def main():
         base = load_car_params(CARS[name] if e != "demo" else CARS["original"])
         track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
         car = rules_for(e, base).with_(superclip_max_w=cap, lift_coast=args.lift_coast)
+        if args.altitude:
+            car = at_altitude(car, track)
         t = time.perf_counter()
         sol = solve_refined(track, car, **grid_kw, **({"soc0_frac": 1.0, "terminal": False} if args.push_lap else {}))
         seconds = time.perf_counter() - t

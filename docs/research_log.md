@@ -2648,3 +2648,26 @@ C1 15 of 18, p = 0.008 (0.59-0.96); LC2 17 of 17, p < 0.001 (0.80-1.00); Y2 13 o
 Bootstrap 95% intervals over races (10,000 resamples, seed 0): Y1 Spearman 0.58 (0.10 to 0.86),
 QL1 0.45 (-0.20 to 0.88); both intervals are wide and include the 0.6 pass mark. Circuits share
 one car model, so they are not fully independent and the sign tests are generous.
+
+## 2026-11-18: Air density by circuit, predictions before any run
+
+The model uses sea-level air density (1.20 kg/m3) at every circuit, which the README lists as a
+limitation. The track files already hold each circuit's height above sea level (from OpenF1 position
+data, mean over the lap). Change under test: density scaled by the standard-atmosphere ratio
+(1 - 2.25577e-5 h)^4.25588 for the circuit's mean height h, nothing fitted, no weather. The ratios
+are 0.93 at Austria (747 m), 0.93 at Spain (731 m), 0.96 at Belgium, 0.98 at Barcelona, Hungary,
+Britain and Italy, 0.99 or more at the rest, and 0.80 at Mexico City (2,227 m). Not changed: engine
+power (the combustion engine loses power with height, by an amount the turbocharger partly makes up and
+which no source here gives, so it stays out) and temperature.
+Run: fia_fix.py --altitude, original car, 250 and 350 kW, the 18 circuits plus Mexico City, into
+results/fia_fix_calendar_alt; judged with hindcast_2026.py exactly as Y1 and Y2 were.
+Expectation, stated honestly: the change is under 7% at every hindcast circuit, so it should move
+little. What would be informative is that it does not rescue Y1.
+- D1: at Austria and Spain (the highest circuits in the hindcast) the model's full-throttle speed
+  drop is not larger than in results/fia_fix_calendar_c (thinner air, less drag, less clipping).
+- D2: Y1 changes by less than 0.05 either way (Spearman against the certified 0.58); if it rises to
+  0.6 or more it is reported as held with the interval, if it falls it is reported as lower.
+- D3: Y2 stays 13 of 16: no verdict flips.
+- D4: Mexico City, now with density 0.80 of sea level: still no clipping, defined as super-clipping
+  under 1 MJ a lap and a full-throttle drop under 1.5 km/h (real cars: 1.0 km/h, model before: 0.86).
+Any miss is reported. Not a result: runs not started.

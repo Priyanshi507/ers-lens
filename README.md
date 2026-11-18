@@ -610,8 +610,9 @@ set `ERSLENS_SOURCE=openf1`. On six races both sources hold, the two agree on ev
 - From Miami, C5.2.8 iii limits deployment during power-limited periods to 250 kW below 310 km/h
   in race sectors that each race's FIA document names (Section B, Issue 09, B7.2.1 b xii).
   Finding 11 models them; findings 8, 9, 12 and 13 do not, and finding 11 bounds what they cost.
-- The model's air density is sea level's (1.20 kg/m³) at every circuit; Mexico City is about
-  2,240 m up. Engine power is not reduced for altitude either.
+- The model's air density is sea level's (1.20 kg/m³) at every circuit in findings 8-13; Mexico City
+  is about 2,240 m up. Engine power is not reduced for altitude either. `fia_fix.py --altitude`
+  scales the density by circuit (research log, 2026-11-18; guide scripts/kaggle_altitude.md).
 - Findings 8-12 use a car that cannot lift and coast; finding 13 adds the option and reports what
   changes. Real lift-and-coast is seen only when it lasts 60 m or more (about 0.7 s at 300 km/h):
   the telemetry samples at about 4 Hz.

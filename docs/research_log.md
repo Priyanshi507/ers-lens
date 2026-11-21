@@ -2854,3 +2854,32 @@ it differs from them at Belgium (8 planned, 7 final), Britain (7.5, 6.5), Madrid
 more has a race limit of 8.5 MJ, so if Qatar's plan holds, FL1 is likely to fail. This is recorded
 now so that a miss is not explained away later. FL1 and FL2 are judged on the race documents when
 they appear.
+
+## 2026-11-21 (afternoon, later still): Limit advisor, predictions before any run
+
+The FIA sets a qualifying recharge limit per circuit (5 to 9 MJ). Its stated aim for the cut from
+Miami: "a maximum superclip duration reduced to approximately 2-4 seconds per lap" (FIA statement,
+as quoted by SomersF1, April 2026). The regulation's criterion is how much energy braking and
+partial throttle can recover. Question: does a circuit-by-circuit limit chosen by the optimum to meet
+the FIA's own target agree with the limits the FIA chose, and do the FIA's limits meet the target?
+The design follows the darts handicap paper (SSAC 2024 finalist): test the heuristic in use against
+its goal, then build an optimization-based alternative.
+Run: fia_fix.py --push-lap (qualifying lap: full battery at the start, free at the end, as in
+QL1-QL4) at --recharge-mj 5.0, 5.5, ... 9.0 (the regulation's range), original car, 350 kW, the 18
+calendar circuits plus Mexico City and Las Vegas, into results/advisor/q_50 ... q_90; judged with
+scripts/limit_advisor.py, written before the run. Advised limit: the largest limit on that grid at
+which the model super-clips 4.0 s or less (the top of the FIA's range); 5.0 if none.
+Checked once on the synthetic demo only (coarse grid, which does not pass the convergence rule;
+the full-grid push laps of QL1-QL4 passed it 36 of 36): super-clipping 2.5 s at 6 MJ, 7.6 s at 9 MJ.
+- LA1, sanity: super-clipping time does not fall as the limit rises (within 0.2 s, all solves
+  converged) at 18 or more of the 20 circuits.
+- LA2, the advisor agrees with the FIA: Spearman between the advised limit and the FIA's final
+  qualifying limit 0.5 or more, over the 17 circuits raced from Miami on (Australia, China and Japan
+  had their limits set under the 250 kW rule and are left out).
+- LA3, the FIA's limits meet the FIA's target in the model: at the FIA's own qualifying limit the
+  model super-clips 4.0 s or less at 12 or more of the 17. Expected not to hold: the model's speed
+  loss in qualifying was 1.94 times the real one (QL2), so it overstates super-clipping; a miss here
+  says as much about the model as about the FIA, and is read that way.
+Value for practice, stated now: a regulator could run this before an event on a new or changed
+circuit (as for Qatar and Abu Dhabi), and the energy price gives the lap-time cost of each choice.
+Any miss is reported. Not a result: runs not started.

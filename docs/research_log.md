@@ -2796,3 +2796,22 @@ slipstream, so the track's speed limits may include a tow; the 50 kW/s reduction
 height (about 620 m) are not modelled. Size is not predicted: the model's drops have been 1.9-7
 times the real ones where real cars clip. The profile file stays on Kaggle; the runs row is kept
 in results/oos_lasvegas/runs.csv. O1 so far: Mexico City right; Las Vegas and Qatar open.
+
+## 2026-11-21 (afternoon): What a megajoule is worth, EP1-EP3 judged
+
+Kaggle, commit 4f2f6b7, 18 circuits at a common 8.5 MJ and 8.0 MJ, original car, 350 kW; all 36
+solves pass the convergence rule (largest proven gap 0.0095 s). results/energy_price_85, _80.
+- EP1 held, 18 of 18: half a MJ less allowance cost between 0.5 p(8.5) and 0.5 p(8.0) at every
+  circuit. The price can be read as the lap-time value of the FIA's recharge limit.
+- EP2 not held, and the other way round: the median price where the FIA set the race limit below
+  8.5 MJ is 0.060 s/MJ against 0.242 elsewhere, and 0 of the 5 are above the others' median.
+- EP3 not held, also reversed: Spearman between price and super-clipping energy -0.41 (bar +0.6).
+Prices at 8.5 MJ, s/MJ: Azerbaijan 0.360, Bahrain 0.345, Belgium 0.336, United States 0.328, China
+0.315, Madrid 0.248, Singapore 0.242, Britain 0.153, Miami 0.128, Italy 0.094, Hungary 0.072,
+Australia 0.060, Canada 0.057, Barcelona 0.035, Zandvoort, Monaco, Japan, Austria 0.000 (the limit
+does not bind: the car cannot use more energy there, so more allowance is worth nothing).
+Observation after the run, not a test: the five circuits the FIA gave a lower limit are among those
+where the model super-clips most at 8.5 MJ (median 5.45 MJ against 1.83 for the other 13; all five
+above 1.83). The FIA's lower limits sit where super-clipping is heavy and an extra megajoule is worth
+little, not where energy is scarce. This was not predicted and is not read as evidence; it can be
+tested forward only on limits the FIA has not yet published.

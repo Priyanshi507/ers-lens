@@ -1,0 +1,3 @@
+event,made_utc,status,call,model_drop_kmh,real_clip_share,real_drop_kmh_median,right,code_commit
+Las Vegas Grand Prix,2026-11-21T06:25+00:00,predicted,clip,24.11,,,,6e84779
+Mexico City Grand Prix,2026-11-14T18:46+00:00,predicted,no clip,0.86,0.178,1.0,True,cc0cb97

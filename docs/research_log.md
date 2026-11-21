@@ -2967,3 +2967,18 @@ scripts/conformal.py, written before the run; about 2,000 network fits on CPU.
 - CP2: they stay useful: median half-width 5.0 s or less (the network's RMSE is 2.15 s).
 Rows within a circuit are not independent, so the finite-sample guarantee is approximate here;
 CP1 is the test of whether it holds in practice. Not a result: run not started.
+
+## 2026-11-21 (evening): Race-week pipeline
+
+The out-of-sample procedure (2026-11-14, applied by hand to Mexico City and Las Vegas) now runs itself:
+scripts/raceweek.py and a scheduled GitHub workflow, every two hours. After qualifying it builds the
+track, solves on CPU, and commits a prediction file before the race; three hours after the race it
+measures real laps (multi_race.py --rebase, as for Mexico City) and adds the verdict. A prediction file
+is never rewritten; a wet qualifying drops the race; a solve that fails the convergence rule writes
+nothing. The race limit must be added by hand from the FIA document, with its source.
+Checked before relying on it: a full-grid CPU solve of Mexico City takes 101 s on two cores and gives
+0.41 MJ of super-clipping and a 0.856 km/h drop, the values recorded for the published prediction
+(0.41 MJ, 0.86 km/h).
+Mexico City and Las Vegas are entered in predictions/2026/ from this log. Stated precisely: the Mexico
+City prediction was made on 14 November, after its race (1 November) but before its data was opened, as
+the protocol says; Las Vegas (21 November) and later races are predicted before the race.

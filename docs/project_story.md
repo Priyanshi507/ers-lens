@@ -40,6 +40,7 @@ target, ranks the circuits almost exactly as the FIA did (rank correlation 0.86)
 | Energy price | the solver's multiplier p: seconds of lap time per extra MJ of allowance |
 | Limit advisor (`scripts/limit_advisor.py`) | the qualifying limit per circuit that meets the FIA's target |
 | Instant advisor (`scripts/surrogate.py`) | neural-network ensemble trained on the certified solves: predicts super-clipping for a new circuit in seconds |
+| Race-week pipeline (`scripts/raceweek.py`) | every race weekend, on GitHub's free servers: track from qualifying, prediction committed before the race, verdict after; never rewritten |
 | Rule checker web page | compares any two of 14 rule sets at every circuit, next to real cars |
 | Tests | 208 automated tests |
 
@@ -50,7 +51,8 @@ saved solves.
 
 - Every test has its predictions and pass marks written in the dated research log before any run.
 - Failures are reported as failures. Corrections are new dated entries; nothing is edited afterwards.
-- Out-of-sample: the procedure was fixed first, then applied to races not yet run.
+- Out-of-sample: the procedure was fixed first, then applied to a race whose data had not been opened
+  (Mexico City, predicted after it was run) and to races not yet run (Las Vegas onward).
 - The 2027 forecast was frozen before 2027: SHA-256 73961e97…0f310f, git tag `forecast-2027-v1`,
   Zenodo DOI 10.5281/zenodo.24238738, OSF registration osf.io/fh6mx.
 - One command (`scripts/paper_numbers.py`) rebuilds the paper's counts from the saved solves.

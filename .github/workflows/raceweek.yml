@@ -1,0 +1,53 @@
+name: raceweek
+
+# Every two hours: after qualifying, publish a dated prediction for the race; three hours after the race,
+# judge it. The commit that adds each prediction is the public proof it came before the race.
+on:
+  schedule:
+    - cron: "23 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "auto, predict, judge or scoreboard"
+        default: auto
+      event:
+        description: "event name for predict or judge, e.g. Qatar Grand Prix"
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: raceweek
+  cancel-in-progress: false
+
+jobs:
+  raceweek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-lock.txt
+          pip install -e . --no-deps
+      - name: Run the pipeline
+        env:
+          ERSLENS_SOURCE: openf1
+          STAGE: ${{ github.event.inputs.stage || 'auto' }}
+          EVENT: ${{ github.event.inputs.event }}
+        run: |
+          if [ -n "$EVENT" ]; then python scripts/raceweek.py "$STAGE" "$EVENT"; else python scripts/raceweek.py "$STAGE"; fi
+      - name: Commit new predictions and judgements
+        run: |
+          git config user.name "erslens-raceweek"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add predictions results/tracks results/raceweek
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "raceweek: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push

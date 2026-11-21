@@ -1,0 +1,18 @@
+{
+  "event": "Mexico City Grand Prix",
+  "year": 2026,
+  "made_utc": "2026-11-14T18:46+00:00",
+  "protocol": "research log 2026-11-14",
+  "status": "predicted",
+  "call": "no clip",
+  "model_drop_kmh": 0.86,
+  "superclip_mj": 0.41,
+  "code_commit": "cc0cb97",
+  "recorded_from": "research log; made by hand before this pipeline existed",
+  "judged_utc": "2026-11-14T19:00+00:00",
+  "real_clip_share": 0.178,
+  "real_drop_kmh_median": 1.0,
+  "real_clean_laps": 625,
+  "right": true,
+  "note": "made after the race (1 November 2026) was run but before its data was opened; Las Vegas onward are made before the race"
+}

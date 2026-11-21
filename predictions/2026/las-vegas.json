@@ -1,0 +1,15 @@
+{
+  "event": "Las Vegas Grand Prix",
+  "year": 2026,
+  "made_utc": "2026-11-21T06:25+00:00",
+  "protocol": "research log 2026-11-14 and 2026-11-21",
+  "status": "predicted",
+  "call": "clip",
+  "model_drop_kmh": 24.11,
+  "superclip_mj": 3.48,
+  "lap_s": 92.98,
+  "proven_gap_s": 0.0017,
+  "price_s_per_mj": 0.326,
+  "code_commit": "6e84779",
+  "recorded_from": "research log; made by hand before this pipeline existed"
+}

@@ -272,7 +272,7 @@ measured the model to the end of the straight, braking included, and reported Sp
 16; the correction is in the research log (2026-11-14). So the model is used for the direction in
 which a rule moves super-clipping, not for how much a real car clips or how circuits rank.
 Out of sample (protocol and race limits fixed before any data, research log 2026-11-14): at Mexico
-City the model, solved from the qualifying track before the race was opened, said no clipping
+City the model, solved from the qualifying track before the race data was opened, said no clipping
 (0.86 km/h); real cars clipped on 18% of 625 clean laps, median 1.0 km/h. Las Vegas and Qatar are
 next (prediction O1: correct at 2 or more of the 3).
 
@@ -473,6 +473,16 @@ is also compiled as C++ and checked against a NumPy twin in the tests, so it is 
 a GPU. It met its accuracy and full-solve predictions but not the 2x backward-pass prediction
 (1.86-1.96x). Use it with `ERSLENS_DP_BACKEND=cuda` on any CUDA GPU; reproduce the comparison
 with `scripts/kaggle_cuda_benchmark.md`.
+
+
+## Live race-week predictions
+
+Every race weekend, a scheduled workflow (`.github/workflows/raceweek.yml`, every two hours, on GitHub's
+free runners) builds the circuit from qualifying, solves it on CPU (about two minutes), and commits a
+prediction (clip or no clip) before the race starts; three hours after the race it measures real cars and
+commits the verdict. Predictions are never rewritten. The one human step is the FIA's race recharge limit,
+added with its source to `configs/rules_2026_races.yaml`: the pipeline stops and says so if it is missing.
+Scoreboard: `predictions/2026/scoreboard.csv`; one file per race in `predictions/2026/`.
 
 ## Repository
 

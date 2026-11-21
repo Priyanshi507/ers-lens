@@ -281,7 +281,9 @@ end at the charge it started with, as in a race. A qualifying push lap solved as
 recharge limit, full battery at the start, free at the end; `fia_fix.py --push-lap`) was compared
 with real qualifying laps at the 11 races with enough of them (predictions QL1-QL4, written first):
 it does not rank circuits better (Spearman 0.45; a charge-neutral control 0.60) and is still 1.9
-times too large where real laps clip, so the size error is not the session's and stays unexplained.
+times too large where real laps clip, so the size error is not the session's. Air density by circuit
+(D1-D4) and the two calibrated cars (S1-S4) do not explain it either (research log, 2026-11-18;
+`docs/experiment_index.md`).
 The direction is right: where real qualifying and race laps differ, the model moves the same way at
 6 of 7 races (QL4 held; `scripts/quali_test.py`).
 Explore every optimal lap on the [Strategy Lab page](https://priyanshi507.github.io/ers-lens/strategy.html).
@@ -529,7 +531,7 @@ scripts/
     export_site.py, export_strategy.py, export_fia.py, export_tracks.py   data for the site and for GPU runs
     kaggle_*.md             step-by-step runs on Kaggle's free T4
     (others)                diagnostics and checks referenced from the research log
-tests/                      197 automated tests (physics invariants, estimators, optimizers, verdict logic)
+tests/                      about 200 automated tests (physics invariants, estimators, optimizers, verdict logic)
 site/                       the Explorer, Strategy Lab and FIA-fix pages (GitHub Pages)
 docs/research_log.md        dated log of every decision, prediction and result
 results/                    per-lap and per-race outputs

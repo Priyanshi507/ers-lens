@@ -28,6 +28,9 @@
 #      Every press value above agrees with [7].
 #  [8] Mexico City: race 8.5 MJ (9 with Overtake), qualifying 8.5 MJ, as reported from the FIA
 #      Power Unit Information document (SomersF1 document cache; Scuderiafans), 2026-11-14.
+#  [9] Las Vegas: race 8.0 MJ (8.5 with Overtake), qualifying 6.0 MJ, power reduction rate 50 kW/s,
+#      power-limited distance 4448 m: FIA Doc 3 "Power Unit Information", published 18.11.26,
+#      fia.com/system/files/decision-document/2026_las_vegas_grand_prix_-_power_unit_information.pdf
 # Overtake mode (+0.5 MJ while active) is not modelled; the race values are without it.
 # Super-clip cap: 250 kW for the three events before Miami, 350 kW from Miami [5].
 
@@ -89,6 +92,9 @@ events:
   Mexico City Grand Prix:
     harvest_per_lap_j: 8.5e6     # [8]
     superclip_max_w: 350000.0
+  Las Vegas Grand Prix:
+    harvest_per_lap_j: 8.0e6     # [9]
+    superclip_max_w: 350000.0
 
 # Qualifying recharge limit per lap; every other rule as in the race entry above.
 qualifying:
@@ -111,6 +117,7 @@ qualifying:
   Singapore Grand Prix: 9.0e6
   United States Grand Prix: 8.5e6
   Mexico City Grand Prix: 8.5e6     # [8]
+  Las Vegas Grand Prix: 6.0e6       # [9]
 
 sensitivity:
   harvest_low_j: 8.0e6           # kept from 2026-10-07 so earlier runs stay comparable

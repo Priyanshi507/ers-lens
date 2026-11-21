@@ -2745,3 +2745,38 @@ not predicted and is reported as an observation. Several rankings have now been 
 Spearman above 0.6 is not read as evidence.
 The size error is not the car's drag and combustion power along the pole-lap ridge. Remaining
 untested candidates: a battery not full at the line, deployment held back by teams, slipstream.
+
+## 2026-11-21: O1 for Las Vegas, limits fixed before any of its data is opened
+
+From the FIA's own document (Doc 3, Power Unit Information, published 18.11.26, read as the PDF):
+race limit 8.0 MJ without Overtake (8.5 with it), qualifying 6.0 MJ, free practice 8.5 MJ, power
+reduction rate 50 kW/s, power-limited distance 4448 m. Added to configs/rules_2026_races.yaml as [9].
+Procedure as fixed on 2026-11-14, unchanged: track from Las Vegas qualifying only (export_tracks.py,
+OpenF1), current model (no lift-and-coast, no altitude), original car, 350 kW, ten bisection steps;
+the full-throttle drop and the verdict (clip if drop >= 3 km/h) written here, with the commit, before
+the race is opened. Written now, before the session is looked at: if qualifying is wet, Las Vegas is
+dropped from O1 (the Sao Paulo rule) and O1 is judged on Mexico City and Qatar. Not modelled and
+stated now: the 50 kW/s reduction rate, and Las Vegas's height (about 620 m, density 0.93 of sea level).
+
+## 2026-11-21: What a megajoule is worth, predictions before any run
+
+The solver's harvest price p (seconds of lap time per MJ of recharge) is the multiplier behind the
+optimality certificate T >= J(p) - p B. For a convex problem it is the slope of best lap time against
+the recharge limit, so it says what one more MJ of allowance is worth at each circuit, the number the
+FIA sets per race. The price is now saved with every solve (price_s_per_mj). Checked once on the
+synthetic demo circuit only (quick grid): 0.5 MJ less cost 0.104 s, between 0.5 p(8.5) = 0.078 s and
+0.5 p(8.0) = 0.126 s.
+Run: fia_fix.py --cars original --caps 350 --recharge-mj 8.5 (results/energy_price_85) and 8.0
+(results/energy_price_80), the 18 circuits of the calendar run, no lift-and-coast, no altitude; judged
+with scripts/energy_price.py, written before the run.
+- EP1, the price is a lap-time value: at each circuit, T(8.0) - T(8.5) lies between 0.5 p(8.5) and
+  0.5 p(8.0), each within 0.005 s, with both solves converged, at 16 or more of 18. A miss means the
+  DP is not close enough to convex for the price to be read as a slope.
+- EP2, the FIA's limits follow the price: at a common 8.5 MJ the median price at the five circuits
+  where the FIA set the race limit below 8.5 MJ (Australia, Canada, Austria, Britain 8.0; Italy 7.0)
+  is above the median of the other 13, and at least 4 of the 5 are above it. The FIA's reasons are
+  not public and may be safety or closing speeds, not lap time, so I expect this less than EP1.
+- EP3, the mechanism: Spearman between the price and super-clipping energy, both at 8.5 MJ, 0.6 or
+  more.
+Las Vegas's price from its O1 solve (at 8.0 MJ) is reported as description, not tested.
+Any miss is reported. Not a result: runs not started.

@@ -2927,3 +2927,23 @@ seen (T1, 3% coverage), so coverage is a prediction, not a footnote.
 Expectation, stated honestly: 20 circuits is little data for a network; ML1 and ML3 I think more
 likely than not; ML2 and ML4 I do not know. The run happens after this entry is public.
 Any miss is reported. Not a result: training not started.
+
+## 2026-11-21 (evening, later): Instant limit advisor, ML1-ML4 judged
+
+Run here after the predictions were public (commit 39eff79, pushed 15:01 IST), on CPU; a second run
+gave identical predictions (largest difference 0.0 s). results/surrogate/loco_predictions.csv.
+Leave-one-circuit-out RMSE of super-clipping time: baseline 4.94 s, linear 2.70 s, network 2.15 s.
+- ML1 held: network 0.44 times the baseline (bar 0.7).
+- ML2 not held: the 90% intervals cover 61.7% of held-out rows (bar 80-97%; mean predicted sd 1.56 s
+  against an RMSE of 2.15 s). The ensemble is overconfident on circuits it has not seen, the same
+  failure as T1 in October, smaller. Its intervals are not to be used as stated.
+- ML3 held: limits advised from the network alone rank circuits like the FIA's at Spearman 0.66 over
+  the 17 from Miami on (the solver itself: 0.86, LA2).
+- ML4 held: network below linear.
+Worst circuits (mean absolute error): Miami 4.0 s, Belgium 3.3, Monaco 2.9, Bahrain 2.7, Las Vegas 2.6.
+Time: training five networks on all 20 circuits and advising, 7 s on a laptop-class CPU, against about
+a minute of GPU time per solve and 180 solves for the advisor.
+Reading: the network gives a usable first answer for a new circuit in seconds, ranks circuits less
+well than the solver, and its error bars are too narrow; the certified solver stays the reference.
+Fixing the coverage (for example by scaling the intervals on held-out folds) would be a new test
+written before it is run, not a change to this one.

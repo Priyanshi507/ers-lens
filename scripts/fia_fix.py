@@ -74,6 +74,7 @@ def main():
     ap.add_argument("--lift-coast", action="store_true", help="let the optimum lift and coast (research log, 2026-11-14)")
     ap.add_argument("--altitude", action="store_true",
                     help="air density at each circuit's mean height (research log, 2026-11-18)")
+    ap.add_argument("--tracks", default="results/tracks", help="folder of track files")
     ap.add_argument("--recharge-mj", type=float,
                     help="one recharge limit per lap at every circuit, in place of the race's (research log, 2026-11-21)")
     ap.add_argument("--quali-rules", action="store_true", help="each event's qualifying recharge limit")
@@ -113,7 +114,7 @@ def main():
 
     def solve_row(e, name, cap, grid_kw):
         base = load_car_params(CARS[name] if e != "demo" else CARS["original"])
-        track = demo_circuit() if e == "demo" else load_track(f"results/tracks/{e}.npz")
+        track = demo_circuit() if e == "demo" else load_track(f"{args.tracks}/{e}.npz")
         car = rules_for(e, base).with_(superclip_max_w=cap, lift_coast=args.lift_coast)
         if args.recharge_mj is not None:
             car = car.with_(harvest_per_lap_j=args.recharge_mj * 1e6)

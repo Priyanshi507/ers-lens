@@ -2815,3 +2815,26 @@ where the model super-clips most at 8.5 MJ (median 5.45 MJ against 1.83 for the 
 above 1.83). The FIA's lower limits sit where super-clipping is heavy and an extra megajoule is worth
 little, not where energy is scarce. This was not predicted and is not read as evidence; it can be
 tested forward only on limits the FIA has not yet published.
+
+## 2026-11-21 (afternoon, later): Predicting the FIA's next limits, rule fixed before any run
+
+From the EP runs (the observation above, not a test): the five circuits where the FIA set the race
+limit below 8.5 MJ are those where the model super-clips 4.06 MJ or more at a common 8.5 MJ.
+Rule, fixed now: if the model super-clips 4.0 MJ or more per lap at 8.5 MJ, the FIA's race limit
+(Overtake not active) will be below 8.5 MJ; under 4.0 MJ, it will be 8.5 MJ or more. On the 18 circuits
+it was read from, the rule is right at 15 of 18 (wrong at Belgium, Barcelona and Japan, all 8.5 MJ
+with 4.9-5.5 MJ of super-clipping), and the threshold was chosen after seeing them, so 15 of 18 is
+not evidence. Already seen and so not tests: Mexico City (0.41 MJ at 8.5 MJ with the sea-level car,
+limit 8.5: the rule is right) and Las Vegas (3.48 MJ at 8.0 MJ, limit 8.0: at 8.5 MJ it would be
+near the threshold).
+Forward test, the only kind that counts: Qatar (race 29 November) and Abu Dhabi (6 December), whose
+FIA Power Unit documents are not yet published (Las Vegas's came out two days before its first
+practice). No 2026 car has run there, so the tracks come from each circuit's 2025 qualifying
+(export_tracks.py --year 2025 into results/tracks_2025): a 2025 car with more downforce, so corner
+speeds are higher than a 2026 car's; stated now as a weakness. Solve: original car, 350 kW,
+--recharge-mj 8.5, no lift-and-coast, no altitude.
+- FL1 (Qatar) and FL2 (Abu Dhabi): the rule's call matches the FIA's published race limit.
+The calls are written here after the solves and before either document appears; if a document is
+already out when the solve is done, that circuit is dropped. Two binary calls with a base rate of
+6 lowered among the 20 races in configs/rules_2026_races.yaml are weak evidence either way, and are reported as a demonstration
+of predicting a regulator's choice, not as proof. Not a result: runs not started.

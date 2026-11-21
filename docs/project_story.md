@@ -81,7 +81,7 @@ saved solves.
 | 21 Nov | Do the FIA's lowered limits follow that value? | no, reversed: they sit where super-clipping is heaviest, consistent with the regulation's own criterion (an observation, not a test) |
 | 21 Nov | Predict Qatar's and Abu Dhabi's limits before the FIA | calls "below 8.5 MJ" written before the documents; a public May plan suggests Qatar's may be wrong |
 | 21 Nov | Limit advisor vs the FIA's choices | LA2 held: Spearman 0.86 over 17 circuits; LA3 not held (model too strict), as predicted |
-| 21 Nov | Instant advisor: a neural network trained on the certified solves, tested on unseen circuits | 3 of 4 held: error 2.15 s vs 4.94 baseline, ranks like the FIA at 0.66 with no solver, 7 s instead of GPU hours; its error bars are too narrow (62% coverage), reported |
+| 21 Nov | Instant advisor: a neural network trained on the certified solves, tested on unseen circuits | 3 of 4 held: error 2.15 s vs 4.94 baseline, ranks like the FIA at 0.66 with no solver, 7 s instead of GPU hours; its own error bars were too narrow (62% coverage); fixed with nested conformal calibration to 91.7% (CP1, CP2 held) |
 
 ## 6. Main findings
 

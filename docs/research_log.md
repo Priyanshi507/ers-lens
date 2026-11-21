@@ -2982,3 +2982,15 @@ Checked before relying on it: a full-grid CPU solve of Mexico City takes 101 s o
 Mexico City and Las Vegas are entered in predictions/2026/ from this log. Stated precisely: the Mexico
 City prediction was made on 14 November, after its race (1 November) but before its data was opened, as
 the protocol says; Las Vegas (21 November) and later races are predicted before the race.
+
+## 2026-11-21 (night): Honest error bars, CP1-CP2 judged
+
+Run here after the predictions were public (commit 35893d8), on CPU, 38 minutes (about 2,000 network
+fits). results/surrogate/conformal_predictions.csv.
+- CP1 held: the nested conformal 90% intervals cover 91.7% of held-out rows (bar 80-97%; the network's
+  own intervals covered 61.7%, ML2).
+- CP2 held: median half-width 4.24 s (bar 5.0 s).
+The scale factor applied to the network's sd was 2.2-3.4 (mean 2.9): its own spread is about a third of
+its real error on an unseen circuit. Coverage is uneven: Belgium and Miami 4 of 9 limits, Las Vegas and
+Bahrain 7 of 9, the other 16 circuits 8 or 9 of 9. The guarantee is on average over circuits, not for
+each circuit, which is what conformal promises and no more.

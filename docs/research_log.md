@@ -2883,3 +2883,22 @@ the full-grid push laps of QL1-QL4 passed it 36 of 36): super-clipping 2.5 s at 
 Value for practice, stated now: a regulator could run this before an event on a new or changed
 circuit (as for Qatar and Abu Dhabi), and the energy price gives the lap-time cost of each choice.
 Any miss is reported. Not a result: runs not started.
+
+## 2026-11-21 (afternoon): Limit advisor, LA1-LA3 judged
+
+Kaggle, commit 15f16d7, 180 qualifying-lap solves (20 circuits x 9 limits, 5.0-9.0 MJ); all pass the
+convergence rule (largest proven gap 0.004 s). results/advisor/q_50 ... q_90.
+- LA1 held, 20 of 20: super-clipping never falls as the limit rises.
+- LA2 held: Spearman 0.86 between the advised limit and the FIA's final qualifying limit over the
+  17 circuits from Miami on (bar 0.5); 0.80 over all 20, reported, not tested.
+- LA3 not held, as expected beforehand: at the FIA's own limit the model super-clips 4.0 s or less
+  at 6 of 17 (bar 12).
+Advised against the FIA's limit at the 17: lower at 10, equal at 4 (Italy, Hungary, Monaco,
+Singapore), higher at 3 (Zandvoort, Miami, Mexico City). The advised limit sits below the FIA's where
+the model overstates super-clipping, the direction QL2 (1.94 times) leads one to expect.
+Reading: given only the FIA's stated 4 s target and a lap-time-optimal car, the advisor ranks the
+circuits almost as the FIA did, which is evidence that the model ranks circuits by how hard
+harvesting is, in qualifying, far better than it ranks race speed drops (Y1 0.58). The level is too
+strict because of the size error, so the advisor is for ordering and for new circuits, not for the
+exact megajoule. The FIA's target and the grid were fixed before the run; nothing was tuned.
+Several rankings have now been tested in this project; this one was written with its bar first.

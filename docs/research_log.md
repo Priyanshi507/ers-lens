@@ -2902,3 +2902,28 @@ harvesting is, in qualifying, far better than it ranks race speed drops (Y1 0.58
 strict because of the size error, so the advisor is for ordering and for new circuits, not for the
 exact megajoule. The FIA's target and the grid were fixed before the run; nothing was tuned.
 Several rankings have now been tested in this project; this one was written with its bar first.
+
+## 2026-11-21 (evening): Instant limit advisor (ML surrogate), predictions before any training run
+
+Each certified solve takes about a minute of GPU time. Networks trained on optimal-control solutions
+over many circuits are an established way to get instant answers (Garlick and Bradley 2021, racing
+lines). Question: can a small network trained on the 180 certified qualifying-lap solves (LA runs)
+predict super-clipping time for a circuit it has never seen, from the circuit's shape and the limit,
+with honest uncertainty, well enough to advise limits?
+Inputs, from the track file only: lap length, share of the lap with no corner speed limit, longest
+such stretch, number of such stretches of 300 m or more, number of corners slower than 150 km/h, and
+the recharge limit. Target: super-clipping seconds of the qualifying lap. Models, fixed now: baseline
+(median of the other circuits at the same limit), ridge-linear on the six inputs, and an ensemble of
+five Gaussian networks (src/erslens/gaussnet.py; 2 layers of 32, 300 epochs, batch 16, learning rate
+0.003, seeds 0-4) whose spread is its uncertainty. Test: leave one circuit out, 20 folds, every model
+trained only on the other 19. scripts/surrogate.py, written before the run.
+The October lesson applies: a network can look accurate and be confidently wrong on what it has not
+seen (T1, 3% coverage), so coverage is a prediction, not a footnote.
+- ML1: network RMSE at most 0.7 times the baseline's.
+- ML2: the network's 90% intervals cover between 80% and 97% of held-out rows.
+- ML3: limits advised from the network's held-out predictions (same rule as LA) rank circuits like the
+  FIA's at Spearman 0.5 or more over the 17 from Miami on, without running the solver.
+- ML4: network RMSE below the linear model's.
+Expectation, stated honestly: 20 circuits is little data for a network; ML1 and ML3 I think more
+likely than not; ML2 and ML4 I do not know. The run happens after this entry is public.
+Any miss is reported. Not a result: training not started.

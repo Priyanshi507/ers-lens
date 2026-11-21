@@ -129,9 +129,37 @@ def forecast(out: Path):
     plt.close(fig)
 
 
+def advisor(out: Path):
+    """Qualifying recharge limit advised from the FIA's 4 s target against the FIA's own choice."""
+    from limit_advisor import BEFORE_MIAMI, advise, fia_limits, load
+
+    advised = advise(load(Path("results/advisor")))
+    fia = fia_limits(Path("configs/rules_2026_races.yaml"))
+    events = sorted([e for e in advised.index if e in fia and e not in BEFORE_MIAMI],
+                    key=lambda e: (fia[e], advised[e]))
+    fig, ax = plt.subplots(figsize=(6.3, 4.8), facecolor=SURFACE)
+    style(ax)
+    for k, e in enumerate(events):
+        ax.plot([fia[e], advised[e]], [k, k], color=GRID, linewidth=2, zorder=1)
+        ax.scatter([fia[e]], [k], color=OLD, s=34, zorder=3)
+        ax.scatter([advised[e]], [k], color=NEW, s=34, zorder=4, marker="D")
+    ax.set_yticks(range(len(events)), [PLACE.get(e, e.replace(" Grand Prix", "")) for e in events],
+                  fontsize=8, color=INK)
+    ax.set_xlabel("Qualifying recharge limit per lap (MJ)", fontsize=9, color=MUTED)
+    ax.set_xlim(4.8, 9.2)
+    ax.grid(axis="x", color=GRID, linewidth=0.6)
+    ax.scatter([], [], color=OLD, s=34, label="Set by the FIA")
+    ax.scatter([], [], color=NEW, s=34, marker="D", label="Advised: largest limit with super-clipping of 4 s or less")
+    ax.legend(fontsize=8, frameon=False, loc="lower right", labelcolor=INK)
+    fig.tight_layout()
+    fig.savefig(out, dpi=200, facecolor=SURFACE)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     trade(Path("docs/paper_trade.png"))
     model_vs_real(Path("docs/paper_model_vs_real.png"))
     straight(Path("docs/paper_straight.png"))
     forecast(Path("docs/paper_forecast.png"))
+    advisor(Path("docs/paper_advisor.png"))
     print("wrote docs/paper_trade.png, paper_model_vs_real.png, paper_straight.png, paper_forecast.png")

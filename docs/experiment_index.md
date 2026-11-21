@@ -53,6 +53,7 @@ Test suite: about 200 tests (12 minutes); every patch ran it first.
 | 11-21 | Limit advisor: the qualifying limit that meets the FIA's 2-4 s target, against the FIA's choices | LA1 held (20 of 20); **LA2 held, Spearman 0.86 with the FIA's own limits**; LA3 not held (6 of 17), as expected from the size error | `kaggle_advisor.md`, `scripts/limit_advisor.py`, `results/advisor` |
 | 11-21 | Instant limit advisor: a network trained on the certified solves, tested on circuits it has not seen | ML1 held (RMSE 2.15 s vs baseline 4.94); ML2 not held (coverage 62%, overconfident); ML3 held (Spearman 0.66 with the FIA, no solver); ML4 held (beats linear 2.70) | `scripts/surrogate.py`, `results/surrogate` |
 
+- 2026-11-21: paper draft 9 (new section 8, From Model to Tool: energy price, limit advisor with Figure 5, instant advisor, FIA calls; 48 judged, 26 held, 22 not; `scripts/paper_figures.py` adds `docs/paper_advisor.png`).
 - 2026-11-18: paper draft 8 (answer first, plain-language section, figures 1 and 5 from committed results via `scripts/paper_figures.py`, tests D and S in Appendix Table A1, 201 tests).
 
 ## 3. What the project now says

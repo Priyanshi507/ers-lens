@@ -2947,3 +2947,10 @@ Reading: the network gives a usable first answer for a new circuit in seconds, r
 well than the solver, and its error bars are too narrow; the certified solver stays the reference.
 Fixing the coverage (for example by scaling the intervals on held-out folds) would be a new test
 written before it is run, not a change to this one.
+
+## 2026-11-21 (evening): Correction to the source of the 2-4 s target (LA entries)
+
+The LA entry of 2026-11-21 cites the 2-4 s target "as quoted by SomersF1". That post does not
+attribute the sentence. Its source is the FIA's own statement on the regulation refinements of
+20 April 2026, quoted as the FIA's by PlanetF1, TSN, Racer and Crash.net. The target, the run and
+the verdicts are unchanged; only the citation is corrected.

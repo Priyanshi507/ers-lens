@@ -2780,3 +2780,19 @@ with scripts/energy_price.py, written before the run.
   more.
 Las Vegas's price from its O1 solve (at 8.0 MJ) is reported as description, not tested.
 Any miss is reported. Not a result: runs not started.
+
+## 2026-11-21 (noon IST): O1 prediction for Las Vegas, before its race is opened
+
+Qualifying was dry (fastest lap 1:33.893 on soft tyres, as reported), so Las Vegas stays in O1.
+Track from Las Vegas qualifying only (OpenF1, export_tracks.py, commit 4f2f6b7: 1233 points,
+6160 m). Kaggle, T4, commit 4f2f6b7, original car, 350 kW, race limit 8.0 MJ, no lift-and-coast, no
+altitude: lap 92.980 s (DP 92.982 s), converged, proven gap 0.0017 s; harvest 7.99 MJ of 8.0;
+super-clipping 3.48 MJ over 12.56 s (longest 1.24 s); full-throttle drop on the longest straight
+24.1 km/h (hindcast_2026.drop_from_profile). Energy price 0.326 s per MJ (description only).
+- O1 prediction for Las Vegas: CLIP (24.1 km/h, threshold 3 km/h). Judged right if real race laps
+  clip on half or more of clean laps (clip_share >= 0.5), with the measure used for Mexico City.
+Noted before the race, not used to change anything: the fastest qualifying lap was set with a large
+slipstream, so the track's speed limits may include a tow; the 50 kW/s reduction rate and the
+height (about 620 m) are not modelled. Size is not predicted: the model's drops have been 1.9-7
+times the real ones where real cars clip. The profile file stays on Kaggle; the runs row is kept
+in results/oos_lasvegas/runs.csv. O1 so far: Mexico City right; Las Vegas and Qatar open.

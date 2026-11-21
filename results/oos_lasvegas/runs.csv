@@ -1,0 +1,2 @@
+event,car,cap_kw,lap_s,dp_pred_s,converged,harvest_mj,superclip_mj,superclip_s,superclip_m,longest_superclip_s,superclip_at_cap_share,peak_superclip_kw,clip_ratio,optimality_gap_s,seconds,coast_mj,coast_s,price_s_per_mj
+Las Vegas Grand Prix,original,350.0,92.9795233219808,92.98176445691199,True,7.994549143303147,3.4764978508452464,12.559986789072095,715.0,1.2383779152108394,0.5635586107281586,350.0,0.06000577611922406,0.001729427294193897,79.1,0.0,0.0,0.3263702392578125

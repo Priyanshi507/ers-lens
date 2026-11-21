@@ -2954,3 +2954,16 @@ The LA entry of 2026-11-21 cites the 2-4 s target "as quoted by SomersF1". That 
 attribute the sentence. Its source is the FIA's own statement on the regulation refinements of
 20 April 2026, quoted as the FIA's by PlanetF1, TSN, Racer and Crash.net. The target, the run and
 the verdicts are unchanged; only the citation is corrected.
+
+## 2026-11-21 (evening): Honest error bars for the instant advisor (conformal), predictions before any run
+
+ML2 failed: the network ensemble's own 90% intervals covered 62% of held-out circuits. Conformal
+prediction rescales an interval by the model's measured errors so that coverage holds without trusting
+the model's own spread. Done here strictly: for each held-out circuit, the scale is the conformal 90%
+quantile of |error| / predicted sd from an inner leave-one-circuit-out over the other 19 circuits only
+(same ensemble, same settings as ML1-ML4), so no circuit informs its own interval.
+scripts/conformal.py, written before the run; about 2,000 network fits on CPU.
+- CP1: the conformal 90% intervals cover between 80% and 97% of held-out rows.
+- CP2: they stay useful: median half-width 5.0 s or less (the network's RMSE is 2.15 s).
+Rows within a circuit are not independent, so the finite-sample guarantee is approximate here;
+CP1 is the test of whether it holds in practice. Not a result: run not started.

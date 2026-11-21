@@ -26,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -47,7 +47,7 @@ jobs:
         run: |
           git config user.name "erslens-raceweek"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add predictions results/tracks results/raceweek
+          for p in predictions results/tracks results/raceweek; do if [ -e "$p" ]; then git add "$p"; fi; done
           if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
           git commit -m "raceweek: $(date -u +%Y-%m-%dT%H:%MZ)"
           git push

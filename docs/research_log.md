@@ -2838,3 +2838,19 @@ The calls are written here after the solves and before either document appears; 
 already out when the solve is done, that circuit is dropped. Two binary calls with a base rate of
 6 lowered among the 20 races in configs/rules_2026_races.yaml are weak evidence either way, and are reported as a demonstration
 of predicting a regulator's choice, not as proof. Not a result: runs not started.
+
+## 2026-11-21 (13:00 IST): FL1 and FL2 calls, before either FIA document
+
+Kaggle, commit 184b07a, tracks from 2025 qualifying (Qatar 5375 m, Abu Dhabi 5225 m), original car,
+350 kW, 8.5 MJ; both converged (proven gaps 0.0016 and 0.0053 s).
+- Qatar: super-clipping 6.10 MJ per lap (price 0.084 s/MJ). FL1 call: race limit BELOW 8.5 MJ.
+- Abu Dhabi: super-clipping 4.91 MJ per lap (price 0.215 s/MJ). FL2 call: race limit BELOW 8.5 MJ.
+Searched before writing: neither race document found published.
+Found after the rule was fixed and before these calls, and not used to change them: a list of the
+FIA's planned QUALIFYING limits published in May (The Race, "F1's new energy rankings for
+qualifying revealed") gives Qatar 8 MJ and Abu Dhabi 7 MJ. It is a plan, not the final documents:
+it differs from them at Belgium (8 planned, 7 final), Britain (7.5, 6.5), Madrid (8, 7.5) and Austin
+(8, 8.5). Among the races in our rules file, every circuit with a final qualifying limit of 8 MJ or
+more has a race limit of 8.5 MJ, so if Qatar's plan holds, FL1 is likely to fail. This is recorded
+now so that a miss is not explained away later. FL1 and FL2 are judged on the race documents when
+they appear.

@@ -48,7 +48,7 @@ Test suite: about 200 tests (12 minutes); every patch ran it first.
 | 11-18 | Is the size error the car? | S1 not held (3.30), S2 not held (2.97), S3 held (0.66, 0.76), S4 not held (Y2 11 and 12 of 16); neither calibrated car is a candidate | `kaggle_cars.md`, `results/fia_fix_calendar_low/high` (patches 0080-0081) |
 | 11-21 | Las Vegas out of sample (O1) | limits from the FIA PDF (race 8.0 MJ, qualifying 6.0, 50 kW/s); qualifying dry; **prediction: clip** (24.1 km/h), written 11-21 before the race; judged after it | `kaggle_lasvegas.md` Part A, `results/oos_lasvegas` |
 | 11-21 | What a megajoule is worth | EP1 held (18 of 18: the price is a lap-time value); EP2 not held, reversed (lowered-limit circuits 0.060 vs 0.242 s/MJ); EP3 not held, reversed (-0.41) | `kaggle_lasvegas.md` Part B, `scripts/energy_price.py`, `results/energy_price_85/80` |
-| 11-21 | Can the model predict the FIA's next limits? | rule fixed first (super-clip ≥ 4.0 MJ at 8.5 MJ → limit below 8.5); FL1 Qatar, FL2 Abu Dhabi, calls written before the documents | `kaggle_fia_limits.md`, `results/fia_limits_forward` |
+| 11-21 | Can the model predict the FIA's next limits? | rule fixed first (super-clip ≥ 4.0 MJ at 8.5 MJ → limit below 8.5); calls written 11-21 before the documents: FL1 Qatar below 8.5 (6.10 MJ), FL2 Abu Dhabi below 8.5 (4.91 MJ); a public May plan of qualifying limits suggests FL1 may fail | `kaggle_fia_limits.md`, `results/fia_limits_forward` |
 
 - 2026-11-18: paper draft 8 (answer first, plain-language section, figures 1 and 5 from committed results via `scripts/paper_figures.py`, tests D and S in Appendix Table A1, 201 tests).
 
